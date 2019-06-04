@@ -62,6 +62,7 @@ import static com.andruid.magic.newsdaily.data.Constants.DEFAULT_COUNTRY;
 import static com.andruid.magic.newsdaily.data.Constants.DIR_TTS;
 import static com.andruid.magic.newsdaily.data.Constants.MEDIA_NOTI_ID;
 import static com.andruid.magic.newsdaily.data.Constants.MEDIA_SERVICE;
+import static com.andruid.magic.newsdaily.data.Constants.NEWS_FETCH_DISTANCE;
 import static com.andruid.magic.newsloader.data.Constants.FIRST_PAGE;
 import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
 
@@ -78,6 +79,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     private File dir;
     private NewsLoader newsLoader = new NewsLoader();
     private Intent mediaButtonIntent;
+    private int page = FIRST_PAGE;
     private BroadcastReceiver mNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -90,7 +92,6 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         super.onCreate();
         initMediaSession();
         initExoPlayer();
-        setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING, 0);
         tts = new TextToSpeech(this, this);
         dir = new File(getCacheDir(), DIR_TTS);
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
@@ -105,6 +106,8 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
                         .createMediaSource(Uri.fromFile(file));
                 concatenatingMediaSource.addMediaSource(mediaSource);
                 exoPlayer.prepare(concatenatingMediaSource, false, false);
+                if(utteranceId.equals("0"))
+                    mediaSessionCallback.onPlay();
             }
 
             @Override
@@ -126,7 +129,6 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         exoPlayer.setAudioAttributes(audioAttributes,true);
         exoPlayer.addListener(this);
         concatenatingMediaSource = new ConcatenatingMediaSource();
-        exoPlayer.setPlayWhenReady(true);
     }
 
     private void initMediaSession() {
@@ -154,7 +156,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         mediaSessionConnector.setPlayer(exoPlayer,null);
     }
 
-    private void loadNews(int page){
+    private void loadNews(){
         newsLoader.loadHeadlines(DEFAULT_COUNTRY, page, PAGE_SIZE, this);
     }
 
@@ -239,7 +241,12 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     public void onPositionDiscontinuity(int reason) {
         if(reason==Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT ||
                 reason==Player.DISCONTINUITY_REASON_PERIOD_TRANSITION || reason==Player.DISCONTINUITY_REASON_INTERNAL){
-            AudioNews audioNews = audioNewsList.get(exoPlayer.getCurrentWindowIndex());
+            int pos = exoPlayer.getCurrentWindowIndex();
+            if(pos == audioNewsList.size() - NEWS_FETCH_DISTANCE) {
+                page++;
+                loadNews();
+            }
+            AudioNews audioNews = audioNewsList.get(pos);
             MediaMetadataCompat mediaMetadataCompat = MediaUtil.buildMetaData(audioNews);
             mediaSessionCompat.setMetadata(mediaMetadataCompat);
             new Thread(() -> {
@@ -291,7 +298,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
                 Toast.makeText(this, "Text to speech not available", Toast.LENGTH_SHORT).show();
             else {
                 audioNewsList.clear();
-                loadNews(FIRST_PAGE);
+                loadNews();
             }
         }
     }
