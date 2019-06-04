@@ -1,4 +1,4 @@
-package com.andruid.magic.newsdaily.paging;
+package com.andruid.magic.newsloader.paging;
 
 import androidx.annotation.NonNull;
 import androidx.paging.PageKeyedDataSource;
@@ -10,13 +10,14 @@ import java.util.List;
 
 import timber.log.Timber;
 
+import static com.andruid.magic.newsloader.data.Constants.FIRST_PAGE;
+import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
+
 public class NewsDataSource extends PageKeyedDataSource<Integer, News> {
-    static final int PAGE_SIZE = 10;
-    private static final int FIRST_PAGE = 1;
     private String country;
     private NewsLoader newsLoader;
 
-    public NewsDataSource(String country) {
+    NewsDataSource(String country) {
         Timber.tag("dslog").d("datasource created");
         newsLoader = new NewsLoader();
         this.country = country;

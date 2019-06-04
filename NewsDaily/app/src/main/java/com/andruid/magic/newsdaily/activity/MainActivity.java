@@ -15,10 +15,10 @@ import androidx.lifecycle.ViewModelProviders;
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.adapter.NewsAdapter;
 import com.andruid.magic.newsdaily.databinding.ActivityMainBinding;
-import com.andruid.magic.newsdaily.paging.NewsViewModel;
-import com.andruid.magic.newsdaily.service.TtsService;
+import com.andruid.magic.newsdaily.service.AudioNewsService;
 import com.andruid.magic.newsdaily.viewholder.NewsViewHolder;
 import com.andruid.magic.newsloader.model.News;
+import com.andruid.magic.newsloader.paging.NewsViewModel;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
 import com.yuyakaido.android.cardstackview.CardStackListener;
 import com.yuyakaido.android.cardstackview.Direction;
@@ -27,9 +27,10 @@ import com.yuyakaido.android.cardstackview.RewindAnimationSetting;
 import com.yuyakaido.android.cardstackview.StackFrom;
 import com.yuyakaido.android.cardstackview.SwipeAnimationSetting;
 
+import static com.andruid.magic.newsdaily.data.Constants.MY_DATA_CHECK_CODE;
+import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
+
 public class MainActivity extends AppCompatActivity implements NewsViewHolder.CardControlsListener {
-    protected static final String NEWS_URL = "news_url";
-    private int MY_DATA_CHECK_CODE = 0;
     private ActivityMainBinding binding;
     private NewsViewModel newsViewModel;
     private NewsAdapter newsAdapter;
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                startService(new Intent(this, TtsService.class));
+                startService(new Intent(this, AudioNewsService.class));
             }
             else {
                 Intent installTTSIntent = new Intent();

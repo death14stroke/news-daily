@@ -1,4 +1,4 @@
-package com.andruid.magic.newsdaily.paging;
+package com.andruid.magic.newsloader.paging;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
@@ -12,7 +12,7 @@ public class NewsDataSourceFactory extends DataSource.Factory<Integer, News> {
             new MutableLiveData<>();
     private String country;
 
-    public NewsDataSourceFactory(String country){
+    NewsDataSourceFactory(String country){
         this.country = country;
     }
 
@@ -22,9 +22,5 @@ public class NewsDataSourceFactory extends DataSource.Factory<Integer, News> {
         NewsDataSource dataSource = new NewsDataSource(country);
         liveDataSource.postValue(dataSource);
         return dataSource;
-    }
-
-    MutableLiveData<PageKeyedDataSource<Integer, News>> getLiveDataSource() {
-        return liveDataSource;
     }
 }

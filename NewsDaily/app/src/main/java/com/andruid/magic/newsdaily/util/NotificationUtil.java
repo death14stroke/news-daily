@@ -21,11 +21,11 @@ import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 
-public class NotificationUtil {
-    private static final String CHANNEL_ID = "channel_headlines";
-    private static final String CHANNEL_NAME = "Read Headlines";
+import static com.andruid.magic.newsdaily.data.Constants.CHANNEL_ID;
+import static com.andruid.magic.newsdaily.data.Constants.CHANNEL_NAME;
 
-    public static NotificationCompat.Builder buildNotification(Context context, MediaMetadataCompat
+public class NotificationUtil {
+    public static NotificationCompat.Builder buildNotification(Context context, int icon, MediaMetadataCompat
             metadataCompat, MediaSessionCompat.Token token){
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if(notificationManager==null)
@@ -52,24 +52,31 @@ public class NotificationUtil {
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .setContentTitle(metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_TITLE))
                 .setContentText(metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ALBUM))
-                .setSubText(metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ARTIST))
                 .setShowWhen(false);
         String albumArtUri = metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI);
+        Thread thread = new Thread(() -> {
+            try {
+                Bitmap bitmap = Picasso.get().load(albumArtUri).get();
+                builder.setLargeIcon(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
         try {
-            Bitmap bitmap = Picasso.get().load(albumArtUri).get();
-            builder.setLargeIcon(bitmap);
-        } catch (IOException e) {
+            thread.join();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        PendingIntent pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
+        PendingIntent pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
         builder.addAction(android.R.drawable.ic_media_previous,"previous",pendingIntent);
-
-        pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,PlaybackStateCompat.ACTION_PLAY_PAUSE);
-        builder.addAction(android.R.drawable.ic_media_play,"play",pendingIntent);
-
-        pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
+        pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+                PlaybackStateCompat.ACTION_PLAY_PAUSE);
+        builder.addAction(icon,"play",pendingIntent);
+        pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
         builder.addAction(android.R.drawable.ic_media_next,"next",pendingIntent);
-
         return builder;
     }
 }

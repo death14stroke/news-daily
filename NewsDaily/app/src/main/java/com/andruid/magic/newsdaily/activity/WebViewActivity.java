@@ -20,6 +20,8 @@ import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.ActivityWebViewBinding;
 import com.andruid.magic.newsdaily.util.MyWebChromeClient;
 
+import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
+
 public class WebViewActivity extends AppCompatActivity {
     private ActivityWebViewBinding binding;
     private String url="";
@@ -30,7 +32,7 @@ public class WebViewActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_web_view);
         Bundle extras = getIntent().getExtras();
         if(extras != null){
-            url = extras.getString(MainActivity.NEWS_URL);
+            url = extras.getString(NEWS_URL);
             setWebView();
         }
         ActionBar actionBar = getSupportActionBar();

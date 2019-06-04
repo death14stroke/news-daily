@@ -3,9 +3,10 @@ package com.andruid.magic.newsloader.server;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static com.andruid.magic.newsloader.data.Constants.BASE_URL;
+
 public class RetrofitClient {
     private static Retrofit retrofit;
-    private static final String BASE_URL = "https://news-daily.herokuapp.com";
 
     public static Retrofit getRetrofitInstance(){
         if(retrofit==null)
