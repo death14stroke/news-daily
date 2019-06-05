@@ -23,10 +23,16 @@ import java.io.IOException;
 
 import static com.andruid.magic.newsdaily.data.Constants.CHANNEL_ID;
 import static com.andruid.magic.newsdaily.data.Constants.CHANNEL_NAME;
+import static com.andruid.magic.newsdaily.data.Constants.INTENT_NOTI_CLICK;
+import static com.andruid.magic.newsdaily.data.Constants.NEWS_TITLE;
 
 public class NotificationUtil {
     public static NotificationCompat.Builder buildNotification(Context context, int icon, MediaMetadataCompat
             metadataCompat, MediaSessionCompat.Token token){
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction(INTENT_NOTI_CLICK);
+        intent.putExtra(NEWS_TITLE, metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
+
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if(notificationManager==null)
             return null;
@@ -39,6 +45,7 @@ public class NotificationUtil {
             notificationChannel.setLightColor(Color.CYAN);
             notificationManager.createNotificationChannel(notificationChannel);
         }
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context,CHANNEL_ID);
         builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(token)
@@ -48,7 +55,7 @@ public class NotificationUtil {
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOnlyAlertOnce(true)
-                .setContentIntent(PendingIntent.getActivity(context,0,new Intent(context, MainActivity.class),
+                .setContentIntent(PendingIntent.getActivity(context, 0, intent,
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .setContentTitle(metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_TITLE))
                 .setContentText(metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ALBUM))

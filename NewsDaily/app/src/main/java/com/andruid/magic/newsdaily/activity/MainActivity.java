@@ -1,8 +1,13 @@
 package com.andruid.magic.newsdaily.activity;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +32,13 @@ import com.yuyakaido.android.cardstackview.RewindAnimationSetting;
 import com.yuyakaido.android.cardstackview.StackFrom;
 import com.yuyakaido.android.cardstackview.SwipeAnimationSetting;
 
+import java.util.List;
+import java.util.OptionalInt;
+import java.util.stream.IntStream;
+
+import static com.andruid.magic.newsdaily.data.Constants.INTENT_NOTI_CLICK;
 import static com.andruid.magic.newsdaily.data.Constants.MY_DATA_CHECK_CODE;
+import static com.andruid.magic.newsdaily.data.Constants.NEWS_TITLE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
 
 public class MainActivity extends AppCompatActivity implements NewsViewHolder.CardControlsListener {
@@ -35,6 +46,10 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
     private NewsViewModel newsViewModel;
     private NewsAdapter newsAdapter;
     private CardStackLayoutManager cardStackLayoutManager;
+    private MediaBrowserCompat mediaBrowserCompat;
+    private MBConnectionCallback mbConnectionCallback;
+    private MediaControllerCompat mediaControllerCompat;
+    private MediaControllerCallback mediaControllerCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +57,11 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         newsViewModel = ViewModelProviders.of(this).get(NewsViewModel.class);
         newsAdapter = new NewsAdapter(this);
+        mbConnectionCallback = new MBConnectionCallback();
+        mediaControllerCallback = new MediaControllerCallback();
+        mediaBrowserCompat = new MediaBrowserCompat(this, new ComponentName(this,
+                AudioNewsService.class), mbConnectionCallback, null);
+        mediaBrowserCompat.connect();
         cardStackLayoutManager = new CardStackLayoutManager(this, new CardStackListener() {
             @Override
             public void onCardDragging(Direction direction, float ratio) {}
@@ -61,6 +81,24 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if(INTENT_NOTI_CLICK.equals(getIntent().getAction())){
+            Bundle extras = getIntent().getExtras();
+            if(extras != null){
+                String title = extras.getString(NEWS_TITLE);
+                scrollToCurrentNews(title);
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
@@ -76,6 +114,16 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
         return true;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mediaControllerCompat!=null)
+            mediaControllerCompat.unregisterCallback(mediaControllerCallback);
+        if(mediaBrowserCompat!=null)
+            mediaBrowserCompat.disconnect();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
@@ -129,5 +177,52 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
         intent.putExtra(Intent.EXTRA_SUBJECT, news.getTitle());
         intent.putExtra(Intent.EXTRA_TEXT, news.getUrl());
         startActivity(Intent.createChooser(intent, "Share news via..."));
+    }
+
+    private class MBConnectionCallback extends MediaBrowserCompat.ConnectionCallback {
+        @Override
+        public void onConnected() {
+            super.onConnected();
+            try {
+                mediaControllerCompat = new MediaControllerCompat(MainActivity.this,
+                        mediaBrowserCompat.getSessionToken());
+                mediaControllerCompat.registerCallback(mediaControllerCallback);
+                MediaControllerCompat.setMediaController(MainActivity.this,
+                        mediaControllerCompat);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class MediaControllerCallback extends MediaControllerCompat.Callback {
+        @Override
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
+            super.onMetadataChanged(metadata);
+            String title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
+            scrollToCurrentNews(title);
+        }
+    }
+
+    private void scrollToCurrentNews(String title) {
+        List<News> newsList = newsAdapter.getNewsList();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            OptionalInt optionalInt = IntStream.range(0, newsList.size())
+                    .filter(pos -> newsList.get(pos).getTitle().equals(title))
+                    .findFirst();
+            if(optionalInt.isPresent()){
+                int pos = optionalInt.getAsInt();
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        }
+        else{
+            com.annimon.stream.OptionalInt optionalInt = com.annimon.stream.IntStream.range(0, newsList.size())
+                    .filter(pos -> newsList.get(pos).getTitle().equals(title))
+                    .findFirst();
+            if(optionalInt.isPresent()){
+                int pos = optionalInt.getAsInt();
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        }
     }
 }

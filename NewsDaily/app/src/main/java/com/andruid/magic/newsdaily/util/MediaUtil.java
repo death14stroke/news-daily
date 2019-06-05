@@ -9,7 +9,7 @@ import com.andruid.magic.newsdaily.model.AudioNews;
 
 public class MediaUtil {
     public static String getFileName(String utteranceId){
-        return "news_"+utteranceId+".wav";
+        return "news_"+utteranceId+".mp3";
     }
 
     public static MediaDescriptionCompat getMediaDescription(AudioNews audioNews){
