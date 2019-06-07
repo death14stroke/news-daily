@@ -17,6 +17,7 @@ import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -57,6 +58,7 @@ import timber.log.Timber;
 
 import static com.andruid.magic.newsdaily.data.Constants.DEFAULT_COUNTRY;
 import static com.andruid.magic.newsdaily.data.Constants.DIR_TTS;
+import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
 import static com.andruid.magic.newsdaily.data.Constants.MEDIA_NOTI_ID;
 import static com.andruid.magic.newsdaily.data.Constants.MEDIA_SERVICE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_FETCH_DISTANCE;
@@ -87,8 +89,12 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     @Override
     public void onCreate() {
         super.onCreate();
+        Timber.tag("dlog").d("service created");
         initMediaSession();
         initExoPlayer();
+    }
+
+    private void initTTS() {
         tts = new TextToSpeech(this, this);
         dir = new File(getCacheDir(), DIR_TTS);
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
@@ -154,6 +160,9 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     }
 
     private void loadNews(){
+        TelephonyManager telephoneManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+        String countryCode = telephoneManager.getNetworkCountryIso();
+        Toast.makeText(getApplicationContext(), "country: "+countryCode, Toast.LENGTH_SHORT).show();
         newsLoader.loadHeadlines(DEFAULT_COUNTRY, page, PAGE_SIZE, this);
     }
 
@@ -188,10 +197,10 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Timber.tag("medialog").d("on start command");
-        if(audioNewsList!=null)
-            MediaButtonReceiver.handleIntent(mediaSessionCompat, intent);
+        if(INTENT_PREPARE_AUDIO.equals(intent.getAction()))
+            initTTS();
         else
-            mediaButtonIntent = intent;
+            MediaButtonReceiver.handleIntent(mediaSessionCompat, intent);
         return START_STICKY;
     }
 

@@ -36,7 +36,10 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
+import timber.log.Timber;
+
 import static com.andruid.magic.newsdaily.data.Constants.INTENT_NOTI_CLICK;
+import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
 import static com.andruid.magic.newsdaily.data.Constants.MY_DATA_CHECK_CODE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_TITLE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
@@ -107,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_speak) {
+            Timber.tag("dlog").d("selected menu speak");
             Intent checkTTSIntent = new Intent();
             checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
             startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
@@ -127,7 +131,9 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                startService(new Intent(this, AudioNewsService.class));
+                Intent intent = new Intent(this, AudioNewsService.class);
+                intent.setAction(INTENT_PREPARE_AUDIO);
+                startService(intent);
             }
             else {
                 Intent installTTSIntent = new Intent();
