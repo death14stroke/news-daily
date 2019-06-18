@@ -18,7 +18,6 @@ import java.util.List;
 
 public class NewsAdapter extends RecyclerView.Adapter<NewsViewHolder> {
     private final AsyncPagedListDiffer<News> mDiffer;
-    private NewsViewHolder.CardControlsListener mListener;
 
     private static final DiffUtil.ItemCallback<News> DIFF_CALLBACK = new DiffUtil.ItemCallback<News>() {
         @Override
@@ -32,9 +31,8 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsViewHolder> {
         }
     };
 
-    public NewsAdapter(NewsViewHolder.CardControlsListener mListener){
+    public NewsAdapter(){
         mDiffer = new AsyncPagedListDiffer<>(this, DIFF_CALLBACK);
-        this.mListener = mListener;
     }
 
     @NonNull
@@ -42,7 +40,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsViewHolder> {
     public NewsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         LayoutNewsBinding binding = LayoutNewsBinding.inflate(inflater, parent, false);
-        return new NewsViewHolder(binding, mListener);
+        return new NewsViewHolder(binding);
     }
 
     @Override

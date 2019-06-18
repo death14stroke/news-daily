@@ -20,8 +20,8 @@ import androidx.lifecycle.ViewModelProviders;
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.adapter.NewsAdapter;
 import com.andruid.magic.newsdaily.databinding.ActivityMainBinding;
+import com.andruid.magic.newsdaily.eventbus.NewsEvent;
 import com.andruid.magic.newsdaily.service.AudioNewsService;
-import com.andruid.magic.newsdaily.viewholder.NewsViewHolder;
 import com.andruid.magic.newsloader.model.News;
 import com.andruid.magic.newsloader.paging.NewsViewModel;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
@@ -32,25 +32,30 @@ import com.yuyakaido.android.cardstackview.RewindAnimationSetting;
 import com.yuyakaido.android.cardstackview.StackFrom;
 import com.yuyakaido.android.cardstackview.SwipeAnimationSetting;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
 
 import timber.log.Timber;
 
+import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
+import static com.andruid.magic.newsdaily.data.Constants.ACTION_SHARE_NEWS;
 import static com.andruid.magic.newsdaily.data.Constants.INTENT_NOTI_CLICK;
 import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
 import static com.andruid.magic.newsdaily.data.Constants.MY_DATA_CHECK_CODE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_TITLE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
 
-public class MainActivity extends AppCompatActivity implements NewsViewHolder.CardControlsListener {
+public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private NewsViewModel newsViewModel;
     private NewsAdapter newsAdapter;
     private CardStackLayoutManager cardStackLayoutManager;
     private MediaBrowserCompat mediaBrowserCompat;
-    private MBConnectionCallback mbConnectionCallback;
     private MediaControllerCompat mediaControllerCompat;
     private MediaControllerCallback mediaControllerCallback;
 
@@ -59,8 +64,8 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         newsViewModel = ViewModelProviders.of(this).get(NewsViewModel.class);
-        newsAdapter = new NewsAdapter(this);
-        mbConnectionCallback = new MBConnectionCallback();
+        newsAdapter = new NewsAdapter();
+        MBConnectionCallback mbConnectionCallback = new MBConnectionCallback();
         mediaControllerCallback = new MediaControllerCallback();
         mediaBrowserCompat = new MediaBrowserCompat(this, new ComponentName(this,
                 AudioNewsService.class), mbConnectionCallback, null);
@@ -86,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
     @Override
     protected void onResume() {
         super.onResume();
+        EventBus.getDefault().register(this);
         if(INTENT_NOTI_CLICK.equals(getIntent().getAction())){
             Bundle extras = getIntent().getExtras();
             if(extras != null){
@@ -93,6 +99,12 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
                 scrollToCurrentNews(title);
             }
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -169,15 +181,23 @@ public class MainActivity extends AppCompatActivity implements NewsViewHolder.Ca
         binding.cardStackView.setAdapter(newsAdapter);
     }
 
-    @Override
-    public void onLoadUrl(String url) {
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNewsEvent(NewsEvent newsEvent){
+        String action = newsEvent.getAction();
+        News news = newsEvent.getNews();
+        if(ACTION_SHARE_NEWS.equals(action))
+            shareNews(news);
+        else if(ACTION_OPEN_URL.equals(action))
+            loadUrl(news.getUrl());
+    }
+
+    public void loadUrl(String url) {
         Intent intent = new Intent(this, WebViewActivity.class);
         intent.putExtra(NEWS_URL, url);
         startActivity(intent);
     }
 
-    @Override
-    public void onShareNews(News news) {
+    public void shareNews(News news) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_SUBJECT, news.getTitle());

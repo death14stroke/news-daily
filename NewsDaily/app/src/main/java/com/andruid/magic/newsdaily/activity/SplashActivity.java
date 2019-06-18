@@ -1,11 +1,9 @@
 package com.andruid.magic.newsdaily.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.andruid.magic.newsdaily.activity.MainActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class SplashActivity extends AppCompatActivity {
     @Override
