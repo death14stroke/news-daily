@@ -6,8 +6,8 @@ API_KEY = 'd96ab6f6d0d44b3ca0eda01c6711da42'
 newsapi = NewsApiClient(api_key=API_KEY)
 
 
-def get_headlines(country, page, page_size):
-    raw_news = newsapi.get_top_headlines(page_size=page_size, page=page, country=country)
+def get_headlines(country, category, page, page_size):
+    raw_news = newsapi.get_top_headlines(page_size=page_size, page=page, country=country, category=category)
     status = raw_news['status']
     size = raw_news['totalResults']
     has_more = paginate(size=size, page_size=page_size, page=page)

@@ -8,6 +8,6 @@ import retrofit2.http.Query;
 
 public interface RetrofitService {
     @GET("/headlines")
-    Call<ApiResponse> getHeadlines(@Query("country") String country, @Query("page") int page,
-                                   @Query("page_size") int pageSize);
+    Call<ApiResponse> getHeadlines(@Query("country") String country, @Query("category") String category,
+                                   @Query("page") int page, @Query("page_size") int pageSize);
 }

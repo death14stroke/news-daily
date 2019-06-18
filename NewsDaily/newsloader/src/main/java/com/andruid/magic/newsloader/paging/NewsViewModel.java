@@ -12,8 +12,8 @@ import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
 public class NewsViewModel extends ViewModel {
     private LiveData<PagedList<News>> pagedListLiveData;
 
-    public NewsViewModel() {
-        NewsDataSourceFactory dataSourceFactory = new NewsDataSourceFactory("in");
+    public NewsViewModel(String category) {
+        NewsDataSourceFactory dataSourceFactory = new NewsDataSourceFactory("in", category);
         PagedList.Config pagedListConfig = new PagedList.Config.Builder()
                 .setEnablePlaceholders(false)
                 .setPageSize(PAGE_SIZE)

@@ -10,7 +10,8 @@ def headlines():
     page = int(request.args.get('page'))
     page_size = int(request.args.get('page_size'))
     country = request.args.get('country')
-    resp = simplejson.dumps(get_headlines(country=country, page=page, page_size=page_size))
+    category = request.args.get('category')
+    resp = simplejson.dumps(get_headlines(country=country, page=page, page_size=page_size, category=category))
     return resp
 
 

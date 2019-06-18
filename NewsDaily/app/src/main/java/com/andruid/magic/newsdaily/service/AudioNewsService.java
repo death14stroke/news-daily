@@ -163,7 +163,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         TelephonyManager telephoneManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
         String countryCode = telephoneManager.getNetworkCountryIso();
         Toast.makeText(getApplicationContext(), "country: "+countryCode, Toast.LENGTH_SHORT).show();
-        newsLoader.loadHeadlines(DEFAULT_COUNTRY, page, PAGE_SIZE, this);
+        newsLoader.loadHeadlines(DEFAULT_COUNTRY, "science", page, PAGE_SIZE, this);
     }
 
     private void setCurrentAudio(int pos) {

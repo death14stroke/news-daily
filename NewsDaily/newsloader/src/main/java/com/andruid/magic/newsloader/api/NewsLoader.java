@@ -19,8 +19,8 @@ public class NewsLoader {
         service = RetrofitClient.getRetrofitInstance().create(RetrofitService.class);
     }
 
-    public void loadHeadlines(String country, final int page, int pageSize, final NewsLoadedListener mListener){
-        service.getHeadlines(country, page, pageSize).enqueue(new Callback<ApiResponse>() {
+    public void loadHeadlines(String country, String category, final int page, int pageSize, final NewsLoadedListener mListener){
+        service.getHeadlines(country, category, page, pageSize).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if(response.body()==null)

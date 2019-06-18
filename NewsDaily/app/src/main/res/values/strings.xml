@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">NewsDaily</string>
+    <string name="general">General</string>
+    <string name="business">Biz</string>
+    <string name="entertainment">Ent</string>
+    <string name="health">Health</string>
+    <string name="science">Science</string>
+    <string name="sports">Sports</string>
+    <string name="technology">Tech</string>
+    <string name="open_in_browser">Open in Browser</string>
+    <string name="copy_url">Copy URL</string>
+    <string name="listen_headlines">Listen Headlines</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
