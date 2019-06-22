@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment;
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.ActivityHomeBinding;
 import com.andruid.magic.newsdaily.fragment.NewsFragment;
-import com.andruid.magic.newsdaily.fragment.SettingsFragment;
+import com.andruid.magic.newsdaily.pref.SettingsFragment;
 import com.andruid.magic.newsdaily.util.AssetsUtil;
 import com.andruid.magic.newsdaily.util.StringUtils;
 import com.cleveroad.loopbar.widget.OnItemClickListener;

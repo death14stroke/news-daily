@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
 import com.andruid.magic.newsdaily.R;
+import com.blongho.country_data.World;
 
 public class CountryPreference extends DialogPreference {
     private String country;
@@ -35,16 +36,7 @@ public class CountryPreference extends DialogPreference {
     public void setCountry(String country) {
         this.country = country;
         persistString(country);
-    }
-
-    @Override
-    protected Object onGetDefaultValue(TypedArray a, int index) {
-        return a.getString(index);
-    }
-
-    @Override
-    protected void onSetInitialValue(@Nullable Object defaultValue) {
-        setCountry((String) defaultValue);
+        setSummary(World.getCountryFrom(country).getName());
     }
 
     @Override

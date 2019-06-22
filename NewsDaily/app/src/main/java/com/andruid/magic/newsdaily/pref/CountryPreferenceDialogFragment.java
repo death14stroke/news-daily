@@ -41,7 +41,6 @@ public class CountryPreferenceDialogFragment extends PreferenceDialogFragmentCom
     @Override
     public void onResume() {
         super.onResume();
-        Timber.tag("preflog").d("register bus on resume");
         EventBus.getDefault().register(this);
     }
 
@@ -49,13 +48,11 @@ public class CountryPreferenceDialogFragment extends PreferenceDialogFragmentCom
     public void onPause() {
         super.onPause();
         EventBus.getDefault().unregister(this);
-        Timber.tag("preflog").d("unregister bus on pause");
     }
 
     @Override
     public void onDialogClosed(boolean positiveResult) {
         if(positiveResult && country != null){
-            Toast.makeText(getContext(), World.getCountryFrom(country).getName(), Toast.LENGTH_SHORT).show();
             DialogPreference preference = getPreference();
             if(preference instanceof CountryPreference){
                 ((CountryPreference)preference).setCountry(country);
@@ -67,12 +64,8 @@ public class CountryPreferenceDialogFragment extends PreferenceDialogFragmentCom
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
         PrefDialogCountryBinding binding = PrefDialogCountryBinding.bind(view);
-        if(binding == null) {
-            Timber.tag("preflog").d("null binding in pref dialog frag");
+        if(binding == null)
             return;
-        }
-        else
-            Timber.tag("preflog").d("found binding in pref dialog frag");
         try {
             List<Country> countries = AssetsUtil.getCountries(Objects.requireNonNull(getContext())
                     .getAssets());
@@ -82,7 +75,6 @@ public class CountryPreferenceDialogFragment extends PreferenceDialogFragmentCom
             binding.recyclerView.setItemAnimator(new DefaultItemAnimator());
             binding.recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),
                     DividerItemDecoration.VERTICAL));
-            Timber.tag("preflog").d("adapter set");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -93,5 +85,6 @@ public class CountryPreferenceDialogFragment extends PreferenceDialogFragmentCom
         country = countryEvent.getCountryCode();
         Timber.tag("preflog").d("country clicked: %s", country);
         Objects.requireNonNull(getDialog()).dismiss();
+        onDialogClosed(true);
     }
 }
