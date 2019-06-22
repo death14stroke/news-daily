@@ -57,6 +57,7 @@ public class NewsViewHolder extends RecyclerView.ViewHolder{
         binding.imageView.setTag(target);
         Picasso.get()
                 .load(news.getImageUrl())
+                .resize(300, 300)
                 .into(target);
         binding.shareBtn.setOnClickListener(v ->
                 EventBus.getDefault().post(new NewsEvent(news, ACTION_SHARE_NEWS))

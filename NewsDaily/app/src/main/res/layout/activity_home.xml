@@ -11,6 +11,7 @@
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolBar"
                 android:layout_width="match_parent"
+                app:titleTextColor="@android:color/white"
                 android:layout_height="?attr/actionBarSize"/>
         </com.google.android.material.appbar.AppBarLayout>
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,12 +19,13 @@
             android:layout_height="match_parent"
             tools:context=".activity.HomeActivity"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-            <androidx.viewpager.widget.ViewPager
-                android:id="@+id/viewPager"
+
+            <FrameLayout
+                android:id="@+id/container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/loopBar"/>
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@id/placeHolder"
+                app:layout_constraintTop_toTopOf="parent" />
             <View
                 android:id="@+id/placeHolder"
                 android:layout_width="match_parent"
@@ -39,7 +41,7 @@
                 app:enls_selectionMargin="10dp"
                 app:enls_selectionInAnimation="@animator/enls_scale_restore"
                 app:enls_selectionOutAnimation="@animator/enls_scale_small"
-                app:enls_selectionBackground="@android:color/holo_blue_dark"
+                app:enls_selectionBackground="@android:color/holo_blue_light"
                 app:enls_menu="@menu/menu_home"
                 app:enls_scrollMode="auto"
                 app:layout_constraintBottom_toBottomOf="parent"/>

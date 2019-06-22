@@ -76,7 +76,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     private ConcatenatingMediaSource concatenatingMediaSource;
     private TextToSpeech tts;
     private File dir;
-    private NewsLoader newsLoader = new NewsLoader();
+    private NewsLoader newsLoader = new NewsLoader(this);
     private Intent mediaButtonIntent;
     private int page = FIRST_PAGE;
     private BroadcastReceiver mNoisyReceiver = new BroadcastReceiver() {

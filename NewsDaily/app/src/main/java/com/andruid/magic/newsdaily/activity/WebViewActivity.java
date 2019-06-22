@@ -18,7 +18,7 @@ import androidx.databinding.DataBindingUtil;
 
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.ActivityWebViewBinding;
-import com.andruid.magic.newsdaily.util.MyWebChromeClient;
+import com.andruid.magic.newsdaily.ui.MyWebChromeClient;
 
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
 

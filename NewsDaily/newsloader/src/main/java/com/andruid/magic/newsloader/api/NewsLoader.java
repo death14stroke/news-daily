@@ -1,5 +1,7 @@
 package com.andruid.magic.newsloader.api;
 
+import android.content.Context;
+
 import com.andruid.magic.newsloader.model.ApiResponse;
 import com.andruid.magic.newsloader.model.News;
 import com.andruid.magic.newsloader.server.RetrofitClient;
@@ -15,8 +17,8 @@ import timber.log.Timber;
 public class NewsLoader {
     private RetrofitService service;
 
-    public NewsLoader(){
-        service = RetrofitClient.getRetrofitInstance().create(RetrofitService.class);
+    public NewsLoader(Context context){
+        service = RetrofitClient.getRetrofitInstance(context).create(RetrofitService.class);
     }
 
     public void loadHeadlines(String country, String category, final int page, int pageSize, final NewsLoadedListener mListener){

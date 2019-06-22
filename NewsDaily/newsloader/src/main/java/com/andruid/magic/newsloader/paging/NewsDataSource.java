@@ -1,5 +1,7 @@
 package com.andruid.magic.newsloader.paging;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.paging.PageKeyedDataSource;
 
@@ -17,10 +19,10 @@ public class NewsDataSource extends PageKeyedDataSource<Integer, News> {
     private String country, category;
     private NewsLoader newsLoader;
 
-    NewsDataSource(String country, String category) {
+    NewsDataSource(Context context, String country, String category) {
         this.category = category;
         Timber.tag("dslog").d("datasource created");
-        newsLoader = new NewsLoader();
+        newsLoader = new NewsLoader(context);
         this.country = country;
     }
 
