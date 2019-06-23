@@ -2,7 +2,6 @@ package com.andruid.magic.newsdaily.pref;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.preference.DialogPreference;
 import androidx.preference.PreferenceDialogFragmentCompat;
@@ -15,7 +14,6 @@ import com.andruid.magic.newsdaily.databinding.PrefDialogCountryBinding;
 import com.andruid.magic.newsdaily.eventbus.CountryEvent;
 import com.andruid.magic.newsdaily.util.AssetsUtil;
 import com.blongho.country_data.Country;
-import com.blongho.country_data.World;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

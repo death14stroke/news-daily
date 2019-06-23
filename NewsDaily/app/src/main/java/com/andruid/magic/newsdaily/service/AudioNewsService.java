@@ -87,6 +87,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         }
     };
     private String category;
+    private boolean ttsInit = false;
 
     @Override
     public void onCreate() {
@@ -95,6 +96,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         Timber.tag("dlog").d("service created");
         initMediaSession();
         initExoPlayer();
+        initTTS();
     }
 
     private void initTTS() {
@@ -203,8 +205,13 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             Bundle extras = intent.getExtras();
             if(extras != null)
                 category = extras.getString(KEY_CATEGORY);
-            initTTS();
-            concatenatingMediaSource.clear();
+            if(ttsInit) {
+                audioNewsList.clear();
+                concatenatingMediaSource.clear();
+                loadNews();
+            }
+            else
+                Toast.makeText(getApplicationContext(), "Text to speech not available", Toast.LENGTH_SHORT).show();
         }
         else
             MediaButtonReceiver.handleIntent(mediaSessionCompat, intent);
@@ -237,7 +244,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         if(playWhenReady)
             icon = android.R.drawable.ic_media_pause;
         MediaMetadataCompat metadataCompat = mediaSessionCompat.getController().getMetadata();
-        if(metadataCompat==null)
+        if(metadataCompat==null || category == null)
             return;
         notificationBuilder = NotificationUtil.buildNotification(this, icon, category,
                 metadataCompat, mediaSessionCompat.getSessionToken());
@@ -308,11 +315,9 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         if(status == TextToSpeech.SUCCESS){
             int result = tts.setLanguage(Locale.getDefault());
             if(result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED)
-                Toast.makeText(this, "Text to speech not available", Toast.LENGTH_SHORT).show();
-            else {
-                audioNewsList.clear();
-                loadNews();
-            }
+                Toast.makeText(getApplicationContext(), "Text to speech not available", Toast.LENGTH_SHORT).show();
+            else
+                ttsInit = true;
         }
     }
 

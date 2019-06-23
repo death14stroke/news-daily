@@ -1,1 +1,1 @@
-include ':app', ':newsloader', ':countrydata'
+include ':app', ':countrydata', ':newsloader'

@@ -1,10 +1,8 @@
 package com.andruid.magic.newsdaily.pref;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
-import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
 import com.andruid.magic.newsdaily.R;

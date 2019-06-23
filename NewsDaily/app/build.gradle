@@ -43,6 +43,8 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation "com.cleveroad:loopbar:1.1.4"
     implementation 'de.hdodenhof:circleimageview:3.0.0'
+    implementation 'com.github.AppIntro:AppIntro:5.1.0'
+    implementation 'com.github.ViksaaSkool:AwesomeSplash:v1.0.0'
 
     implementation project(path: ':newsloader')
     implementation project(path: ':countrydata')
