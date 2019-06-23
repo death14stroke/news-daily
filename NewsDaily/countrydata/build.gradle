@@ -19,6 +19,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'com.diegodobelo.expandingview:expanding-view:0.9.4'
+
+    api 'androidx.annotation:annotation:1.1.0'
 }

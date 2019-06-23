@@ -19,7 +19,6 @@
             android:layout_height="match_parent"
             tools:context=".activity.HomeActivity"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-
             <FrameLayout
                 android:id="@+id/container"
                 android:layout_width="match_parent"
