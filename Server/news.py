@@ -21,12 +21,36 @@ def get_headlines(country, category, page, page_size):
                 'desc': a['description'],
                 'url': a['url'],
                 'imageUrl': a['urlToImage'],
-                'published': int(mktime(strptime(a['publishedAt'], "%Y-%m-%dT%H:%M:%SZ")))*1000,
-                'content': a['content']
+                'published': int(mktime(strptime(a['publishedAt'], "%Y-%m-%dT%H:%M:%SZ")))*1000
             }
             articles.append(obj)
     resp = {
         'hasMore': has_more,
-        "news": articles
+        'news': articles
+    }
+    return resp
+
+
+def get_articles(language, query, page, page_size):
+    raw_articles = newsapi.get_everything(language=language, q=query, page=page, page_size=page_size)
+    status = raw_articles['status']
+    size = raw_articles['totalResults']
+    has_more = paginate(size=size, page_size=page_size, page=page)
+    articles = []
+    if status == 'ok':
+        for a in raw_articles['articles']:
+            obj = {
+                'sourceName': a['source']['name'],
+                'author': a['author'],
+                'title': a['title'],
+                'desc': a['description'],
+                'url': a['url'],
+                'imageUrl': a['urlToImage'],
+                'published': int(mktime(strptime(a['publishedAt'], "%Y-%m-%dT%H:%M:%SZ"))) * 1000
+            }
+            articles.append(obj)
+    resp = {
+        'hasMore': has_more,
+        'articles': articles
     }
     return resp

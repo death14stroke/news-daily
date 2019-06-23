@@ -1,5 +1,6 @@
 package com.andruid.magic.newsdaily.activity;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -42,6 +43,7 @@ public class WebViewActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void setWebView() {
         binding.webView.setWebChromeClient(new MyWebChromeClient(binding.progressBar));
         binding.webView.setWebViewClient(new WebViewClient(){
@@ -52,6 +54,7 @@ public class WebViewActivity extends AppCompatActivity {
             }
         });
         binding.webView.loadUrl(url);
+        binding.webView.getSettings().setJavaScriptEnabled(true);
         binding.webView.getSettings().setBuiltInZoomControls(true);
         binding.webView.getSettings().setUseWideViewPort(true);
         binding.webView.getSettings().setLoadWithOverviewMode(true);

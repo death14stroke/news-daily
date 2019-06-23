@@ -1,7 +1,6 @@
 package com.andruid.magic.newsdaily.activity;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -21,23 +20,25 @@ public class IntroActivity extends AppIntro {
         super.onCreate(savedInstanceState);
         addPage("Categories", "Get news from 7 different categories - General, Business, " +
                 "Entertainment, Health, Science, Sports and Technology", R.mipmap.ic_launcher,
-                android.R.color.holo_orange_light);
+                R.color.colorSplash, R.color.colorPrimaryDark, R.color.colorPrimary);
         addPage("Audio news", "Want to keep updated but no time to read? Listen to latest" +
-                " news while working", R.drawable.ic_speak, android.R.color.holo_green_light);
-        setBarColor(Color.parseColor("#3F51B5"));
-        setSeparatorColor(Color.parseColor("#2196F3"));
+                " news while working", R.drawable.ic_speak, R.color.colorBg2, R.color.colorDesc2,
+                R.color.colorTitle2);
         showSkipButton(true);
         setProgressButtonEnabled(true);
         setVibrate(true);
         setVibrateIntensity(30);
     }
 
-    private void addPage(String title, String desc, int image, int bgColor){
+    private void addPage(String title, String desc, int image, int bgColor, int descColor,
+                         int titleColor){
         SliderPage sliderPage = new SliderPagerBuilder()
                 .title(title)
                 .description(desc)
                 .imageDrawable(image)
                 .bgColor(ContextCompat.getColor(this, bgColor))
+                .descColor(ContextCompat.getColor(this, descColor))
+                .titleColor(ContextCompat.getColor(this, titleColor))
                 .build();
         addSlide(AppIntroFragment.newInstance(sliderPage));
     }
@@ -45,12 +46,17 @@ public class IntroActivity extends AppIntro {
     @Override
     public void onSkipPressed(Fragment currentFragment) {
         super.onSkipPressed(currentFragment);
-        startActivity(new Intent(this, HomeActivity.class));
+        goToHomeScreen();
     }
 
     @Override
     public void onDonePressed(Fragment currentFragment) {
         super.onDonePressed(currentFragment);
+        goToHomeScreen();
+    }
+
+    private void goToHomeScreen() {
         startActivity(new Intent(this, HomeActivity.class));
+        finish();
     }
 }

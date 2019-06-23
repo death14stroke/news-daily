@@ -63,6 +63,15 @@ public class NotificationUtil {
                 .setSubText(StringUtils.capFirstLetter(category))
                 .setShowWhen(true);
         String albumArtUri = metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI);
+        PendingIntent pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
+        builder.addAction(android.R.drawable.ic_media_previous,"previous",pendingIntent);
+        pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+                PlaybackStateCompat.ACTION_PLAY_PAUSE);
+        builder.addAction(icon,"play",pendingIntent);
+        pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
+        builder.addAction(android.R.drawable.ic_media_next,"next",pendingIntent);
         Thread thread = new Thread(() -> {
             try {
                 Bitmap bitmap = Picasso.get().load(albumArtUri).get();
@@ -77,15 +86,6 @@ public class NotificationUtil {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        PendingIntent pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
-        builder.addAction(android.R.drawable.ic_media_previous,"previous",pendingIntent);
-        pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-                PlaybackStateCompat.ACTION_PLAY_PAUSE);
-        builder.addAction(icon,"play",pendingIntent);
-        pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
-        builder.addAction(android.R.drawable.ic_media_next,"next",pendingIntent);
         return builder;
     }
 }

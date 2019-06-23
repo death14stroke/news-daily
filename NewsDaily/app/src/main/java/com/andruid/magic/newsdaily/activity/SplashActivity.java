@@ -46,7 +46,10 @@ public class SplashActivity extends AwesomeSplash {
                 });
             }
             else{
-                startActivity(new Intent(this, HomeActivity.class));
+                runOnUiThread(() -> {
+                    startActivity(new Intent(this, HomeActivity.class));
+                    finish();
+                });
             }
         }).start();
     }
