@@ -78,13 +78,14 @@
                 <TextView
                     android:id="@+id/descTV"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:text="@{news.desc}"
                     android:textColor="#00062C"
                     android:layout_marginTop="5dp"
                     android:padding="10dp"
                     android:textSize="15sp"
-                    app:layout_constraintTop_toBottomOf="@id/titleTV" />
+                    app:layout_constraintTop_toBottomOf="@id/titleTV"
+                    app:layout_constraintBottom_toTopOf="@id/goToUrlTV"/>
                 <TextView
                     android:id="@+id/goToUrlTV"
                     android:textColor="#DBE0FF"

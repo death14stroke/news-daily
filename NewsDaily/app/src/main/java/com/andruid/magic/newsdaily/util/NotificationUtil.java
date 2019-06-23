@@ -16,7 +16,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.media.session.MediaButtonReceiver;
 
 import com.andruid.magic.newsdaily.R;
-import com.andruid.magic.newsdaily.activity.MainActivity;
+import com.andruid.magic.newsdaily.activity.HomeActivity;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -24,14 +24,15 @@ import java.io.IOException;
 import static com.andruid.magic.newsdaily.data.Constants.CHANNEL_ID;
 import static com.andruid.magic.newsdaily.data.Constants.CHANNEL_NAME;
 import static com.andruid.magic.newsdaily.data.Constants.INTENT_NOTI_CLICK;
-import static com.andruid.magic.newsdaily.data.Constants.NEWS_TITLE;
+import static com.andruid.magic.newsdaily.data.Constants.KEY_CATEGORY;
 
 public class NotificationUtil {
-    public static NotificationCompat.Builder buildNotification(Context context, int icon, MediaMetadataCompat
-            metadataCompat, MediaSessionCompat.Token token){
-        Intent intent = new Intent(context, MainActivity.class);
+    public static NotificationCompat.Builder buildNotification(Context context, int icon, String category,
+                                                               MediaMetadataCompat metadataCompat,
+                                                               MediaSessionCompat.Token token){
+        Intent intent = new Intent(context, HomeActivity.class);
         intent.setAction(INTENT_NOTI_CLICK);
-        intent.putExtra(NEWS_TITLE, metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
+        intent.putExtra(KEY_CATEGORY, category);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if(notificationManager==null)
@@ -59,7 +60,8 @@ public class NotificationUtil {
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .setContentTitle(metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_TITLE))
                 .setContentText(metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ALBUM))
-                .setShowWhen(false);
+                .setSubText(StringUtils.capFirstLetter(category))
+                .setShowWhen(true);
         String albumArtUri = metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI);
         Thread thread = new Thread(() -> {
             try {

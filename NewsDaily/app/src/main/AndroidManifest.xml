@@ -15,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".activity.HomeActivity" />
+
         <activity
             android:name=".activity.SplashActivity"
             android:theme="@style/SplashTheme">
@@ -46,9 +48,6 @@
 
         <activity android:name=".activity.WebViewActivity"
             android:theme="@style/ActionBarTheme"/>
-        <activity
-            android:name=".activity.MainActivity"
-            android:launchMode="singleTop" />
     </application>
 
 </manifest>

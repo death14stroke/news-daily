@@ -17,7 +17,6 @@ import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.telephony.TelephonyManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,11 +24,13 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.media.MediaBrowserServiceCompat;
 import androidx.media.session.MediaButtonReceiver;
+import androidx.preference.PreferenceManager;
 
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.model.AudioNews;
 import com.andruid.magic.newsdaily.util.MediaUtil;
 import com.andruid.magic.newsdaily.util.NotificationUtil;
+import com.andruid.magic.newsdaily.util.PrefUtil;
 import com.andruid.magic.newsloader.api.NewsLoader;
 import com.andruid.magic.newsloader.model.News;
 import com.google.android.exoplayer2.C;
@@ -56,9 +57,9 @@ import java.util.Objects;
 
 import timber.log.Timber;
 
-import static com.andruid.magic.newsdaily.data.Constants.DEFAULT_COUNTRY;
 import static com.andruid.magic.newsdaily.data.Constants.DIR_TTS;
 import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
+import static com.andruid.magic.newsdaily.data.Constants.KEY_CATEGORY;
 import static com.andruid.magic.newsdaily.data.Constants.MEDIA_NOTI_ID;
 import static com.andruid.magic.newsdaily.data.Constants.MEDIA_SERVICE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_FETCH_DISTANCE;
@@ -76,7 +77,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     private ConcatenatingMediaSource concatenatingMediaSource;
     private TextToSpeech tts;
     private File dir;
-    private NewsLoader newsLoader = new NewsLoader(this);
+    private NewsLoader newsLoader;
     private Intent mediaButtonIntent;
     private int page = FIRST_PAGE;
     private BroadcastReceiver mNoisyReceiver = new BroadcastReceiver() {
@@ -85,10 +86,12 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             mediaSessionCallback.onPause();
         }
     };
+    private String category;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        newsLoader = new NewsLoader(getApplicationContext());
         Timber.tag("dlog").d("service created");
         initMediaSession();
         initExoPlayer();
@@ -160,10 +163,9 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     }
 
     private void loadNews(){
-        TelephonyManager telephoneManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-        String countryCode = telephoneManager.getNetworkCountryIso();
-        Toast.makeText(getApplicationContext(), "country: "+countryCode, Toast.LENGTH_SHORT).show();
-        newsLoader.loadHeadlines(DEFAULT_COUNTRY, "science", page, PAGE_SIZE, this);
+        String country = PreferenceManager.getDefaultSharedPreferences(this).getString(
+                getString(R.string.pref_country), PrefUtil.getDefaultCountry(this));
+        newsLoader.loadHeadlines(country, category, page, PAGE_SIZE, this);
     }
 
     private void setCurrentAudio(int pos) {
@@ -197,8 +199,13 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Timber.tag("medialog").d("on start command");
-        if(INTENT_PREPARE_AUDIO.equals(intent.getAction()))
+        if(intent != null && INTENT_PREPARE_AUDIO.equals(intent.getAction())) {
+            Bundle extras = intent.getExtras();
+            if(extras != null)
+                category = extras.getString(KEY_CATEGORY);
             initTTS();
+            concatenatingMediaSource.clear();
+        }
         else
             MediaButtonReceiver.handleIntent(mediaSessionCompat, intent);
         return START_STICKY;
@@ -232,7 +239,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         MediaMetadataCompat metadataCompat = mediaSessionCompat.getController().getMetadata();
         if(metadataCompat==null)
             return;
-        notificationBuilder = NotificationUtil.buildNotification(this, icon,
+        notificationBuilder = NotificationUtil.buildNotification(this, icon, category,
                 metadataCompat, mediaSessionCompat.getSessionToken());
         Notification notification = Objects.requireNonNull(notificationBuilder).build();
         if(playWhenReady)
@@ -257,7 +264,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             mediaSessionCompat.setMetadata(mediaMetadataCompat);
             new Thread(() -> {
                 notificationBuilder = NotificationUtil.buildNotification(this,
-                        android.R.drawable.ic_media_pause, mediaMetadataCompat,
+                        android.R.drawable.ic_media_pause, category, mediaMetadataCompat,
                         mediaSessionCompat.getSessionToken());
                 Notification notification = Objects.requireNonNull(notificationBuilder).build();
                 startForeground(MEDIA_NOTI_ID, notification);

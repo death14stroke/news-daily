@@ -1,8 +1,6 @@
 package com.andruid.magic.newsdaily.pref;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
@@ -10,6 +8,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.andruid.magic.newsdaily.R;
+import com.andruid.magic.newsdaily.util.PrefUtil;
 
 import java.util.Objects;
 
@@ -24,11 +23,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.app_preferences);
         countryPreference = findPreference(getString(R.string.pref_country));
-        TelephonyManager telephoneManager = (TelephonyManager) Objects.requireNonNull(getContext())
-                .getSystemService(Context.TELEPHONY_SERVICE);
-        String countryCode = telephoneManager.getNetworkCountryIso();
+        String defCountry = PrefUtil.getDefaultCountry(Objects.requireNonNull(getContext()));
         String country = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(
-                getString(R.string.pref_country), countryCode);
+                getString(R.string.pref_country), defCountry);
         countryPreference.setCountry(country);
     }
 

@@ -1,22 +1,32 @@
 package com.andruid.magic.newsdaily.fragment;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.speech.tts.TextToSpeech;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.preference.PreferenceManager;
 
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.activity.WebViewActivity;
 import com.andruid.magic.newsdaily.adapter.NewsAdapter;
 import com.andruid.magic.newsdaily.databinding.FragmentNewsBinding;
 import com.andruid.magic.newsdaily.eventbus.NewsEvent;
+import com.andruid.magic.newsdaily.service.AudioNewsService;
+import com.andruid.magic.newsdaily.util.PrefUtil;
 import com.andruid.magic.newsloader.model.News;
 import com.andruid.magic.newsloader.paging.NewsViewModel;
 import com.andruid.magic.newsloader.paging.NewsViewModelFactory;
@@ -31,13 +41,18 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
+import java.util.stream.IntStream;
 
 import timber.log.Timber;
 
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_SHARE_NEWS;
+import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
 import static com.andruid.magic.newsdaily.data.Constants.KEY_CATEGORY;
+import static com.andruid.magic.newsdaily.data.Constants.MY_DATA_CHECK_CODE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
 
 public class NewsFragment extends Fragment {
@@ -46,6 +61,9 @@ public class NewsFragment extends Fragment {
     private NewsViewModel newsViewModel;
     private NewsAdapter newsAdapter;
     private CardStackLayoutManager cardStackLayoutManager;
+    private MediaBrowserCompat mediaBrowserCompat;
+    private MediaControllerCompat mediaControllerCompat;
+    private MediaControllerCallback mediaControllerCallback;
 
     public static NewsFragment newInstance(String category) {
         NewsFragment fragment = new NewsFragment();
@@ -60,8 +78,11 @@ public class NewsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null)
             category = getArguments().getString(KEY_CATEGORY);
+        String defCountry = PrefUtil.getDefaultCountry(Objects.requireNonNull(getContext()));
+        String country = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(
+                getString(R.string.pref_country), defCountry);
         newsViewModel = ViewModelProviders.of(this, new NewsViewModelFactory(
-                Objects.requireNonNull(getActivity()).getApplication(), category))
+                Objects.requireNonNull(getActivity()).getApplication(), category, country))
                 .get(NewsViewModel.class);
         Timber.tag("assetslog").d("fragment created %s", category);
         newsAdapter = new NewsAdapter();
@@ -79,6 +100,11 @@ public class NewsFragment extends Fragment {
             @Override
             public void onCardDisappeared(View view, int position) {}
         });
+        MBConnectionCallback mbConnectionCallback = new MBConnectionCallback();
+        mediaControllerCallback = new MediaControllerCallback();
+        mediaBrowserCompat = new MediaBrowserCompat(getContext(), new ComponentName(getContext(),
+                AudioNewsService.class), mbConnectionCallback, null);
+        mediaBrowserCompat.connect();
     }
 
     @Override
@@ -87,6 +113,10 @@ public class NewsFragment extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_news, container, false);
         setUpCardStackView();
         loadHeadlines();
+        binding.speakBtn.setOnClickListener(v -> {
+            Intent checkTTSIntent = new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
+        });
         return binding.getRoot();
     }
 
@@ -100,6 +130,33 @@ public class NewsFragment extends Fragment {
     public void onPause() {
         super.onPause();
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mediaControllerCompat!=null)
+            mediaControllerCompat.unregisterCallback(mediaControllerCallback);
+        if(mediaBrowserCompat!=null)
+            mediaBrowserCompat.disconnect();
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                Intent intent = new Intent(getActivity(), AudioNewsService.class);
+                intent.setAction(INTENT_PREPARE_AUDIO);
+                intent.putExtra(KEY_CATEGORY, category);
+                Objects.requireNonNull(getContext()).startService(intent);
+            } else {
+                Intent installTTSIntent = new Intent();
+                installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installTTSIntent);
+            }
+        }
     }
 
     private void setUpCardStackView() {
@@ -144,5 +201,55 @@ public class NewsFragment extends Fragment {
         intent.putExtra(Intent.EXTRA_SUBJECT, news.getTitle());
         intent.putExtra(Intent.EXTRA_TEXT, news.getUrl());
         startActivity(Intent.createChooser(intent, "Share news via..."));
+    }
+
+    private class MBConnectionCallback extends MediaBrowserCompat.ConnectionCallback {
+        @Override
+        public void onConnected() {
+            super.onConnected();
+            try {
+                mediaControllerCompat = new MediaControllerCompat(getContext(),
+                        mediaBrowserCompat.getSessionToken());
+                mediaControllerCompat.registerCallback(mediaControllerCallback);
+                MediaControllerCompat.setMediaController(Objects.requireNonNull(getActivity()),
+                        mediaControllerCompat);
+                MediaMetadataCompat metadata = mediaControllerCompat.getMetadata();
+                if(metadata != null)
+                    mediaControllerCallback.onMetadataChanged(metadata);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class MediaControllerCallback extends MediaControllerCompat.Callback {
+        @Override
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
+            super.onMetadataChanged(metadata);
+            String title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
+            scrollToCurrentNews(title);
+        }
+    }
+
+    private void scrollToCurrentNews(String title) {
+        List<News> newsList = newsAdapter.getNewsList();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            OptionalInt optionalInt = IntStream.range(0, newsList.size())
+                    .filter(pos -> newsList.get(pos).getTitle().equals(title))
+                    .findFirst();
+            if(optionalInt.isPresent()){
+                int pos = optionalInt.getAsInt();
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        }
+        else{
+            com.annimon.stream.OptionalInt optionalInt = com.annimon.stream.IntStream.range(0, newsList.size())
+                    .filter(pos -> newsList.get(pos).getTitle().equals(title))
+                    .findFirst();
+            if(optionalInt.isPresent()){
+                int pos = optionalInt.getAsInt();
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        }
     }
 }

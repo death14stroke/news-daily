@@ -46,4 +46,6 @@ dependencies {
 
     implementation project(path: ':newsloader')
     implementation project(path: ':countrydata')
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-alpha-2'
 }
