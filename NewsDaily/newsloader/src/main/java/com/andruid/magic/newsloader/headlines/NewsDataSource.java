@@ -1,4 +1,4 @@
-package com.andruid.magic.newsloader.paging;
+package com.andruid.magic.newsloader.headlines;
 
 import android.content.Context;
 

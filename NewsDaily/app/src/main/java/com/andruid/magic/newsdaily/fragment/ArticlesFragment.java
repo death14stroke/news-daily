@@ -18,18 +18,16 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.preference.PreferenceManager;
 
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.activity.WebViewActivity;
 import com.andruid.magic.newsdaily.adapter.NewsAdapter;
-import com.andruid.magic.newsdaily.databinding.FragmentNewsBinding;
+import com.andruid.magic.newsdaily.databinding.FragmentArticlesBinding;
 import com.andruid.magic.newsdaily.eventbus.NewsEvent;
 import com.andruid.magic.newsdaily.service.AudioNewsService;
-import com.andruid.magic.newsdaily.util.PrefUtil;
+import com.andruid.magic.newsloader.articles.ArticlesViewModel;
+import com.andruid.magic.newsloader.articles.ArticlesViewModelFactory;
 import com.andruid.magic.newsloader.model.News;
-import com.andruid.magic.newsloader.headlines.NewsViewModel;
-import com.andruid.magic.newsloader.headlines.NewsViewModelFactory;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
 import com.yuyakaido.android.cardstackview.CardStackListener;
 import com.yuyakaido.android.cardstackview.Direction;
@@ -51,40 +49,31 @@ import timber.log.Timber;
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_SHARE_NEWS;
 import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
-import static com.andruid.magic.newsdaily.data.Constants.KEY_CATEGORY;
 import static com.andruid.magic.newsdaily.data.Constants.MY_DATA_CHECK_CODE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
 
-public class NewsFragment extends Fragment {
-    private FragmentNewsBinding binding;
-    private String category;
-    private NewsViewModel newsViewModel;
+public class ArticlesFragment extends Fragment {
+    private FragmentArticlesBinding binding;
+    private ArticlesViewModel articlesViewModel;
     private NewsAdapter newsAdapter;
     private CardStackLayoutManager cardStackLayoutManager;
     private MediaBrowserCompat mediaBrowserCompat;
     private MediaControllerCompat mediaControllerCompat;
     private MediaControllerCallback mediaControllerCallback;
 
-    public static NewsFragment newInstance(String category) {
-        NewsFragment fragment = new NewsFragment();
-        Bundle args = new Bundle();
-        args.putString(KEY_CATEGORY, category);
-        fragment.setArguments(args);
-        return fragment;
+    public static ArticlesFragment newInstance() {
+        return new ArticlesFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null)
-            category = getArguments().getString(KEY_CATEGORY);
-        String defCountry = PrefUtil.getDefaultCountry(Objects.requireNonNull(getContext()));
-        String country = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(
-                getString(R.string.pref_country), defCountry);
-        newsViewModel = ViewModelProviders.of(this, new NewsViewModelFactory(
-                Objects.requireNonNull(getActivity()).getApplication(), category, country))
-                .get(NewsViewModel.class);
-        Timber.tag("assetslog").d("fragment created %s", category);
+        String language = "en", query = "bitcoin";
+        articlesViewModel = ViewModelProviders.of(this, new ArticlesViewModelFactory(
+                Objects.requireNonNull(getActivity()).getApplication(), language, query))
+                .get(ArticlesViewModel.class);
+        setHasOptionsMenu(true);
+        Timber.tag("assetslog").d("fragment created articles: %s - %s", language, query);
         newsAdapter = new NewsAdapter();
         cardStackLayoutManager = new CardStackLayoutManager(getContext(), new CardStackListener() {
             @Override
@@ -102,15 +91,16 @@ public class NewsFragment extends Fragment {
         });
         MBConnectionCallback mbConnectionCallback = new MBConnectionCallback();
         mediaControllerCallback = new MediaControllerCallback();
-        mediaBrowserCompat = new MediaBrowserCompat(getContext(), new ComponentName(getContext(),
-                AudioNewsService.class), mbConnectionCallback, null);
+        mediaBrowserCompat = new MediaBrowserCompat(getContext(), new ComponentName(
+                Objects.requireNonNull(getContext()), AudioNewsService.class),
+                mbConnectionCallback, null);
         mediaBrowserCompat.connect();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_news, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_articles, container, false);
         setUpCardStackView();
         loadHeadlines();
         binding.speakBtn.setOnClickListener(v -> {
@@ -149,7 +139,6 @@ public class NewsFragment extends Fragment {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 Intent intent = new Intent(getActivity(), AudioNewsService.class);
                 intent.setAction(INTENT_PREPARE_AUDIO);
-                intent.putExtra(KEY_CATEGORY, category);
                 Objects.requireNonNull(getContext()).startService(intent);
             } else {
                 Intent installTTSIntent = new Intent();
@@ -173,7 +162,7 @@ public class NewsFragment extends Fragment {
     }
 
     private void loadHeadlines() {
-        newsViewModel.getPagedListLiveData().observe(this, pagedList ->
+        articlesViewModel.getPagedListLiveData().observe(this, pagedList ->
                 newsAdapter.submitList(pagedList)
         );
         binding.cardStackView.setAdapter(newsAdapter);

@@ -1,4 +1,4 @@
-package com.andruid.magic.newsloader.paging;
+package com.andruid.magic.newsloader.articles;
 
 import android.content.Context;
 
@@ -9,22 +9,23 @@ import androidx.paging.PageKeyedDataSource;
 
 import com.andruid.magic.newsloader.model.News;
 
-public class NewsDataSourceFactory extends DataSource.Factory<Integer, News> {
+public class ArticlesDataSourceFactory extends DataSource.Factory<Integer, News> {
     private MutableLiveData<PageKeyedDataSource<Integer, News>> liveDataSource =
             new MutableLiveData<>();
-    private String country, category;
+    private String language, query;
     private Context context;
 
-    NewsDataSourceFactory(Context context, String country, String category){
-        this.country = country;
-        this.category = category;
+
+    ArticlesDataSourceFactory(Context context, String language, String query){
         this.context = context;
+        this.language = language;
+        this.query = query;
     }
 
     @NonNull
     @Override
     public DataSource<Integer, News> create() {
-        NewsDataSource dataSource = new NewsDataSource(context, country, category);
+        ArticlesDataSource dataSource = new ArticlesDataSource(context, language, query);
         liveDataSource.postValue(dataSource);
         return dataSource;
     }

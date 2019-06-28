@@ -51,6 +51,6 @@ def get_articles(language, query, page, page_size):
             articles.append(obj)
     resp = {
         'hasMore': has_more,
-        'articles': articles
+        'news': articles
     }
     return resp

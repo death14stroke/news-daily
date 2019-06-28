@@ -21,7 +21,4 @@
     <item android:id="@+id/menu_tech"
         android:icon="@drawable/ic_tech"
         android:title="@string/technology"/>
-    <item android:id="@+id/menu_settings"
-        android:icon="@drawable/ic_settings"
-        android:title="@string/settings"/>
 </menu>

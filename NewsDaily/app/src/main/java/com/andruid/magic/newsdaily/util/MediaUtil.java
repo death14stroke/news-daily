@@ -8,10 +8,6 @@ import android.support.v4.media.MediaMetadataCompat;
 import com.andruid.magic.newsdaily.model.AudioNews;
 
 public class MediaUtil {
-    public static String getFileName(String utteranceId){
-        return "news_"+utteranceId+".mp3";
-    }
-
     public static MediaDescriptionCompat getMediaDescription(AudioNews audioNews){
         Bundle extras = new Bundle();
         extras.putParcelable(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI,

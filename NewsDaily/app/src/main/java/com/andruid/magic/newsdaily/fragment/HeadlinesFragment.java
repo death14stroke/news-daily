@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment;
 
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.FragmentHeadlinesBinding;
-import com.andruid.magic.newsdaily.pref.SettingsFragment;
 import com.andruid.magic.newsdaily.util.AssetsUtil;
 import com.andruid.magic.newsdaily.util.StringUtils;
 import com.cleveroad.loopbar.widget.OnItemClickListener;
@@ -20,8 +19,6 @@ import java.util.List;
 import java.util.Objects;
 
 import timber.log.Timber;
-
-import static com.andruid.magic.newsdaily.data.Constants.POS_SETTINGS;
 
 public class HeadlinesFragment extends Fragment implements OnItemClickListener {
     private FragmentHeadlinesBinding binding;
@@ -57,13 +54,6 @@ public class HeadlinesFragment extends Fragment implements OnItemClickListener {
                     .replace(R.id.container, fragment)
                     .commit();
             Objects.requireNonNull(getActivity()).setTitle(StringUtils.capFirstLetter(category));
-        }
-        else if(position == POS_SETTINGS){
-            Fragment fragment = SettingsFragment.newInstance();
-            getChildFragmentManager().beginTransaction()
-                    .replace(R.id.container, fragment)
-                    .commit();
-            Objects.requireNonNull(getActivity()).setTitle("Settings");
         }
     }
 

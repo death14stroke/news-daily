@@ -10,8 +10,6 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.media.MediaBrowserCompat.MediaItem;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -33,6 +31,8 @@ import com.andruid.magic.newsdaily.util.NotificationUtil;
 import com.andruid.magic.newsdaily.util.PrefUtil;
 import com.andruid.magic.newsloader.api.NewsLoader;
 import com.andruid.magic.newsloader.model.News;
+import com.andruid.magic.texttoaudiofile.api.TtsApi;
+import com.andruid.magic.texttoaudiofile.util.FileUtils;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Player;
@@ -52,12 +52,10 @@ import com.google.android.exoplayer2.util.Util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import timber.log.Timber;
 
-import static com.andruid.magic.newsdaily.data.Constants.DIR_TTS;
 import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
 import static com.andruid.magic.newsdaily.data.Constants.KEY_CATEGORY;
 import static com.andruid.magic.newsdaily.data.Constants.MEDIA_NOTI_ID;
@@ -66,7 +64,8 @@ import static com.andruid.magic.newsdaily.data.Constants.NEWS_FETCH_DISTANCE;
 import static com.andruid.magic.newsloader.data.Constants.FIRST_PAGE;
 import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
 
-public class AudioNewsService extends MediaBrowserServiceCompat implements Player.EventListener, TextToSpeech.OnInitListener, NewsLoader.NewsLoadedListener {
+public class AudioNewsService extends MediaBrowserServiceCompat implements Player.EventListener,
+        NewsLoader.NewsLoadedListener, TtsApi.AudioConversionListener {
     private MediaSessionCompat mediaSessionCompat;
     private MediaSessionCallback mediaSessionCallback;
     private SimpleExoPlayer exoPlayer;
@@ -75,8 +74,6 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     private DataSource.Factory dataSourceFactory;
     private NotificationCompat.Builder notificationBuilder;
     private ConcatenatingMediaSource concatenatingMediaSource;
-    private TextToSpeech tts;
-    private File dir;
     private NewsLoader newsLoader;
     private Intent mediaButtonIntent;
     private int page = FIRST_PAGE;
@@ -87,42 +84,16 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         }
     };
     private String category;
-    private boolean ttsInit = false;
+    private TtsApi ttsApi;
 
     @Override
     public void onCreate() {
         super.onCreate();
         newsLoader = new NewsLoader(getApplicationContext());
+        ttsApi = new TtsApi(getApplicationContext(), this);
         Timber.tag("dlog").d("service created");
         initMediaSession();
         initExoPlayer();
-        initTTS();
-    }
-
-    private void initTTS() {
-        tts = new TextToSpeech(this, this);
-        dir = new File(getCacheDir(), DIR_TTS);
-        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-            @Override
-            public void onStart(String utteranceId) {}
-
-            @Override
-            public void onDone(String utteranceId) {
-                File file = new File(dir, MediaUtil.getFileName(utteranceId));
-                Timber.tag("ttslog").d("Utterance done %s", utteranceId);
-                MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory)
-                        .createMediaSource(Uri.fromFile(file));
-                concatenatingMediaSource.addMediaSource(mediaSource);
-                exoPlayer.prepare(concatenatingMediaSource, false, false);
-                if(utteranceId.equals("0"))
-                    mediaSessionCallback.onPlay();
-            }
-
-            @Override
-            public void onError(String utteranceId) {
-                Timber.tag("ttslog").d("error in %s", utteranceId);
-            }
-        });
     }
 
     private void initExoPlayer() {
@@ -205,7 +176,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             Bundle extras = intent.getExtras();
             if(extras != null)
                 category = extras.getString(KEY_CATEGORY);
-            if(ttsInit) {
+            if(ttsApi.isReady()) {
                 audioNewsList.clear();
                 concatenatingMediaSource.clear();
                 loadNews();
@@ -282,15 +253,13 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     @Override
     public void onSuccess(List<News> newsList, boolean hasMore) {
         int pos = audioNewsList.size();
-        if(!dir.exists()) {
-            boolean res = dir.mkdir();
-            Timber.tag("ttslog").d("dir created %s", res);
-        }
         for(int i=0; i<newsList.size(); i++){
             News news = newsList.get(i);
+            String text = news.getDesc();
             audioNewsList.add(new AudioNews("", news));
-            File file = new File(dir, MediaUtil.getFileName(String.valueOf(pos+i)));
-            tts.synthesizeToFile(news.getDesc(), null, file, String.valueOf(pos+i));
+            if(text == null || text.isEmpty())
+                text = "No description available";
+            ttsApi.convertToAudioFile(text, String.valueOf(pos+i));
         }
     }
 
@@ -311,14 +280,20 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     }
 
     @Override
-    public void onInit(int status) {
-        if(status == TextToSpeech.SUCCESS){
-            int result = tts.setLanguage(Locale.getDefault());
-            if(result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED)
-                Toast.makeText(getApplicationContext(), "Text to speech not available", Toast.LENGTH_SHORT).show();
-            else
-                ttsInit = true;
-        }
+    public void onAudioCreated(File file) {
+        String utteranceId = FileUtils.getUtteranceId(file.getName());
+        Timber.tag("ttslog").d("Utterance done %s", utteranceId);
+        MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(Uri.fromFile(file));
+        concatenatingMediaSource.addMediaSource(mediaSource);
+        exoPlayer.prepare(concatenatingMediaSource, false, false);
+        if(utteranceId.equals("0"))
+            mediaSessionCallback.onPlay();
+    }
+
+    @Override
+    public void onFailure(String msg) {
+        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
     private final class MediaSessionCallback extends MediaSessionCompat.Callback {

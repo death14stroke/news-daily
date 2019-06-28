@@ -21,8 +21,29 @@ public class NewsLoader {
         service = RetrofitClient.getRetrofitInstance(context).create(RetrofitService.class);
     }
 
-    public void loadHeadlines(String country, String category, final int page, int pageSize, final NewsLoadedListener mListener){
+    public void loadHeadlines(String country, String category, final int page, int pageSize,
+                              final NewsLoadedListener mListener){
         service.getHeadlines(country, category, page, pageSize).enqueue(new Callback<ApiResponse>() {
+            @Override
+            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                if(response.body()==null)
+                    return;
+                Timber.tag("pagelog").d("page: %d, size: %d", page, response.body().getNewsList().size());
+                List<News> newsList = response.body().getNewsList();
+                if(newsList!=null)
+                    mListener.onSuccess(newsList, response.body().isHasMore());
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                mListener.onFailure(t);
+            }
+        });
+    }
+
+    public void loadArticles(String language, String query, final int page, int pageSize,
+                             final NewsLoadedListener mListener){
+        service.getArticles(language, query, page, pageSize).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if(response.body()==null)

@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.ActivityDrawerBinding;
+import com.andruid.magic.newsdaily.fragment.ArticlesFragment;
 import com.andruid.magic.newsdaily.fragment.HeadlinesFragment;
 import com.andruid.magic.newsdaily.pref.SettingsFragment;
 import com.mikepenz.materialdrawer.Drawer;
@@ -15,6 +16,7 @@ import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 
+import static com.andruid.magic.newsdaily.data.Constants.ID_ARTICLES;
 import static com.andruid.magic.newsdaily.data.Constants.ID_HEADLINES;
 import static com.andruid.magic.newsdaily.data.Constants.ID_SETTINGS;
 
@@ -40,6 +42,9 @@ public class DrawerActivity extends AppCompatActivity {
                     switch ((int) drawerItem.getIdentifier()){
                         case ID_HEADLINES:
                             loadFragment(HeadlinesFragment.newInstance());
+                            break;
+                        case ID_ARTICLES:
+                            loadFragment(ArticlesFragment.newInstance());
                             break;
                         case ID_SETTINGS:
                             loadFragment(SettingsFragment.newInstance());
@@ -68,8 +73,11 @@ public class DrawerActivity extends AppCompatActivity {
     private void addDrawerItems() {
         PrimaryDrawerItem headlinesItem = buildDrawerItem(ID_HEADLINES, R.string.headlines,
                 R.drawable.ic_general);
+        PrimaryDrawerItem articlesItem = buildDrawerItem(ID_ARTICLES, R.string.articles,
+                R.drawable.ic_articles);
         PrimaryDrawerItem settingsItem = buildDrawerItem(ID_SETTINGS, R.string.settings,
                 R.drawable.ic_settings);
-        drawerBuilder.addDrawerItems(headlinesItem, new DividerDrawerItem(), settingsItem);
+        drawerBuilder.addDrawerItems(headlinesItem, articlesItem, new DividerDrawerItem(),
+                settingsItem);
     }
 }
