@@ -15,19 +15,28 @@ import timber.log.Timber;
 import static com.andruid.magic.texttoaudiofile.data.Constants.DIR_TTS;
 
 public class TtsApi {
-    private TextToSpeech tts;
-    private File dir;
-    private AudioConversionListener mListener;
-    private boolean ttsInit = false;
+    private static TtsApi sInstance;
+    private static final Object LOCK = new Object();
+    private static TextToSpeech tts;
+    private static File dir;
+    private static boolean ttsInit = false;
 
-    public TtsApi(final Context context, final AudioConversionListener mListener){
+    public static void init(Context context){
         dir = new File(context.getCacheDir(), DIR_TTS);
-        this.mListener = mListener;
         initTTS(context);
-
     }
 
-    private void initTTS(final Context context) {
+    public static TtsApi getInstance(){
+        if(sInstance == null){
+            synchronized (LOCK){
+                Timber.d("ttsapi instance created");
+                sInstance = new TtsApi();
+            }
+        }
+        return sInstance;
+    }
+
+    private static void initTTS(final Context context) {
         tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -40,29 +49,30 @@ public class TtsApi {
                 }
             }
         });
-        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-            @Override
-            public void onStart(String utteranceId) {}
-
-            @Override
-            public void onDone(String utteranceId) {
-                File file = new File(dir, FileUtils.getFileName(utteranceId));
-                mListener.onAudioCreated(file);
-            }
-
-            @Override
-            public void onError(String utteranceId) {
-                mListener.onFailure("Failed creating audio for utterance id "+utteranceId);
-            }
-        });
     }
 
-    public void convertToAudioFile(String text, String utteranceId){
+    public void convertToAudioFile(String text, String utteranceId,
+                                   final AudioConversionListener mListener){
         if(!dir.exists()) {
             boolean res = dir.mkdir();
-            Timber.tag("ttslog").d("dir created %s", res);
+            Timber.d("dir created %s", res);
         }
         if(ttsInit) {
+            tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                @Override
+                public void onStart(String utteranceId) {}
+
+                @Override
+                public void onDone(String utteranceId) {
+                    File file = new File(dir, FileUtils.getFileName(utteranceId));
+                    mListener.onAudioCreated(file);
+                }
+
+                @Override
+                public void onError(String utteranceId) {
+                    mListener.onFailure("Failed creating audio for utterance id "+utteranceId);
+                }
+            });
             File file = new File(dir, FileUtils.getFileName(utteranceId));
             tts.synthesizeToFile(text, null, file, utteranceId);
         }
@@ -72,6 +82,10 @@ public class TtsApi {
 
     public boolean isReady() {
         return ttsInit;
+    }
+
+    public static void release(){
+        tts.shutdown();
     }
 
     public interface AudioConversionListener {

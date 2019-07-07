@@ -43,6 +43,12 @@ public class WebViewActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding.unbind();
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     private void setWebView() {
         binding.webView.setWebChromeClient(new MyWebChromeClient(binding.progressBar));

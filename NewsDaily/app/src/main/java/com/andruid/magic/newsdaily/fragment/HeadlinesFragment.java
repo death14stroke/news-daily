@@ -45,6 +45,12 @@ public class HeadlinesFragment extends Fragment implements OnItemClickListener {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding.unbind();
+    }
+
+    @Override
     public void onItemClicked(int position) {
         Timber.tag(TAG).d("clicked: %d", position);
         if(position >= 0 && position < categories.size()) {

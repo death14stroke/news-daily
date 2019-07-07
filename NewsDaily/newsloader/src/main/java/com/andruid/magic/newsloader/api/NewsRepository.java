@@ -14,11 +14,23 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-public class NewsLoader {
-    private RetrofitService service;
+public class NewsRepository {
+    private static final Object LOCK = new Object();
+    private static NewsRepository sInstance;
+    private static RetrofitService service;
 
-    public NewsLoader(Context context){
+    public static void init(Context context){
         service = RetrofitClient.getRetrofitInstance(context).create(RetrofitService.class);
+    }
+
+    public static NewsRepository getInstance() {
+        if(sInstance == null){
+            synchronized (LOCK) {
+                Timber.d("Created news repository instance");
+                sInstance = new NewsRepository();
+            }
+        }
+        return sInstance;
     }
 
     public void loadHeadlines(String country, String category, final int page, int pageSize,
@@ -48,7 +60,7 @@ public class NewsLoader {
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if(response.body()==null)
                     return;
-                Timber.tag("pagelog").d("page: %d, size: %d", page, response.body().getNewsList().size());
+                Timber.d("page: %d, size: %d", page, response.body().getNewsList().size());
                 List<News> newsList = response.body().getNewsList();
                 if(newsList!=null)
                     mListener.onSuccess(newsList, response.body().isHasMore());

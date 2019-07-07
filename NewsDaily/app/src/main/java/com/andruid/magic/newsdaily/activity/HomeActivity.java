@@ -55,6 +55,12 @@ public class HomeActivity extends AppCompatActivity implements OnItemClickListen
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding.unbind();
+    }
+
     private void loadCategories() {
         try {
             categories = AssetsUtil.readCategories(getAssets());

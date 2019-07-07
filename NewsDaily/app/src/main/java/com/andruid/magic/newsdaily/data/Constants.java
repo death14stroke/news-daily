@@ -5,7 +5,6 @@ public class Constants {
     public static final String CHANNEL_ID = "channel_headlines";
     public static final String CHANNEL_NAME = "Read Headlines";
     public static final String MEDIA_SERVICE = "AudioNewsService";
-    public static final String DIR_TTS = "ttsNews";
     public static final String INTENT_NOTI_CLICK = "intent_noti_click";
     public static final String INTENT_PREPARE_AUDIO = "intent_prepare_audio";
     public static final String ACTION_SHARE_NEWS = "action_share_news";

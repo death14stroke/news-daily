@@ -1,9 +1,7 @@
 package com.andruid.magic.newsloader.headlines;
 
-import android.app.Application;
-
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
 
@@ -11,13 +9,11 @@ import com.andruid.magic.newsloader.model.News;
 
 import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
 
-public class NewsViewModel extends AndroidViewModel {
+public class NewsViewModel extends ViewModel {
     private LiveData<PagedList<News>> pagedListLiveData;
 
-    NewsViewModel(Application application, String category, String country) {
-        super(application);
-        NewsDataSourceFactory dataSourceFactory = new NewsDataSourceFactory(application
-                .getApplicationContext(), country, category);
+    NewsViewModel(String category, String country) {
+        NewsDataSourceFactory dataSourceFactory = new NewsDataSourceFactory(country, category);
         PagedList.Config pagedListConfig = new PagedList.Config.Builder()
                 .setEnablePlaceholders(false)
                 .setPageSize(PAGE_SIZE)

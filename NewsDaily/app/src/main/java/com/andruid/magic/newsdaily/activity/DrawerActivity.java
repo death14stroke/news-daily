@@ -28,10 +28,17 @@ public class DrawerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_drawer);
+        setSupportActionBar(binding.toolBar);
         initDrawerBuilder();
         addDrawerItems();
         Drawer drawer = drawerBuilder.build();
         drawer.setSelection(ID_HEADLINES, true);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding.unbind();
     }
 
     private void initDrawerBuilder() {

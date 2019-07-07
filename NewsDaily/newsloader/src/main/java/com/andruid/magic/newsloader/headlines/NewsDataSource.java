@@ -1,11 +1,9 @@
 package com.andruid.magic.newsloader.headlines;
 
-import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.paging.PageKeyedDataSource;
 
-import com.andruid.magic.newsloader.api.NewsLoader;
+import com.andruid.magic.newsloader.api.NewsRepository;
 import com.andruid.magic.newsloader.model.News;
 
 import java.util.List;
@@ -17,19 +15,17 @@ import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
 
 public class NewsDataSource extends PageKeyedDataSource<Integer, News> {
     private String country, category;
-    private NewsLoader newsLoader;
 
-    NewsDataSource(Context context, String country, String category) {
+    NewsDataSource(String country, String category) {
         this.category = category;
         Timber.tag("dslog").d("datasource created");
-        newsLoader = new NewsLoader(context);
         this.country = country;
     }
 
     @Override
     public void loadInitial(@NonNull LoadInitialParams<Integer> params, @NonNull final LoadInitialCallback<Integer, News> callback) {
         Timber.tag("pagelog").d("load initial");
-        newsLoader.loadHeadlines(country, category, FIRST_PAGE, PAGE_SIZE, new NewsLoader.NewsLoadedListener() {
+        NewsRepository.getInstance().loadHeadlines(country, category, FIRST_PAGE, PAGE_SIZE, new NewsRepository.NewsLoadedListener() {
             @Override
             public void onSuccess(List<News> newsList, boolean hasMore) {
                 callback.onResult(newsList, null, FIRST_PAGE + 1);
@@ -44,7 +40,7 @@ public class NewsDataSource extends PageKeyedDataSource<Integer, News> {
 
     @Override
     public void loadBefore(@NonNull final LoadParams<Integer> params, @NonNull final LoadCallback<Integer, News> callback) {
-        newsLoader.loadHeadlines(country, category, params.key, PAGE_SIZE, new NewsLoader.NewsLoadedListener() {
+        NewsRepository.getInstance().loadHeadlines(country, category, params.key, PAGE_SIZE, new NewsRepository.NewsLoadedListener() {
             @Override
             public void onSuccess(List<News> newsList, boolean hasMore) {
                 Integer adjacentKey = (params.key > FIRST_PAGE) ? params.key - 1 : null;
@@ -62,7 +58,7 @@ public class NewsDataSource extends PageKeyedDataSource<Integer, News> {
     @Override
     public void loadAfter(@NonNull final LoadParams<Integer> params, @NonNull final LoadCallback<Integer, News> callback) {
         Timber.tag("pagelog").d("load page %d", params.key);
-        newsLoader.loadHeadlines(country, category, params.key, PAGE_SIZE, new NewsLoader.NewsLoadedListener() {
+        NewsRepository.getInstance().loadHeadlines(country, category, params.key, PAGE_SIZE, new NewsRepository.NewsLoadedListener() {
             @Override
             public void onSuccess(List<News> newsList, boolean hasMore) {
                 Integer key = hasMore ? params.key + 1 : null;

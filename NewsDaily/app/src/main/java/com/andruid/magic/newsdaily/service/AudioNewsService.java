@@ -29,7 +29,7 @@ import com.andruid.magic.newsdaily.model.AudioNews;
 import com.andruid.magic.newsdaily.util.MediaUtil;
 import com.andruid.magic.newsdaily.util.NotificationUtil;
 import com.andruid.magic.newsdaily.util.PrefUtil;
-import com.andruid.magic.newsloader.api.NewsLoader;
+import com.andruid.magic.newsloader.api.NewsRepository;
 import com.andruid.magic.newsloader.model.News;
 import com.andruid.magic.texttoaudiofile.api.TtsApi;
 import com.andruid.magic.texttoaudiofile.util.FileUtils;
@@ -65,7 +65,7 @@ import static com.andruid.magic.newsloader.data.Constants.FIRST_PAGE;
 import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
 
 public class AudioNewsService extends MediaBrowserServiceCompat implements Player.EventListener,
-        NewsLoader.NewsLoadedListener, TtsApi.AudioConversionListener {
+        NewsRepository.NewsLoadedListener, TtsApi.AudioConversionListener {
     private MediaSessionCompat mediaSessionCompat;
     private MediaSessionCallback mediaSessionCallback;
     private SimpleExoPlayer exoPlayer;
@@ -74,7 +74,6 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     private DataSource.Factory dataSourceFactory;
     private NotificationCompat.Builder notificationBuilder;
     private ConcatenatingMediaSource concatenatingMediaSource;
-    private NewsLoader newsLoader;
     private Intent mediaButtonIntent;
     private int page = FIRST_PAGE;
     private BroadcastReceiver mNoisyReceiver = new BroadcastReceiver() {
@@ -84,14 +83,11 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         }
     };
     private String category;
-    private TtsApi ttsApi;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        newsLoader = new NewsLoader(getApplicationContext());
-        ttsApi = new TtsApi(getApplicationContext(), this);
-        Timber.tag("dlog").d("service created");
+        Timber.d("service created");
         initMediaSession();
         initExoPlayer();
     }
@@ -138,7 +134,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     private void loadNews(){
         String country = PreferenceManager.getDefaultSharedPreferences(this).getString(
                 getString(R.string.pref_country), PrefUtil.getDefaultCountry(this));
-        newsLoader.loadHeadlines(country, category, page, PAGE_SIZE, this);
+        NewsRepository.getInstance().loadHeadlines(country, category, page, PAGE_SIZE, this);
     }
 
     private void setCurrentAudio(int pos) {
@@ -176,7 +172,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             Bundle extras = intent.getExtras();
             if(extras != null)
                 category = extras.getString(KEY_CATEGORY);
-            if(ttsApi.isReady()) {
+            if(TtsApi.getInstance().isReady()) {
                 audioNewsList.clear();
                 concatenatingMediaSource.clear();
                 loadNews();
@@ -259,7 +255,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             audioNewsList.add(new AudioNews("", news));
             if(text == null || text.isEmpty())
                 text = "No description available";
-            ttsApi.convertToAudioFile(text, String.valueOf(pos+i));
+            TtsApi.getInstance().convertToAudioFile(text, String.valueOf(pos+i), this);
         }
     }
 

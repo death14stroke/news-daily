@@ -81,10 +81,9 @@ public class NewsFragment extends Fragment {
         String defCountry = PrefUtil.getDefaultCountry(Objects.requireNonNull(getContext()));
         String country = PreferenceManager.getDefaultSharedPreferences(getContext()).getString(
                 getString(R.string.pref_country), defCountry);
-        newsViewModel = ViewModelProviders.of(this, new NewsViewModelFactory(
-                Objects.requireNonNull(getActivity()).getApplication(), category, country))
-                .get(NewsViewModel.class);
-        Timber.tag("assetslog").d("fragment created %s", category);
+        newsViewModel = ViewModelProviders.of(this,
+                new NewsViewModelFactory(category, country)).get(NewsViewModel.class);
+        Timber.d("fragment created %s", category);
         newsAdapter = new NewsAdapter();
         cardStackLayoutManager = new CardStackLayoutManager(getContext(), new CardStackListener() {
             @Override
@@ -118,6 +117,12 @@ public class NewsFragment extends Fragment {
             startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
         });
         return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding.unbind();
     }
 
     @Override

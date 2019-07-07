@@ -68,12 +68,11 @@ public class ArticlesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String language = "en", query = "bitcoin";
-        articlesViewModel = ViewModelProviders.of(this, new ArticlesViewModelFactory(
-                Objects.requireNonNull(getActivity()).getApplication(), language, query))
-                .get(ArticlesViewModel.class);
         setHasOptionsMenu(true);
-        Timber.tag("assetslog").d("fragment created articles: %s - %s", language, query);
+        String language = "en", query = "bitcoin";
+        articlesViewModel = ViewModelProviders.of(this,
+                new ArticlesViewModelFactory(language, query)).get(ArticlesViewModel.class);
+        Timber.d("fragment created articles: %s - %s", language, query);
         newsAdapter = new NewsAdapter();
         cardStackLayoutManager = new CardStackLayoutManager(getContext(), new CardStackListener() {
             @Override
@@ -108,6 +107,12 @@ public class ArticlesFragment extends Fragment {
             startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
         });
         return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding.unbind();
     }
 
     @Override
