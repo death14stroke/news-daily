@@ -56,7 +56,7 @@ public class IntroActivity extends AppIntro {
     }
 
     private void goToHomeScreen() {
-        startActivity(new Intent(this, HomeActivity.class));
+        startActivity(new Intent(this, DrawerActivity.class));
         finish();
     }
 }

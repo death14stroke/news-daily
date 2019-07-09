@@ -1,5 +1,6 @@
 package com.andruid.magic.newsdaily.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.animation.AccelerateInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
@@ -42,8 +44,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
 import timber.log.Timber;
 
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
@@ -53,6 +58,7 @@ import static com.andruid.magic.newsdaily.data.Constants.MY_DATA_CHECK_CODE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
 
 public class ArticlesFragment extends Fragment {
+    private static final long TIMEOUT = 250;
     private FragmentArticlesBinding binding;
     private ArticlesViewModel articlesViewModel;
     private NewsAdapter newsAdapter;
@@ -69,10 +75,10 @@ public class ArticlesFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        String language = "en", query = "bitcoin";
+        String language = "en";
         articlesViewModel = ViewModelProviders.of(this,
-                new ArticlesViewModelFactory(language, query)).get(ArticlesViewModel.class);
-        Timber.d("fragment created articles: %s - %s", language, query);
+                new ArticlesViewModelFactory(language)).get(ArticlesViewModel.class);
+        Timber.d("fragment created articles: %s", language);
         newsAdapter = new NewsAdapter();
         cardStackLayoutManager = new CardStackLayoutManager(getContext(), new CardStackListener() {
             @Override
@@ -96,12 +102,31 @@ public class ArticlesFragment extends Fragment {
         mediaBrowserCompat.connect();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SuppressLint("CheckResult")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_articles, container, false);
+        Observable.create((ObservableOnSubscribe<String>) emitter ->
+                binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        emitter.onNext(query);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        emitter.onNext(newText);
+                        return false;
+                    }
+        })).map(text -> text.toLowerCase().trim())
+                .debounce(TIMEOUT, TimeUnit.MILLISECONDS)
+                .distinct()
+                .filter(text -> !text.isEmpty())
+                .subscribe(this::loadArticles);
         setUpCardStackView();
-        loadHeadlines();
         binding.speakBtn.setOnClickListener(v -> {
             Intent checkTTSIntent = new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
             startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
@@ -166,11 +191,11 @@ public class ArticlesFragment extends Fragment {
         binding.cardStackView.setLayoutManager(cardStackLayoutManager);
     }
 
-    private void loadHeadlines() {
-        articlesViewModel.getPagedListLiveData().observe(this, pagedList ->
-                newsAdapter.submitList(pagedList)
-        );
-        binding.cardStackView.setAdapter(newsAdapter);
+    private void loadArticles(String query) {
+        articlesViewModel.loadArticles(query).observe(this, pagedList -> {
+            newsAdapter.submitList(pagedList);
+            binding.cardStackView.setAdapter(newsAdapter);
+        });
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

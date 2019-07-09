@@ -1,15 +1,15 @@
 package com.andruid.magic.newsdaily.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-
-import androidx.preference.PreferenceManager;
 
 import com.andruid.magic.newsdaily.R;
+import com.andruid.magic.newsdaily.util.PrefUtil;
 import com.daimajia.androidanimations.library.Techniques;
 import com.viksaa.sssplash.lib.activity.AwesomeSplash;
 import com.viksaa.sssplash.lib.cnst.Flags;
 import com.viksaa.sssplash.lib.model.ConfigSplash;
+
+import java.util.concurrent.Executors;
 
 public class SplashActivity extends AwesomeSplash {
     @Override
@@ -32,25 +32,20 @@ public class SplashActivity extends AwesomeSplash {
 
     @Override
     public void animationsFinished() {
-        new Thread(() -> {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-                    this);
-            boolean isFirstStart = sharedPreferences.getBoolean(getString(R.string.first_start), true);
-            if(isFirstStart){
-                sharedPreferences.edit()
-                        .putBoolean(getString(R.string.first_start), false)
-                        .apply();
+        Executors.newSingleThreadExecutor().execute(() -> {
+            if(PrefUtil.isFirstTime(SplashActivity.this)){
                 runOnUiThread(() -> {
-                    startActivity(new Intent(this, IntroActivity.class));
+                    startActivity(new Intent(SplashActivity.this, IntroActivity.class));
                     finish();
                 });
+                PrefUtil.updateFirstTimePref(this);
             }
             else{
                 runOnUiThread(() -> {
-                    startActivity(new Intent(this, DrawerActivity.class));
+                    startActivity(new Intent(SplashActivity.this, DrawerActivity.class));
                     finish();
                 });
             }
-        }).start();
+        });
     }
 }

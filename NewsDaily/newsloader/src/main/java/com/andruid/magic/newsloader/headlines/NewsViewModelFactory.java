@@ -12,6 +12,7 @@ public class NewsViewModelFactory implements ViewModelProvider.Factory {
         this.country = country;
     }
 
+    @SuppressWarnings("unchecked")
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {

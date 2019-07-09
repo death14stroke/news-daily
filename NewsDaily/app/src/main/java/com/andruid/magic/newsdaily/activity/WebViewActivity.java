@@ -13,6 +13,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -21,11 +22,13 @@ import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.ActivityWebViewBinding;
 import com.andruid.magic.newsdaily.ui.MyWebChromeClient;
 
+import java.util.Objects;
+
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
 
 public class WebViewActivity extends AppCompatActivity {
     private ActivityWebViewBinding binding;
-    private String url="";
+    private String url = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,20 +76,20 @@ public class WebViewActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
-                finish();
+                onBackPressed();
                 break;
             case R.id.menu_open_browser:
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(url));
+                Intent intent = new Intent(Intent.ACTION_VIEW)
+                        .setData(Uri.parse(url));
                 startActivity(intent);
                 break;
             case R.id.menu_copy:
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText("news", url);
-                clipboard.setPrimaryClip(clip);
+                Objects.requireNonNull(clipboard).setPrimaryClip(clip);
                 Toast.makeText(this, "Copied url", Toast.LENGTH_SHORT).show();
         }
         return true;

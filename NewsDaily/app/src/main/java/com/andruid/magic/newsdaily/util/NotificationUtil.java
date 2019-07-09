@@ -16,7 +16,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.media.session.MediaButtonReceiver;
 
 import com.andruid.magic.newsdaily.R;
-import com.andruid.magic.newsdaily.activity.HomeActivity;
+import com.andruid.magic.newsdaily.activity.DrawerActivity;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class NotificationUtil {
     public static NotificationCompat.Builder buildNotification(Context context, int icon, String category,
                                                                MediaMetadataCompat metadataCompat,
                                                                MediaSessionCompat.Token token){
-        Intent intent = new Intent(context, HomeActivity.class);
+        Intent intent = new Intent(context, DrawerActivity.class);
         intent.setAction(INTENT_NOTI_CLICK);
         intent.putExtra(KEY_CATEGORY, category);
 

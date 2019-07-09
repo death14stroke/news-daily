@@ -10,18 +10,19 @@ import com.andruid.magic.newsloader.model.News;
 import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
 
 public class ArticlesViewModel extends ViewModel {
-    private LiveData<PagedList<News>> pagedListLiveData;
+    private final String language;
 
-    ArticlesViewModel(String language, String query) {
+    ArticlesViewModel(String language) {
+        this.language = language;
+    }
+
+
+    public LiveData<PagedList<News>> loadArticles(String query) {
         ArticlesDataSourceFactory dataSourceFactory = new ArticlesDataSourceFactory(language, query);
         PagedList.Config pagedListConfig = new PagedList.Config.Builder()
                 .setEnablePlaceholders(false)
                 .setPageSize(PAGE_SIZE)
                 .build();
-        pagedListLiveData = new LivePagedListBuilder<>(dataSourceFactory, pagedListConfig).build();
-    }
-
-    public LiveData<PagedList<News>> getPagedListLiveData() {
-        return pagedListLiveData;
+        return new LivePagedListBuilder<>(dataSourceFactory, pagedListConfig).build();
     }
 }

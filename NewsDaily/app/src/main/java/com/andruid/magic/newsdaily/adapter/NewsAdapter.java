@@ -4,10 +4,9 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.paging.AsyncPagedListDiffer;
 import androidx.paging.PagedList;
+import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.andruid.magic.newsdaily.databinding.LayoutNewsBinding;
 import com.andruid.magic.newsdaily.viewholder.NewsViewHolder;
@@ -16,9 +15,7 @@ import com.andruid.magic.newsloader.model.News;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewsAdapter extends RecyclerView.Adapter<NewsViewHolder> {
-    private final AsyncPagedListDiffer<News> mDiffer;
-
+public class NewsAdapter extends PagedListAdapter<News, NewsViewHolder> {
     private static final DiffUtil.ItemCallback<News> DIFF_CALLBACK = new DiffUtil.ItemCallback<News>() {
         @Override
         public boolean areItemsTheSame(@NonNull News oldItem, @NonNull News newItem) {
@@ -32,7 +29,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsViewHolder> {
     };
 
     public NewsAdapter(){
-        mDiffer = new AsyncPagedListDiffer<>(this, DIFF_CALLBACK);
+        super(DIFF_CALLBACK);
     }
 
     @NonNull
@@ -45,23 +42,14 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
-        News news = mDiffer.getItem(position);
+        News news = getItem(position);
         holder.bind(news);
     }
 
-    public void submitList(PagedList<News> pagedList){
-        mDiffer.submitList(pagedList);
-    }
-
     public List<News> getNewsList(){
-        PagedList<News> newsPagedList = mDiffer.getCurrentList();
+        PagedList<News> newsPagedList = getCurrentList();
         if(newsPagedList != null)
             return new ArrayList<>(newsPagedList.snapshot());
         return new ArrayList<>();
-    }
-
-    @Override
-    public int getItemCount() {
-        return mDiffer.getItemCount();
     }
 }

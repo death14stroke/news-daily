@@ -1,8 +1,8 @@
 package com.andruid.magic.newsdaily.util;
 
-import android.text.Html;
 import android.widget.TextView;
 
+import androidx.core.text.HtmlCompat;
 import androidx.databinding.BindingAdapter;
 
 import com.squareup.picasso.Picasso;
@@ -22,7 +22,7 @@ public class DataBindingAdapter {
     @BindingAdapter({"readMore"})
     public static void readMoreUrl(TextView textView, String url){
         String str = "<u>" + url + "</u>";
-        textView.setText(Html.fromHtml(str));
+        textView.setText(HtmlCompat.fromHtml(str, HtmlCompat.FROM_HTML_MODE_LEGACY));
     }
 
     @BindingAdapter({"imageRes"})

@@ -5,16 +5,16 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 public class ArticlesViewModelFactory implements ViewModelProvider.Factory {
-    private String language, query;
+    private String language;
 
-    public ArticlesViewModelFactory(String language, String query) {
+    public ArticlesViewModelFactory(String language) {
         this.language = language;
-        this.query = query;
     }
 
+    @SuppressWarnings("unchecked")
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new ArticlesViewModel(language, query);
+        return (T) new ArticlesViewModel(language);
     }
 }

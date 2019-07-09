@@ -10,6 +10,10 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+    
+    <style name="DrawerTheme" parent="MaterialDrawerTheme.Light">
+        <item name="colorControlNormal">@android:color/white</item>
+    </style>
 
     <style name="AppPreference">
         <item name="android:layout">@layout/preference_material</item>
