@@ -54,6 +54,7 @@ import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
 import static com.andruid.magic.newsdaily.data.Constants.KEY_CATEGORY;
 import static com.andruid.magic.newsdaily.data.Constants.MY_DATA_CHECK_CODE;
 import static com.andruid.magic.newsdaily.data.Constants.NEWS_URL;
+import static com.andruid.magic.newsdaily.data.Constants.STATE_POSITION;
 
 public class NewsFragment extends Fragment {
     private FragmentNewsBinding binding;
@@ -65,12 +66,18 @@ public class NewsFragment extends Fragment {
     private MediaControllerCompat mediaControllerCompat;
     private MediaControllerCallback mediaControllerCallback;
 
-    public static NewsFragment newInstance(String category) {
+    static NewsFragment newInstance(String category) {
         NewsFragment fragment = new NewsFragment();
         Bundle args = new Bundle();
         args.putString(KEY_CATEGORY, category);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_POSITION, cardStackLayoutManager.getTopPosition());
     }
 
     @Override
@@ -110,13 +117,18 @@ public class NewsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_news, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         setUpCardStackView();
-        loadHeadlines();
+        loadHeadlines(savedInstanceState);
         binding.speakBtn.setOnClickListener(v -> {
             Intent checkTTSIntent = new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
             startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
         });
-        return binding.getRoot();
     }
 
     @Override
@@ -175,13 +187,17 @@ public class NewsFragment extends Fragment {
         cardStackLayoutManager.setDirections(Direction.VERTICAL);
         cardStackLayoutManager.setStackFrom(StackFrom.Bottom);
         binding.cardStackView.setLayoutManager(cardStackLayoutManager);
+        binding.cardStackView.setAdapter(newsAdapter);
     }
 
-    private void loadHeadlines() {
-        newsViewModel.getPagedListLiveData().observe(this, pagedList ->
-                newsAdapter.submitList(pagedList)
-        );
-        binding.cardStackView.setAdapter(newsAdapter);
+    private void loadHeadlines(Bundle savedInstanceState) {
+        newsViewModel.getPagedListLiveData().observe(this, pagedList -> {
+            newsAdapter.submitList(pagedList);
+            if(savedInstanceState != null) {
+                int pos = savedInstanceState.getInt(STATE_POSITION);
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        });
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

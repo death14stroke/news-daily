@@ -12,9 +12,7 @@ public class Constants {
     public static final String KEY_CATEGORY = "category";
     public static final String ASSET_CATEGORIES = "file:///android_asset/categories.txt",
             ASSET_COUNTRIES = "file:///android_asset/countries.txt";
-    public static final int MY_DATA_CHECK_CODE = 0, MEDIA_NOTI_ID = 1, NEWS_FETCH_DISTANCE = 3,
-            NAV_ITEMS = 7;
-    public static final int POS_GEN = 0, POS_BIZ = 1, POS_ENT = 2, POS_HEALTH = 3, POS_SCIENCE = 4,
-            POS_SPORTS = 5, POS_TECH = 6;
+    public static final String STATE_POSITION = "state_position";
+    public static final int MY_DATA_CHECK_CODE = 0, MEDIA_NOTI_ID = 1, NEWS_FETCH_DISTANCE = 3;
     public static final int ID_HEADLINES = 0, ID_ARTICLES = 1, ID_SETTINGS = 2;
 }

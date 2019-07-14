@@ -7,6 +7,8 @@ import androidx.paging.PageKeyedDataSource;
 
 import com.andruid.magic.newsloader.model.News;
 
+import timber.log.Timber;
+
 public class NewsDataSourceFactory extends DataSource.Factory<Integer, News> {
     private MutableLiveData<PageKeyedDataSource<Integer, News>> liveDataSource =
             new MutableLiveData<>();
