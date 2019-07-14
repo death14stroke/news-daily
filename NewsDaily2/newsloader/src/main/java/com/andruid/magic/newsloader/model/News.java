@@ -3,6 +3,8 @@ package com.andruid.magic.newsloader.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
 public class News implements Parcelable {
     private final String sourceName, title, desc, url, imageUrl;
     private final long published;
@@ -75,5 +77,15 @@ public class News implements Parcelable {
         parcel.writeString(url);
         parcel.writeString(imageUrl);
         parcel.writeLong(published);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if(obj == null || obj.getClass() != News.class)
+            return false;
+        News news = (News)obj;
+        return sourceName.equals(news.sourceName) && title.equals(news.title) &&
+                desc.equals(news.desc) && url.equals(news.url) && imageUrl.equals(news.imageUrl)
+                && published==news.published;
     }
 }

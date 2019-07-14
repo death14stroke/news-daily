@@ -6,23 +6,18 @@
     </style>
 
     <style name="InfoTextTheme">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">@dimen/textPadding</item>
         <item name="android:textColor">@color/colorTextInfo</item>
         <item name="android:textSize">@dimen/infoTextSize</item>
     </style>
 
     <style name="NewsTextViewTheme">
-        <item name="android:layout_marginTop">@dimen/textViewMarginTop</item>
         <item name="android:padding">@dimen/textPadding</item>
     </style>
 
     <style name="LinkTextTheme" parent="NewsTextViewTheme">
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/colorSecondaryText</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <style name="DescTextTheme" parent="NewsTextViewTheme">
@@ -30,9 +25,7 @@
         <item name="android:textColor">@color/colorPrimaryText</item>
     </style>
 
-    <style name="TitleTextTheme">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
+    <style name="TitleTextTheme" parent="NewsTextViewTheme">
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/colorTextTitle</item>
         <item name="android:textSize">@dimen/titleTextSize</item>

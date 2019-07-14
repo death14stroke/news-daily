@@ -12,17 +12,53 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 
-import com.andruid.magic.newsdaily.NewsViewModel;
+import com.andruid.magic.newsdaily.adapter.NewsAdapter;
+import com.andruid.magic.newsdaily.headlines.NewsViewModel;
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.NewsFragmentBinding;
+import com.andruid.magic.newsdaily.headlines.NewsViewModelFactory;
+import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
+import com.yuyakaido.android.cardstackview.CardStackListener;
+import com.yuyakaido.android.cardstackview.Direction;
+import com.yuyakaido.android.cardstackview.Duration;
+import com.yuyakaido.android.cardstackview.StackFrom;
+import com.yuyakaido.android.cardstackview.SwipeAnimationSetting;
 
 public class NewsFragment extends Fragment {
+    private static String KEY_CATEGORY = "category";
     private NewsFragmentBinding binding;
-    private NewsViewModel mViewModel;
+    private NewsViewModel newsViewModel;
+    private NewsAdapter newsAdapter;
+    private CardStackLayoutManager cardStackLayoutManager;
 
-    public static NewsFragment newInstance() {
-        return new NewsFragment();
+    public static NewsFragment newInstance(String category) {
+        NewsFragment fragment = new NewsFragment();
+        Bundle args = new Bundle();
+        args.putString(KEY_CATEGORY, category);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        newsAdapter = new NewsAdapter();
+        cardStackLayoutManager = new CardStackLayoutManager(getContext(), new CardStackListener() {
+            @Override
+            public void onCardDragging(Direction direction, float ratio) {}
+            @Override
+            public void onCardSwiped(Direction direction) {}
+            @Override
+            public void onCardRewound() {}
+            @Override
+            public void onCardCanceled() {}
+            @Override
+            public void onCardAppeared(View view, int position) {}
+            @Override
+            public void onCardDisappeared(View view, int position) {}
+        });
     }
 
     @Override
@@ -34,9 +70,48 @@ public class NewsFragment extends Fragment {
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setUpCardStackView();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding.unbind();
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(NewsViewModel.class);
-        // TODO: Use the ViewModel
+        String category;
+        if(getArguments() != null)
+            category = getArguments().getString(KEY_CATEGORY);
+        else
+            category = "general";
+        String country = "in";
+        newsViewModel = ViewModelProviders.of(this,
+                new NewsViewModelFactory(category, country)).get(NewsViewModel.class);
+        loadHeadlines();
+    }
+
+    private void setUpCardStackView() {
+        SwipeAnimationSetting swipeSetting = new SwipeAnimationSetting.Builder()
+                .setDirection(Direction.Bottom)
+                .setInterpolator(new AccelerateInterpolator())
+                .setDuration(Duration.Normal.duration)
+                .build();
+        cardStackLayoutManager.setSwipeAnimationSetting(swipeSetting);
+        cardStackLayoutManager.setCanScrollHorizontal(false);
+        cardStackLayoutManager.setDirections(Direction.VERTICAL);
+        cardStackLayoutManager.setStackFrom(StackFrom.Bottom);
+        binding.cardStackView.setLayoutManager(cardStackLayoutManager);
+        binding.cardStackView.setAdapter(newsAdapter);
+    }
+
+    private void loadHeadlines() {
+        newsViewModel.getPagedListLiveData().observe(this, pagedList ->
+                newsAdapter.submitList(pagedList)
+        );
     }
 }

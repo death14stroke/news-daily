@@ -35,6 +35,8 @@
                 app:layout_constraintTop_toTopOf="@id/imageView"/>
             <TextView
                 android:id="@+id/dateTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 style="@style/InfoTextTheme"
                 tools:text="13-July-2019"
                 app:dateFromMs="@{news.published}"
@@ -44,6 +46,8 @@
                 app:layout_constraintEnd_toEndOf="@id/imageView"/>
             <TextView
                 android:id="@+id/sourceTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 style="@style/InfoTextTheme"
                 tools:text="Times of India"
                 android:text="@{news.sourceName}"
@@ -61,8 +65,10 @@
                 app:layout_constraintBottom_toBottomOf="parent">
                 <TextView
                     android:id="@+id/titleTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     tools:text="Title"
-                    style="@style/NewsTextViewTheme"
+                    style="@style/TitleTextTheme"
                     android:text="@{news.title}"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -78,7 +84,11 @@
                     app:layout_constraintBottom_toTopOf="@id/goToUrlTV"/>
                 <TextView
                     android:id="@+id/goToUrlTV"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     tools:text="www.google.com"
+                    android:maxLines="2"
+                    android:ellipsize="end"
                     style="@style/LinkTextTheme"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
