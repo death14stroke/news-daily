@@ -3,7 +3,7 @@
     <dimen name="roundRectRadius">15dp</dimen>
     <dimen name="textPadding">10dp</dimen>
     <dimen name="infoTextSize">16sp</dimen>
-    <dimen name="titleTextSize">18sp</dimen>
+    <dimen name="titleTextSize">17sp</dimen>
     <dimen name="descTextSize">15sp</dimen>
     <dimen name="textViewMarginTop">5dp</dimen>
 </resources>

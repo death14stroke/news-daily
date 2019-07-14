@@ -27,7 +27,7 @@ import com.yuyakaido.android.cardstackview.StackFrom;
 import com.yuyakaido.android.cardstackview.SwipeAnimationSetting;
 
 public class NewsFragment extends Fragment {
-    private static String KEY_CATEGORY = "category";
+    private static final String KEY_POSITION = "position", KEY_CATEGORY = "category";
     private NewsFragmentBinding binding;
     private NewsViewModel newsViewModel;
     private NewsAdapter newsAdapter;
@@ -76,6 +76,12 @@ public class NewsFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_POSITION, cardStackLayoutManager.getTopPosition());
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding.unbind();
@@ -92,7 +98,7 @@ public class NewsFragment extends Fragment {
         String country = "in";
         newsViewModel = ViewModelProviders.of(this,
                 new NewsViewModelFactory(category, country)).get(NewsViewModel.class);
-        loadHeadlines();
+        loadHeadlines(savedInstanceState);
     }
 
     private void setUpCardStackView() {
@@ -109,9 +115,13 @@ public class NewsFragment extends Fragment {
         binding.cardStackView.setAdapter(newsAdapter);
     }
 
-    private void loadHeadlines() {
-        newsViewModel.getPagedListLiveData().observe(this, pagedList ->
-                newsAdapter.submitList(pagedList)
-        );
+    private void loadHeadlines(Bundle savedInstanceState) {
+        newsViewModel.getPagedListLiveData().observe(this, pagedList -> {
+            newsAdapter.submitList(pagedList);
+            if(savedInstanceState != null){
+                int pos = savedInstanceState.getInt(KEY_POSITION);
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        });
     }
 }
