@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +25,8 @@ import java.util.List;
 
 import timber.log.Timber;
 
+import static com.andruid.magic.newsdaily.data.Constants.KEY_SEARCH;
+
 public class MainActivity extends AppCompatActivity implements OnItemClickListener {
     private static final String KEY_CATEGORIES = "categories";
     private ActivityMainBinding binding;
@@ -45,7 +46,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         binding.searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Toast.makeText(MainActivity.this, query, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, SearchActivity.class)
+                        .putExtra(KEY_SEARCH, query);
+                startActivity(intent);
                 return true;
             }
 
