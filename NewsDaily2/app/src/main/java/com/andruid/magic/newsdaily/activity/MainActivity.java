@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,10 +15,10 @@ import androidx.fragment.app.Fragment;
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.ActivityMainBinding;
 import com.andruid.magic.newsdaily.fragment.NewsFragment;
-import com.andruid.magic.newsdaily.fragment.SettingsFragment;
 import com.andruid.magic.newsdaily.util.AssetsUtil;
 import com.andruid.magic.newsdaily.util.StringUtil;
 import com.cleveroad.loopbar.widget.OnItemClickListener;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,12 +35,25 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        setSupportActionBar(binding.toolBar);
         binding.loopBar.addOnItemClickListener(this);
-        binding.loopBar.setBackgroundColor(ContextCompat.getColor(this, R.color.transparent));
+        binding.loopBar.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
         if(savedInstanceState == null)
             loadCategories();
         else
             categories = savedInstanceState.getStringArrayList(KEY_CATEGORIES);
+        binding.searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Toast.makeText(MainActivity.this, query, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
     @Override
@@ -51,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem item = menu.findItem(R.id.searchItem);
+        binding.searchView.setMenuItem(item);
         return true;
     }
 
@@ -61,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 break;
             case R.id.settingsItem:
                 startActivity(new Intent(this, SettingsActivity.class));
+                break;
         }
         return true;
     }

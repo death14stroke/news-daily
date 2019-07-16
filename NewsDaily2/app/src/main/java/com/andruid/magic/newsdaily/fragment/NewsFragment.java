@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.andruid.magic.newsdaily.headlines.NewsViewModel;
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.NewsFragmentBinding;
 import com.andruid.magic.newsdaily.headlines.NewsViewModelFactory;
+import com.andruid.magic.newsdaily.util.PrefUtil;
 import com.andruid.magic.newsloader.model.News;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
 import com.yuyakaido.android.cardstackview.CardStackListener;
@@ -33,6 +35,8 @@ import com.yuyakaido.android.cardstackview.SwipeAnimationSetting;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.Objects;
 
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_SHARE_NEWS;
@@ -120,7 +124,9 @@ public class NewsFragment extends Fragment {
             category = getArguments().getString(KEY_CATEGORY);
         else
             category = DEF_CATEGORY;
-        String country = "in";
+        String country = PreferenceManager.getDefaultSharedPreferences(Objects
+                .requireNonNull(getContext())).getString(getString(R.string.pref_country),
+                PrefUtil.getDefaultCountry(getContext()));
         newsViewModel = ViewModelProviders.of(this,
                 new NewsViewModelFactory(category, country)).get(NewsViewModel.class);
         loadHeadlines(savedInstanceState);

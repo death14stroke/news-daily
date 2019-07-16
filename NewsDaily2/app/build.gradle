@@ -44,12 +44,11 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.annimon:stream:1.2.1'
     implementation "com.cleveroad:loopbar:1.1.4"
-    implementation "com.mikepenz:materialdrawer:6.1.2"
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.github.AppIntro:AppIntro:5.1.0'
     implementation 'de.hdodenhof:circleimageview:3.0.0'
     implementation 'org.greenrobot:eventbus:3.1.1'
-    implementation 'br.com.mauker.materialsearchview:materialsearchview:1.2.3'
+    implementation 'com.miguelcatalan:materialsearchview:1.4.0'
     implementation "io.reactivex.rxjava2:rxjava:2.1.14"
 
     implementation project(path: ':countrydata')
