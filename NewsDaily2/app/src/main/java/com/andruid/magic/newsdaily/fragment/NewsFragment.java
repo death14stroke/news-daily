@@ -1,5 +1,6 @@
 package com.andruid.magic.newsdaily.fragment;
 
+import androidx.core.app.ShareCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -40,10 +41,11 @@ import java.util.Objects;
 
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_SHARE_NEWS;
+import static com.andruid.magic.newsdaily.data.Constants.KEY_POSITION;
 import static com.andruid.magic.newsdaily.data.Constants.KEY_URL;
 
 public class NewsFragment extends Fragment {
-    private static final String KEY_POSITION = "position", KEY_CATEGORY = "category";
+    private static final String KEY_CATEGORY = "category";
     private static final String DEF_CATEGORY = "general";
     private NewsFragmentBinding binding;
     private NewsViewModel newsViewModel;
@@ -143,17 +145,18 @@ public class NewsFragment extends Fragment {
     }
 
     private void loadUrl(String url) {
-        Intent intent = new Intent(getActivity(), WebViewActivity.class);
-        intent.putExtra(KEY_URL, url);
+        Intent intent = new Intent(getActivity(), WebViewActivity.class)
+                .putExtra(KEY_URL, url);
         startActivity(intent);
     }
 
     private void shareNews(News news) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_SUBJECT, news.getTitle());
-        intent.putExtra(Intent.EXTRA_TEXT, news.getUrl());
-        startActivity(Intent.createChooser(intent, "Share news via..."));
+        Intent intent = ShareCompat.IntentBuilder.from(Objects.requireNonNull(getActivity()))
+                .setType("text/plain")
+                .setText(news.getUrl())
+                .getIntent();
+        if(intent.resolveActivity(getActivity().getPackageManager()) != null)
+            startActivity(intent);
     }
 
     private void setUpCardStackView() {

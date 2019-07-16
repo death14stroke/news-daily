@@ -86,6 +86,15 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     @Override
+    public void onBackPressed() {
+        if(binding.searchView.isSearchOpen())
+            binding.searchView.closeSearch();
+        else
+            super.onBackPressed();
+    }
+
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         binding.unbind();
