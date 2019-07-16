@@ -24,4 +24,11 @@ public class DataBindingAdapter {
         String str = "<u>" + url + "</u>";
         textView.setText(HtmlCompat.fromHtml(str, HtmlCompat.FROM_HTML_MODE_LEGACY));
     }
+
+    @BindingAdapter({"imageRes"})
+    public static void loadFlagRes(CircleImageView imageView, int res){
+        Picasso.get()
+                .load(res)
+                .into(imageView);
+    }
 }

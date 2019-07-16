@@ -30,4 +30,30 @@
         <item name="android:textColor">@color/colorTextTitle</item>
         <item name="android:textSize">@dimen/titleTextSize</item>
     </style>
+
+    <style name="CountryTextTheme" parent="TitleTextTheme">
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="CircleImageTheme">
+        <item name="android:layout_width">@dimen/circleImageSize</item>
+        <item name="android:layout_height">@dimen/circleImageSize</item>
+    </style>
+
+    <style name="ItemRootTheme">
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
+        <item name="android:padding">@dimen/normalPadding</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="AppPreference">
+        <item name="android:layout">@layout/preference_material</item>
+    </style>
+
+    <style name="AppPreference.DialogPreference">
+        <item name="negativeButtonText">@android:string/cancel</item>
+    </style>
 </resources>

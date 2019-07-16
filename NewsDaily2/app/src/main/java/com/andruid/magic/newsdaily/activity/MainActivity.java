@@ -1,6 +1,9 @@
 package com.andruid.magic.newsdaily.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.ActivityMainBinding;
 import com.andruid.magic.newsdaily.fragment.NewsFragment;
+import com.andruid.magic.newsdaily.fragment.SettingsFragment;
 import com.andruid.magic.newsdaily.util.AssetsUtil;
 import com.andruid.magic.newsdaily.util.StringUtil;
 import com.cleveroad.loopbar.widget.OnItemClickListener;
@@ -42,6 +46,23 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putStringArrayList(KEY_CATEGORIES, (ArrayList<String>) categories);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.searchItem:
+                break;
+            case R.id.settingsItem:
+                startActivity(new Intent(this, SettingsActivity.class));
+        }
+        return true;
     }
 
     @Override
