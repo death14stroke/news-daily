@@ -39,8 +39,6 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
         newsAdapter = new NewsAdapter();
-        articlesViewModel = ViewModelProviders.of(this,
-                new ArticlesViewModelFactory("en")).get(ArticlesViewModel.class);
         cardStackLayoutManager = new CardStackLayoutManager(this, new CardStackListener() {
             @Override
             public void onCardDragging(Direction direction, float ratio) {}
@@ -61,8 +59,14 @@ public class SearchActivity extends AppCompatActivity {
         setUpCardStackView();
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
+            Timber.d("extras not null");
             String query = extras.getString(KEY_SEARCH);
-            loadArticles(query, savedInstanceState);
+            articlesViewModel = ViewModelProviders.of(this,
+                    new ArticlesViewModelFactory("en", query)).get(ArticlesViewModel.class);
+
+            if (actionBar != null)
+                actionBar.setTitle("Found: "+query);
+            loadArticles(savedInstanceState);
         }
     }
 
@@ -85,14 +89,16 @@ public class SearchActivity extends AppCompatActivity {
         binding.unbind();
     }
 
-    private void loadArticles(String query, Bundle savedInstanceState) {
-        articlesViewModel.loadArticles(query).observe(this, pagedList -> {
+    private void loadArticles(Bundle savedInstanceState) {
+        articlesViewModel.getPagedListLiveData().observe(this, pagedList -> {
             Timber.d("articles search loaded");
-            newsAdapter.submitList(pagedList);
-            if(savedInstanceState != null){
-                int pos = savedInstanceState.getInt(KEY_POSITION);
-                cardStackLayoutManager.scrollToPosition(pos);
-            }
+            newsAdapter.submitList(pagedList, () -> {
+                if(savedInstanceState != null){
+                    int pos = savedInstanceState.getInt(KEY_POSITION);
+                    Timber.d("saved state not null: %d", pos);
+                    cardStackLayoutManager.scrollToPosition(pos);
+                }
+            });
         });
     }
 

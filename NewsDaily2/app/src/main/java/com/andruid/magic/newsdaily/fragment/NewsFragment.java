@@ -39,6 +39,8 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Objects;
 
+import timber.log.Timber;
+
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_SHARE_NEWS;
 import static com.andruid.magic.newsdaily.data.Constants.KEY_POSITION;
@@ -121,6 +123,7 @@ public class NewsFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Timber.d("on activity created");
         String category;
         if(getArguments() != null)
             category = getArguments().getString(KEY_CATEGORY);
@@ -175,11 +178,12 @@ public class NewsFragment extends Fragment {
 
     private void loadHeadlines(Bundle savedInstanceState) {
         newsViewModel.getPagedListLiveData().observe(this, pagedList -> {
-            newsAdapter.submitList(pagedList);
-            if(savedInstanceState != null){
-                int pos = savedInstanceState.getInt(KEY_POSITION);
-                cardStackLayoutManager.scrollToPosition(pos);
-            }
+            newsAdapter.submitList(pagedList, () -> {
+                if(savedInstanceState != null){
+                    int pos = savedInstanceState.getInt(KEY_POSITION);
+                    cardStackLayoutManager.scrollToPosition(pos);
+                }
+            });
         });
     }
 }

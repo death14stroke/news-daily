@@ -39,9 +39,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         setSupportActionBar(binding.toolBar);
         binding.loopBar.addOnItemClickListener(this);
         binding.loopBar.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
-        if(savedInstanceState == null)
+        if(savedInstanceState == null) {
             loadCategories();
-        else
+            loadFirstFrag();
+        } else
             categories = savedInstanceState.getStringArrayList(KEY_CATEGORIES);
         binding.searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
@@ -103,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private void loadCategories() {
         try {
             categories = AssetsUtil.readCategories(getAssets());
-            loadFirstFrag();
             Timber.d("categories try %d", categories.size());
         } catch (IOException e) {
             Timber.e("categories not read exc");
