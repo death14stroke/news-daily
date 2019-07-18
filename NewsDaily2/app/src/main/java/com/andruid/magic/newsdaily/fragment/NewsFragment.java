@@ -4,6 +4,7 @@ import androidx.core.app.ShareCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -12,6 +13,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
+import android.os.RemoteException;
+import android.speech.tts.TextToSpeech;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +30,7 @@ import com.andruid.magic.newsdaily.headlines.NewsViewModel;
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.NewsFragmentBinding;
 import com.andruid.magic.newsdaily.headlines.NewsViewModelFactory;
+import com.andruid.magic.newsdaily.service.AudioNewsService;
 import com.andruid.magic.newsdaily.util.PrefUtil;
 import com.andruid.magic.newsloader.model.News;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
@@ -37,22 +44,30 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
+import java.util.stream.IntStream;
 
 import timber.log.Timber;
 
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_SHARE_NEWS;
+import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
 import static com.andruid.magic.newsdaily.data.Constants.KEY_POSITION;
 import static com.andruid.magic.newsdaily.data.Constants.KEY_URL;
 
 public class NewsFragment extends Fragment {
-    private static final String KEY_CATEGORY = "category";
-    private static final String DEF_CATEGORY = "general";
+    private static final String KEY_CATEGORY = "category", DEF_CATEGORY = "general";
+    private static final int MY_DATA_CHECK_CODE = 0;
     private NewsFragmentBinding binding;
     private NewsViewModel newsViewModel;
     private NewsAdapter newsAdapter;
     private CardStackLayoutManager cardStackLayoutManager;
+    private MediaBrowserCompat mediaBrowserCompat;
+    private MediaControllerCompat mediaControllerCompat;
+    private MediaControllerCallback mediaControllerCallback;
+    private String category;
 
     public static NewsFragment newInstance(String category) {
         NewsFragment fragment = new NewsFragment();
@@ -80,6 +95,12 @@ public class NewsFragment extends Fragment {
             @Override
             public void onCardDisappeared(View view, int position) {}
         });
+        MBConnectionCallback mbConnectionCallback = new MBConnectionCallback();
+        mediaControllerCallback = new MediaControllerCallback();
+        mediaBrowserCompat = new MediaBrowserCompat(getContext(), new ComponentName(
+                Objects.requireNonNull(getContext()), AudioNewsService.class), mbConnectionCallback,
+                null);
+        mediaBrowserCompat.connect();
     }
 
     @Override
@@ -124,7 +145,6 @@ public class NewsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Timber.d("on activity created");
-        String category;
         if(getArguments() != null)
             category = getArguments().getString(KEY_CATEGORY);
         else
@@ -135,6 +155,32 @@ public class NewsFragment extends Fragment {
         newsViewModel = ViewModelProviders.of(this,
                 new NewsViewModelFactory(category, country)).get(NewsViewModel.class);
         loadHeadlines(savedInstanceState);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mediaControllerCompat!=null)
+            mediaControllerCompat.unregisterCallback(mediaControllerCallback);
+        if(mediaBrowserCompat!=null)
+            mediaBrowserCompat.disconnect();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                Intent intent = new Intent(getActivity(), AudioNewsService.class);
+                intent.setAction(INTENT_PREPARE_AUDIO);
+                intent.putExtra(KEY_CATEGORY, category);
+                Objects.requireNonNull(getContext()).startService(intent);
+            } else {
+                Intent installTTSIntent = new Intent();
+                installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installTTSIntent);
+            }
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -177,13 +223,63 @@ public class NewsFragment extends Fragment {
     }
 
     private void loadHeadlines(Bundle savedInstanceState) {
-        newsViewModel.getPagedListLiveData().observe(this, pagedList -> {
-            newsAdapter.submitList(pagedList, () -> {
-                if(savedInstanceState != null){
-                    int pos = savedInstanceState.getInt(KEY_POSITION);
-                    cardStackLayoutManager.scrollToPosition(pos);
-                }
-            });
-        });
+        newsViewModel.getPagedListLiveData().observe(this, pagedList ->
+                newsAdapter.submitList(pagedList, () -> {
+                    if(savedInstanceState != null){
+                        int pos = savedInstanceState.getInt(KEY_POSITION);
+                        cardStackLayoutManager.scrollToPosition(pos);
+                    }
+                })
+        );
+    }
+
+    private class MBConnectionCallback extends MediaBrowserCompat.ConnectionCallback {
+        @Override
+        public void onConnected() {
+            super.onConnected();
+            try {
+                mediaControllerCompat = new MediaControllerCompat(getContext(),
+                        mediaBrowserCompat.getSessionToken());
+                mediaControllerCompat.registerCallback(mediaControllerCallback);
+                MediaControllerCompat.setMediaController(Objects.requireNonNull(getActivity()),
+                        mediaControllerCompat);
+                MediaMetadataCompat metadata = mediaControllerCompat.getMetadata();
+                if(metadata != null)
+                    mediaControllerCallback.onMetadataChanged(metadata);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class MediaControllerCallback extends MediaControllerCompat.Callback {
+        @Override
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
+            super.onMetadataChanged(metadata);
+            String title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
+            scrollToCurrentNews(title);
+        }
+    }
+
+    private void scrollToCurrentNews(String title) {
+        List<News> newsList = newsAdapter.getNewsList();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            OptionalInt optionalInt = IntStream.range(0, newsList.size())
+                    .filter(pos -> newsList.get(pos).getTitle().equals(title))
+                    .findFirst();
+            if(optionalInt.isPresent()){
+                int pos = optionalInt.getAsInt();
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        }
+        else{
+            com.annimon.stream.OptionalInt optionalInt = com.annimon.stream.IntStream.range(0, newsList.size())
+                    .filter(pos -> newsList.get(pos).getTitle().equals(title))
+                    .findFirst();
+            if(optionalInt.isPresent()){
+                int pos = optionalInt.getAsInt();
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        }
     }
 }
