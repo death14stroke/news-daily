@@ -1,8 +1,10 @@
-package com.andruid.magic.newsdaily;
+package com.andruid.magic.newsdaily.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.andruid.magic.newsdaily.R;
 
 public class MainActivity extends AppCompatActivity {
 
