@@ -36,12 +36,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:dateFromMs="@{news.published}"
-                android:textColor="#FFF29E"
+                style="@style/InfoTextTheme"
                 tools:text="25-Jul-19"
-                android:textSize="16sp"
-                android:textStyle="italic"
                 android:background="@drawable/round_rect_left"
-                android:padding="10dp"
                 app:layout_constraintBottom_toBottomOf="@id/imageView"
                 app:layout_constraintEnd_toEndOf="@id/imageView"/>
             <TextView
@@ -49,10 +46,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{news.sourceName}"
-                android:padding="10dp"
+                style="@style/InfoTextTheme"
                 tools:text="News source"
-                android:textColor="#FFF29E"
-                android:textStyle="bold"
                 android:background="@drawable/round_rect_right"
                 app:layout_constraintStart_toStartOf="@id/imageView"
                 app:layout_constraintBottom_toBottomOf="@id/imageView"/>
@@ -69,12 +64,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toTopOf="parent"
-                    android:textStyle="bold"
+                    style="@style/TitleTextTheme"
                     tools:text="News title"
-                    android:textSize="18sp"
-                    android:layout_marginTop="5dp"
-                    android:textColor="#220101"
-                    android:padding="10dp"
                     android:text="@{news.title}"/>
                 <TextView
                     android:id="@+id/descTV"
@@ -82,19 +73,14 @@
                     android:layout_height="0dp"
                     android:text="@{news.desc}"
                     tools:text="News description"
-                    android:textColor="#00062C"
-                    android:layout_marginTop="5dp"
-                    android:padding="10dp"
-                    android:textSize="15sp"
+                    style="@style/DescTextTheme"
                     app:layout_constraintTop_toBottomOf="@id/titleTV"
                     app:layout_constraintBottom_toTopOf="@id/goToUrlTV"/>
                 <TextView
                     android:id="@+id/goToUrlTV"
-                    android:textColor="#DBE0FF"
-                    android:textStyle="bold"
-                    android:padding="10dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    style="@style/URLTextTheme"
                     tools:text="www.google.com"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:readMore="@{news.url}"/>
