@@ -1,1 +1,2 @@
-include ':app', ':countrydata', ':newsloader', ':texttoaudiofile'
+include ':app', ':countrydata', ':newsloader'
+rootProject.name='NewsDaily'
