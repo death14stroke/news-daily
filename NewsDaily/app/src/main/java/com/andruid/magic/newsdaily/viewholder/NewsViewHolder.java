@@ -8,6 +8,7 @@ import android.graphics.drawable.GradientDrawable;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.databinding.LayoutNewsBinding;
 import com.andruid.magic.newsdaily.eventbus.NewsEvent;
 import com.andruid.magic.newsloader.model.News;
@@ -52,12 +53,15 @@ public class NewsViewHolder extends RecyclerView.ViewHolder{
             }
 
             @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {}
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                binding.imageView.setImageDrawable(placeHolderDrawable);
+            }
         };
         binding.imageView.setTag(target);
         Picasso.get()
                 .load(news.getImageUrl())
                 .resize(300, 300)
+                .placeholder(R.drawable.ic_launcher_background)
                 .into(target);
         binding.shareBtn.setOnClickListener(v ->
                 EventBus.getDefault().post(new NewsEvent(news, ACTION_SHARE_NEWS))

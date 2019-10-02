@@ -71,6 +71,7 @@
                     android:id="@+id/descTV"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
+                    android:scrollbars="vertical"
                     android:text="@{news.desc}"
                     tools:text="News description"
                     style="@style/DescTextTheme"

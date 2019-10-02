@@ -1,4 +1,4 @@
-package com.andruid.magic.newsloader.articles;
+package com.andruid.magic.newsdaily.articles;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;

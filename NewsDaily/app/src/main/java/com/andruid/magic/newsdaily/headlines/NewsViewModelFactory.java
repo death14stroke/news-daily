@@ -5,10 +5,9 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 public class NewsViewModelFactory implements ViewModelProvider.Factory {
-    private String category, country;
+    private String country;
 
-    public NewsViewModelFactory(String category, String country) {
-        this.category = category;
+    public NewsViewModelFactory(String country) {
         this.country = country;
     }
 
@@ -16,6 +15,6 @@ public class NewsViewModelFactory implements ViewModelProvider.Factory {
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new NewsViewModel(category, country);
+        return (T) new NewsViewModel(country);
     }
 }
