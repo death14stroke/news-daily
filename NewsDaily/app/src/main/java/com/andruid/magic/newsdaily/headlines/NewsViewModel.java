@@ -1,4 +1,4 @@
-package com.andruid.magic.newsloader.headlines;
+package com.andruid.magic.newsdaily.headlines;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;

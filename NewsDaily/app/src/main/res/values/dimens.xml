@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="cardCornerRadius">8dp</dimen>
+    <dimen name="cardElevation">5dp</dimen>
+    <dimen name="roundRectRadius">15dp</dimen>
+    <dimen name="infoTextSize">16sp</dimen>
+    <dimen name="textPadding">10dp</dimen>
+    <dimen name="titleTextSize">18sp</dimen>
+    <dimen name="topMargin">5dp</dimen>
+    <dimen name="descTextSize">15sp</dimen>
+</resources>

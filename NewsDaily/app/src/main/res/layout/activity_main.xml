@@ -5,6 +5,32 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        tools:context=".activity.MainActivity">
+        <com.yuyakaido.android.cardstackview.CardStackView
+            android:id="@+id/cardStackView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/placeHolder"
+            tools:listitem="@layout/layout_news"/>
+        <View
+            android:id="@+id/placeHolder"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+        <com.cleveroad.loopbar.widget.LoopBarView
+            android:id="@+id/loopBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:enls_placeholderId="@id/placeHolder"
+            app:enls_overlaySize="10dp"
+            app:enls_selectionGravity="start"
+            app:enls_selectionMargin="10dp"
+            app:enls_selectionInAnimation="@animator/enls_scale_restore"
+            app:enls_selectionOutAnimation="@animator/enls_scale_small"
+            app:enls_selectionBackground="@color/colorAccent"
+            app:enls_listBackground="@color/colorPrimary"
+            app:enls_menu="@menu/menu_headlines"
+            app:enls_scrollMode="auto"
+            app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

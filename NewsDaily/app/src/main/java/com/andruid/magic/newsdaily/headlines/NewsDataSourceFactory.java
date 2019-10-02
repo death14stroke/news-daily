@@ -1,4 +1,4 @@
-package com.andruid.magic.newsloader.headlines;
+package com.andruid.magic.newsdaily.headlines;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
@@ -6,8 +6,6 @@ import androidx.paging.DataSource;
 import androidx.paging.PageKeyedDataSource;
 
 import com.andruid.magic.newsloader.model.News;
-
-import timber.log.Timber;
 
 public class NewsDataSourceFactory extends DataSource.Factory<Integer, News> {
     private MutableLiveData<PageKeyedDataSource<Integer, News>> liveDataSource =

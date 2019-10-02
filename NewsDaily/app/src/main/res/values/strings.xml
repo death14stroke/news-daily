@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">NewsDaily</string>
+    <string name="news_image">News Image</string>
+    <string name="general">General</string>
+    <string name="business">Biz</string>
+    <string name="entertainment">Ent</string>
+    <string name="health">Health</string>
+    <string name="science">Science</string>
+    <string name="sports">Sports</string>
+    <string name="technology">Tech</string>
 </resources>
