@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.andruid.magic.newsdaily">
-
     <application
         android:name=".application.MyApplication"
         android:allowBackup="true"
@@ -11,16 +10,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.SearchActivity"></activity>
+        <activity android:name=".activity.SearchActivity"
+            android:label="@string/search"
+            android:theme="@style/AppTheme.FullScreen"
+            android:windowSoftInputMode="adjustPan|adjustResize"/>
         <activity android:name=".activity.WebViewActivity" />
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

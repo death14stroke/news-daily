@@ -35,12 +35,16 @@ dependencies {
     implementation 'androidx.paging:paging-runtime:2.1.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.2.0-alpha05'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0-alpha05'
+    implementation 'com.google.android.material:material:1.0.0'
 
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation "com.yuyakaido.android:card-stack-view:2.3.4"
     implementation 'com.cleveroad:loopbar:1.2.0'
+    implementation 'com.miguelcatalan:materialsearchview:1.4.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.13'
 
     implementation project(path: ':newsloader')
     implementation project(path: ':countrydata')
