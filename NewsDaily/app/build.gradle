@@ -50,6 +50,8 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.13'
     implementation 'de.hdodenhof:circleimageview:3.0.1'
     implementation 'com.annimon:stream:1.2.1'
+    implementation 'com.github.AppIntro:AppIntro:5.1.0'
+    implementation 'com.github.ViksaaSkool:AwesomeSplash:v1.0.0'
 
     implementation project(path: ':newsloader')
     implementation project(path: ':countrydata')
