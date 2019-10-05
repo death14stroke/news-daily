@@ -177,6 +177,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             }
             else
                 Toast.makeText(getApplicationContext(), "Text to speech not available", Toast.LENGTH_SHORT).show();
+            registerReceiver(mNoisyReceiver, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
         }
         else
             MediaButtonReceiver.handleIntent(mediaSessionCompat, intent);
@@ -193,6 +194,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     public void onDestroy() {
         mediaSessionCompat.release();
         mediaSessionConnector.setPlayer(null, null);
+        unregisterReceiver(mNoisyReceiver);
         exoPlayer.release();
         exoPlayer = null;
     }
@@ -298,7 +300,6 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             if(audioNewsList == null)
                 return;
             exoPlayer.setPlayWhenReady(true);
-            registerReceiver(mNoisyReceiver, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
             int pos = exoPlayer.getCurrentWindowIndex();
             setCurrentAudio(pos);
             mediaSessionCompat.setActive(true);
@@ -310,7 +311,6 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             Timber.tag("medialog").d("pause");
             super.onPause();
             exoPlayer.setPlayWhenReady(false);
-            unregisterReceiver(mNoisyReceiver);
             setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED, exoPlayer.getCurrentWindowIndex());
         }
 

@@ -1,14 +1,21 @@
 package com.andruid.magic.newsdaily.activity;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.speech.tts.TextToSpeech;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
@@ -20,6 +27,7 @@ import com.andruid.magic.newsdaily.databinding.ActivityMainBinding;
 import com.andruid.magic.newsdaily.eventbus.NewsEvent;
 import com.andruid.magic.newsdaily.headlines.NewsViewModel;
 import com.andruid.magic.newsdaily.headlines.NewsViewModelFactory;
+import com.andruid.magic.newsdaily.service.AudioNewsService;
 import com.andruid.magic.newsdaily.util.AssetsUtil;
 import com.andruid.magic.newsdaily.util.PrefUtil;
 import com.andruid.magic.newsloader.model.News;
@@ -37,20 +45,29 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.OptionalInt;
+import java.util.stream.IntStream;
 
 import timber.log.Timber;
 
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
+import static com.andruid.magic.newsdaily.data.Constants.ACTION_PREPARE_AUDIO;
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_SHARE_NEWS;
+import static com.andruid.magic.newsdaily.data.Constants.EXTRA_CATEGORY;
 import static com.andruid.magic.newsdaily.data.Constants.EXTRA_NEWS_URL;
 
 public class MainActivity extends AppCompatActivity implements OnItemClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
+    private static final int MY_DATA_CHECK_CODE = 0;
+    private String category;
     private ActivityMainBinding binding;
     private List<String> categories;
     private NewsViewModel newsViewModel;
     private NewsAdapter newsAdapter;
     private CardStackLayoutManager cardStackLayoutManager;
+    private MediaBrowserCompat mediaBrowserCompat;
+    private MediaControllerCompat mediaControllerCompat;
+    private MediaControllerCallback mediaControllerCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +96,15 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         loadCategories();
         setUpCardStackView();
         binding.loopBar.addOnItemClickListener(this);
+        binding.speakBtn.setOnClickListener(v -> {
+            Intent checkTTSIntent = new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+            startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
+        });
+        MBConnectionCallback mbConnectionCallback = new MBConnectionCallback();
+        mediaControllerCallback = new MediaControllerCallback();
+        mediaBrowserCompat = new MediaBrowserCompat(this, new ComponentName(this,
+                AudioNewsService.class), mbConnectionCallback, null);
+        mediaBrowserCompat.connect();
     }
 
     @Override
@@ -91,6 +117,23 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     protected void onPause() {
         super.onPause();
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                Intent intent = new Intent(this, AudioNewsService.class);
+                intent.setAction(ACTION_PREPARE_AUDIO);
+                intent.putExtra(EXTRA_CATEGORY, category);
+                startService(intent);
+            } else {
+                Intent installTTSIntent = new Intent();
+                installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installTTSIntent);
+            }
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -152,11 +195,15 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     protected void onDestroy() {
         super.onDestroy();
         binding.unbind();
+        if(mediaControllerCompat!=null)
+            mediaControllerCompat.unregisterCallback(mediaControllerCallback);
+        if(mediaBrowserCompat!=null)
+            mediaBrowserCompat.disconnect();
     }
 
     @Override
     public void onItemClicked(int position) {
-        String category = categories.get(position);
+        category = categories.get(position);
         loadNews(category);
     }
 
@@ -170,7 +217,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private void loadCategories() {
         try {
             categories = AssetsUtil.readCategories(getAssets());
-            loadNews(categories.get(0));
+            category = categories.get(0);
+            loadNews(category);
             Timber.d("categories try %d", categories.size());
         } catch (IOException e) {
             Timber.d("categories catch");
@@ -183,5 +231,54 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         String country = sharedPreferences.getString(getString(R.string.pref_country),
                 PrefUtil.getDefaultCountry(this));
         newsViewModel.setCountry(country);
+    }
+
+    private void scrollToCurrentNews(String title) {
+        List<News> newsList = newsAdapter.getNewsList();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            OptionalInt optionalInt = IntStream.range(0, newsList.size())
+                    .filter(pos -> newsList.get(pos).getTitle().equals(title))
+                    .findFirst();
+            if(optionalInt.isPresent()){
+                int pos = optionalInt.getAsInt();
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        }
+        else{
+            com.annimon.stream.OptionalInt optionalInt = com.annimon.stream.IntStream.range(0, newsList.size())
+                    .filter(pos -> newsList.get(pos).getTitle().equals(title))
+                    .findFirst();
+            if(optionalInt.isPresent()){
+                int pos = optionalInt.getAsInt();
+                cardStackLayoutManager.scrollToPosition(pos);
+            }
+        }
+    }
+
+    private class MBConnectionCallback extends MediaBrowserCompat.ConnectionCallback {
+        @Override
+        public void onConnected() {
+            super.onConnected();
+            try {
+                mediaControllerCompat = new MediaControllerCompat(MainActivity.this,
+                        mediaBrowserCompat.getSessionToken());
+                mediaControllerCompat.registerCallback(mediaControllerCallback);
+                MediaControllerCompat.setMediaController(MainActivity.this, mediaControllerCompat);
+                MediaMetadataCompat metadata = mediaControllerCompat.getMetadata();
+                if(metadata != null)
+                    mediaControllerCallback.onMetadataChanged(metadata);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class MediaControllerCallback extends MediaControllerCompat.Callback {
+        @Override
+        public void onMetadataChanged(MediaMetadataCompat metadata) {
+            super.onMetadataChanged(metadata);
+            String title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
+            scrollToCurrentNews(title);
+        }
     }
 }

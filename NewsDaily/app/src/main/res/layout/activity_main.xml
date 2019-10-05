@@ -13,6 +13,18 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/placeHolder"
             tools:listitem="@layout/layout_news"/>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/speakBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            app:fabSize="mini"
+            android:src="@drawable/ic_speak"
+            app:rippleColor="#000"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
         <View
             android:id="@+id/placeHolder"
             android:layout_width="match_parent"
