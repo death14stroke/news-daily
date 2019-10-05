@@ -11,4 +11,9 @@
     <string name="copy_url">Copy URL</string>
     <string name="open_in_browser">Open in Browser</string>
     <string name="search">Search</string>
+    <string name="listen_headlines">Listen Headlines</string>
+    <string name="pref_country" translatable="false">pref_country</string>
+    <string name="settings">Settings</string>
+    <string name="first_start">firstStart</string>
+    <string name="headlines">Headlines</string>
 </resources>

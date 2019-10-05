@@ -1,6 +1,7 @@
 package com.andruid.magic.newsdaily.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.adapter.NewsAdapter;
@@ -19,6 +21,7 @@ import com.andruid.magic.newsdaily.eventbus.NewsEvent;
 import com.andruid.magic.newsdaily.headlines.NewsViewModel;
 import com.andruid.magic.newsdaily.headlines.NewsViewModelFactory;
 import com.andruid.magic.newsdaily.util.AssetsUtil;
+import com.andruid.magic.newsdaily.util.PrefUtil;
 import com.andruid.magic.newsloader.model.News;
 import com.cleveroad.loopbar.widget.OnItemClickListener;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
@@ -41,7 +44,8 @@ import static com.andruid.magic.newsdaily.data.Constants.ACTION_OPEN_URL;
 import static com.andruid.magic.newsdaily.data.Constants.ACTION_SHARE_NEWS;
 import static com.andruid.magic.newsdaily.data.Constants.EXTRA_NEWS_URL;
 
-public class MainActivity extends AppCompatActivity implements OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements OnItemClickListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
     private ActivityMainBinding binding;
     private List<String> categories;
     private NewsViewModel newsViewModel;
@@ -53,8 +57,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         newsAdapter = new NewsAdapter();
-        newsViewModel = new ViewModelProvider(this, new NewsViewModelFactory(
-                "in")).get(NewsViewModel.class);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.registerOnSharedPreferenceChangeListener(this);
+        String country = preferences.getString(getString(R.string.pref_country), PrefUtil.getDefaultCountry(this));
+        newsViewModel = new ViewModelProvider(this, new NewsViewModelFactory(country))
+                .get(NewsViewModel.class);
         cardStackLayoutManager = new CardStackLayoutManager(this, new CardStackListener() {
             @Override
             public void onCardDragging(Direction direction, float ratio) {}
@@ -103,8 +110,13 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId() == R.id.menu_search)
-            startActivity(new Intent(this, SearchActivity.class));
+        switch (item.getItemId()){
+            case R.id.menu_search:
+                startActivity(new Intent(this, SearchActivity.class));
+                break;
+            case R.id.menu_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+        }
         return true;
     }
 
@@ -164,5 +176,12 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             Timber.d("categories catch");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        String country = sharedPreferences.getString(getString(R.string.pref_country),
+                PrefUtil.getDefaultCountry(this));
+        newsViewModel.setCountry(country);
     }
 }

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -53,5 +53,13 @@
         <item name="android:textColor">@color/colorPrimaryLight</item>
         <item name="android:textColorHint">@color/colorSecondaryText</item>
         <item name="android:hint">@string/search</item>
+    </style>
+    <style name="AppPreference">
+        <item name="android:layout" tools:ignore="PrivateResource">
+            @layout/preference_material
+        </item>
+    </style>
+    <style name="AppPreference.DialogPreference">
+        <item name="negativeButtonText">@android:string/cancel</item>
     </style>
 </resources>
