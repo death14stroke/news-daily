@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.andruid.magic.newsdaily">
+
     <application
         android:name=".application.MyApplication"
         android:allowBackup="true"
@@ -10,24 +11,46 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.SettingsActivity"
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
+        <!--
+         Main music service, provides media browsing and media playback services to
+         consumers through MediaBrowserService and MediaSession. Consumers connect to it through
+         MediaBrowser (for browsing) and MediaController (for playback control)
+        -->
+        <service
+            android:name=".service.AudioNewsService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".activity.SettingsActivity"
             android:label="@string/settings"
-            android:launchMode="singleTop"/>
+            android:launchMode="singleTop" />
         <activity
             android:name=".activity.SearchActivity"
             android:label="@string/search"
-            android:theme="@style/AppTheme.FullScreen"
             android:launchMode="singleTop"
+            android:theme="@style/AppTheme.FullScreen"
             android:windowSoftInputMode="adjustPan|adjustResize" />
-        <activity android:name=".activity.WebViewActivity"
-            android:launchMode="singleTop"/>
-        <activity android:name=".activity.MainActivity"
+        <activity
+            android:name=".activity.WebViewActivity"
+            android:launchMode="singleTop" />
+        <activity
+            android:name=".activity.MainActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

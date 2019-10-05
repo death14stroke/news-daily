@@ -56,16 +56,16 @@ import java.util.Objects;
 
 import timber.log.Timber;
 
-import static com.andruid.magic.newsdaily.data.Constants.INTENT_PREPARE_AUDIO;
-import static com.andruid.magic.newsdaily.data.Constants.KEY_CATEGORY;
-import static com.andruid.magic.newsdaily.data.Constants.MEDIA_NOTI_ID;
-import static com.andruid.magic.newsdaily.data.Constants.MEDIA_SERVICE;
-import static com.andruid.magic.newsdaily.data.Constants.NEWS_FETCH_DISTANCE;
+import static com.andruid.magic.newsdaily.data.Constants.ACTION_PREPARE_AUDIO;
+import static com.andruid.magic.newsdaily.data.Constants.EXTRA_CATEGORY;
 import static com.andruid.magic.newsloader.data.Constants.FIRST_PAGE;
 import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
 
 public class AudioNewsService extends MediaBrowserServiceCompat implements Player.EventListener,
         NewsRepository.NewsLoadedListener, TtsApi.AudioConversionListener {
+    private static final String MEDIA_SERVICE = "AudioNewsService";
+    public static final int NEWS_FETCH_DISTANCE = 3;
+    public static final int MEDIA_NOTI_ID = 1;
     private MediaSessionCompat mediaSessionCompat;
     private MediaSessionCallback mediaSessionCallback;
     private SimpleExoPlayer exoPlayer;
@@ -118,8 +118,6 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         setSessionToken(mediaSessionCompat.getSessionToken());
         mediaSessionCallback = new MediaSessionCallback();
         mediaSessionCompat.setCallback(mediaSessionCallback);
-        mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
-                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
         mediaSessionCompat.setActive(true);
         mediaSessionConnector = new MediaSessionConnector(mediaSessionCompat);
         mediaSessionConnector.setQueueNavigator(new TimelineQueueNavigator(mediaSessionCompat) {
@@ -168,10 +166,10 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Timber.tag("medialog").d("on start command");
-        if(intent != null && INTENT_PREPARE_AUDIO.equals(intent.getAction())) {
+        if(ACTION_PREPARE_AUDIO.equals(intent.getAction())) {
             Bundle extras = intent.getExtras();
             if(extras != null)
-                category = extras.getString(KEY_CATEGORY);
+                category = extras.getString(EXTRA_CATEGORY);
             if(TtsApi.getInstance().isReady()) {
                 audioNewsList.clear();
                 concatenatingMediaSource.clear();
@@ -211,7 +209,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         if(playWhenReady)
             icon = android.R.drawable.ic_media_pause;
         MediaMetadataCompat metadataCompat = mediaSessionCompat.getController().getMetadata();
-        if(metadataCompat==null || category == null)
+        if(metadataCompat == null || category == null)
             return;
         notificationBuilder = NotificationUtil.buildNotification(this, icon, category,
                 metadataCompat, mediaSessionCompat.getSessionToken());
