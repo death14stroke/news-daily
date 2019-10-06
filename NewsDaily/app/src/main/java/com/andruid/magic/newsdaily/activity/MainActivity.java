@@ -28,8 +28,8 @@ import com.andruid.magic.newsdaily.eventbus.NewsEvent;
 import com.andruid.magic.newsdaily.headlines.NewsViewModel;
 import com.andruid.magic.newsdaily.headlines.NewsViewModelFactory;
 import com.andruid.magic.newsdaily.service.AudioNewsService;
-import com.andruid.magic.newsdaily.util.AssetsUtil;
 import com.andruid.magic.newsdaily.util.PrefUtil;
+import com.andruid.magic.newsdaily.util.StringUtils;
 import com.andruid.magic.newsloader.model.News;
 import com.cleveroad.loopbar.widget.OnItemClickListener;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
@@ -43,7 +43,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.stream.IntStream;
@@ -219,15 +218,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     private void loadCategories() {
-        try {
-            categories = AssetsUtil.readCategories(getAssets());
-            category = categories.get(0);
-            loadNews(category);
-            Timber.d("categories try %d", categories.size());
-        } catch (IOException e) {
-            Timber.d("categories catch");
-            e.printStackTrace();
-        }
+        categories = StringUtils.getCategories();
+        category = categories.get(0);
+        loadNews(category);
     }
 
     @Override
