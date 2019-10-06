@@ -11,6 +11,13 @@
         <item name="colorControlNormal">@android:color/white</item>
         <item name="titleTextColor">@android:color/white</item>
     </style>
+    <style name="AppTheme.Splash" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
     <style name="CardViewTheme" parent="CardView.Light">
         <item name="cardCornerRadius">@dimen/cardCornerRadius</item>
         <item name="cardElevation">@dimen/cardElevation</item>

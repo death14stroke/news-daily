@@ -56,7 +56,9 @@ public class IntroActivity extends AppIntro {
     }
 
     private void goToHomeScreen() {
-        startActivity(new Intent(this, MainActivity.class));
+        Intent intent = new Intent(this, MainActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
         finish();
     }
 }

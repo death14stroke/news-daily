@@ -159,6 +159,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 break;
             case R.id.menu_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
+                break;
+            case R.id.menu_help:
+                startActivity(new Intent(this, IntroActivity.class));
+                break;
         }
         return true;
     }
