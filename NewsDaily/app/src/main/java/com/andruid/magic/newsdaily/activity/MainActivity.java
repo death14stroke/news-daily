@@ -1,5 +1,6 @@
 package com.andruid.magic.newsdaily.activity;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,8 +10,10 @@ import android.speech.tts.TextToSpeech;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private MediaControllerCompat mediaControllerCompat;
     private MediaControllerCallback mediaControllerCallback;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +102,31 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         binding.speakBtn.setOnClickListener(v -> {
             Intent checkTTSIntent = new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
             startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE);
+        });
+//        ActionBar actionBar = getSupportActionBar();
+        binding.cardStackView.setOnTouchListener(new View.OnTouchListener() {
+            private GestureDetector gestureDetector = new GestureDetector(MainActivity.this,
+                    new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    if(binding.loopBar.getVisibility() == View.VISIBLE) {
+                        binding.loopBar.setVisibility(View.GONE);
+                        /*if (actionBar != null)
+                            actionBar.hide();*/
+                    }
+                    else {
+                        binding.loopBar.setVisibility(View.VISIBLE);
+                        /*if (actionBar != null)
+                            actionBar.show();*/
+                    }
+                    return true;
+                }
+            });
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return gestureDetector.onTouchEvent(motionEvent);
+            }
         });
         MBConnectionCallback mbConnectionCallback = new MBConnectionCallback();
         mediaControllerCallback = new MediaControllerCallback();

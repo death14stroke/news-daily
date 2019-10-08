@@ -9,9 +9,9 @@
         <com.yuyakaido.android.cardstackview.CardStackView
             android:id="@+id/cardStackView"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/placeHolder"
+            app:layout_constraintBottom_toBottomOf="parent"
             tools:listitem="@layout/layout_news"/>
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/speakBtn"
