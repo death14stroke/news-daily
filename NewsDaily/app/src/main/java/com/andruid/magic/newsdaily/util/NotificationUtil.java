@@ -36,8 +36,6 @@ public class NotificationUtil {
                 .putExtra(EXTRA_CATEGORY, category)
                 .setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if(notificationManager==null)
-            return null;
         int importance = 0;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             importance = NotificationManager.IMPORTANCE_HIGH;
@@ -45,7 +43,8 @@ public class NotificationUtil {
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance);
             notificationChannel.enableLights(true);
             notificationChannel.setLightColor(Color.GREEN);
-            notificationManager.createNotificationChannel(notificationChannel);
+            if (notificationManager != null)
+                notificationManager.createNotificationChannel(notificationChannel);
         }
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID);
         builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle()

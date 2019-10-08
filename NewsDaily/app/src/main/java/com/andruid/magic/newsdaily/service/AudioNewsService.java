@@ -1,6 +1,5 @@
 package com.andruid.magic.newsdaily.service;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -11,6 +10,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.support.v4.media.MediaBrowserCompat.MediaItem;
 import android.support.v4.media.MediaDescriptionCompat;
@@ -54,7 +54,6 @@ import com.google.android.exoplayer2.util.Util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import timber.log.Timber;
 
@@ -67,15 +66,14 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         NewsRepository.NewsLoadedListener, TtsApi.AudioConversionListener {
     private static final String MEDIA_SERVICE = "AudioNewsService";
     public static final int NEWS_FETCH_DISTANCE = 3, MEDIA_NOTI_ID = 1;
-    private static final int MSG_INIT_NEWS = 0, MSG_STOP_SERVICE = 1, MSG_UPDATE_SOURCE = 2;
-    private static final int WAIT_QUEUE_TIMEOUT_MS = 3000;
+    private static final int MSG_INIT_NEWS = 0, MSG_STOP_SERVICE = 1, MSG_UPDATE_SOURCE = 2, MSG_SHOW_NOTI = 3;
+    private static final int WAIT_QUEUE_TIMEOUT_MS = 5000;
     private MediaSessionCompat mediaSessionCompat;
     private MediaSessionCallback mediaSessionCallback;
     private SimpleExoPlayer exoPlayer;
     private MediaSessionConnector mediaSessionConnector;
     private List<AudioNews> audioNewsList = new ArrayList<>();
     private DataSource.Factory dataSourceFactory;
-    private NotificationCompat.Builder notificationBuilder;
     private ConcatenatingMediaSource concatenatingMediaSource;
     private Intent mediaButtonIntent;
     private int page = FIRST_PAGE;
@@ -87,12 +85,15 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     };
     private String category;
     private Handler audioNewsHandler;
+    private HandlerThread audioNewsHandlerThread;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Timber.d("service created");
-        audioNewsHandler = new Handler(new AudioNewsHandler());
+        audioNewsHandlerThread = new HandlerThread("HandlerThread");
+        audioNewsHandlerThread.start();
+        audioNewsHandler = new Handler(audioNewsHandlerThread.getLooper(), new AudioNewsHandler());
         initMediaSession();
         initExoPlayer();
     }
@@ -182,7 +183,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         }
         else
             MediaButtonReceiver.handleIntent(mediaSessionCompat, intent);
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -197,35 +198,26 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         mediaSessionConnector.setPlayer(null, null);
         unregisterReceiver(mNoisyReceiver);
         exoPlayer.release();
+        audioNewsHandlerThread.quit();
     }
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        if(playbackState==Player.STATE_READY){
-            if(mediaButtonIntent != null){
+        if(playbackState == Player.STATE_READY) {
+            if (mediaButtonIntent != null) {
                 MediaButtonReceiver.handleIntent(mediaSessionCompat, mediaButtonIntent);
                 mediaButtonIntent = null;
             }
+            int icon = android.R.drawable.ic_media_play;
+            if (playWhenReady)
+                icon = android.R.drawable.ic_media_pause;
+            MediaMetadataCompat metadataCompat = mediaSessionCompat.getController().getMetadata();
+            if (metadataCompat == null || category == null)
+                return;
+            Timber.d("sending message noti show in state change");
+            Message message = audioNewsHandler.obtainMessage(MSG_SHOW_NOTI, icon, playWhenReady ? 1 : 0, category);
+            audioNewsHandler.sendMessage(message);
         }
-        int icon = android.R.drawable.ic_media_play;
-        if(playWhenReady)
-            icon = android.R.drawable.ic_media_pause;
-        MediaMetadataCompat metadataCompat = mediaSessionCompat.getController().getMetadata();
-        if(metadataCompat == null || category == null)
-            return;
-        int finalIcon = icon;
-        new Thread(() -> {
-            notificationBuilder = NotificationUtil.buildNotification(AudioNewsService.this,
-                    finalIcon, category,
-                    metadataCompat, mediaSessionCompat.getSessionToken());
-            Notification notification = Objects.requireNonNull(notificationBuilder).build();
-            if(playWhenReady)
-                startForeground(MEDIA_NOTI_ID, notification);
-            else {
-                NotificationManagerCompat.from(AudioNewsService.this).notify(MEDIA_NOTI_ID, notification);
-                stopForeground(false);
-            }
-        }).start();
     }
 
     @Override
@@ -240,13 +232,10 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             AudioNews audioNews = audioNewsList.get(pos);
             MediaMetadataCompat mediaMetadataCompat = MediaUtil.buildMetaData(audioNews);
             mediaSessionCompat.setMetadata(mediaMetadataCompat);
-            new Thread(() -> {
-                notificationBuilder = NotificationUtil.buildNotification(this,
-                        android.R.drawable.ic_media_pause, category, mediaMetadataCompat,
-                        mediaSessionCompat.getSessionToken());
-                Notification notification = Objects.requireNonNull(notificationBuilder).build();
-                startForeground(MEDIA_NOTI_ID, notification);
-            }).start();
+            Timber.d("sending message noti show in pos discontinuity");
+            Message message = audioNewsHandler.obtainMessage(MSG_SHOW_NOTI, android.R.drawable.ic_media_pause,
+                    1, category);
+            audioNewsHandler.sendMessage(message);
         }
     }
 
@@ -337,6 +326,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
 
         @Override
         public boolean handleMessage(@NonNull Message message) {
+            Timber.d("handle message: %d", message.what);
             switch (message.what){
                 case MSG_INIT_NEWS:
                     audioNewsHandler.removeCallbacksAndMessages(null);
@@ -353,6 +343,21 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
                 case MSG_UPDATE_SOURCE:
                     audioNewsHandler.removeMessages(MSG_UPDATE_SOURCE);
                     exoPlayer.prepare(concatenatingMediaSource, false, false);
+                    break;
+                case MSG_SHOW_NOTI:
+                    int icon = message.arg1;
+                    String category = (String) message.obj;
+                    boolean playWhenReady = (message.arg2 == 1);
+                    MediaMetadataCompat metadataCompat = mediaSessionCompat.getController().getMetadata();
+                    NotificationCompat.Builder notificationBuilder = NotificationUtil.buildNotification(AudioNewsService.this,
+                            icon, category, metadataCompat, mediaSessionCompat.getSessionToken());
+                    if(playWhenReady)
+                        startForeground(MEDIA_NOTI_ID, notificationBuilder.build());
+                    else {
+                        NotificationManagerCompat.from(AudioNewsService.this).notify(MEDIA_NOTI_ID,
+                                notificationBuilder.build());
+                        stopForeground(false);
+                    }
                     break;
             }
             return false;
