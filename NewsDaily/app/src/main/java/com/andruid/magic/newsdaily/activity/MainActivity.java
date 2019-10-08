@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private MediaBrowserCompat mediaBrowserCompat;
     private MediaControllerCompat mediaControllerCompat;
     private MediaControllerCallback mediaControllerCallback;
+    private boolean syncWithUI;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         newsAdapter = new NewsAdapter();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(this);
+        syncWithUI = preferences.getBoolean(getString(R.string.pref_ui_sync), false);
         String country = preferences.getString(getString(R.string.pref_country), PrefUtil.getDefaultCountry(this));
         newsViewModel = new ViewModelProvider(this, new NewsViewModelFactory(country))
                 .get(NewsViewModel.class);
@@ -254,9 +256,12 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        String country = sharedPreferences.getString(getString(R.string.pref_country),
-                PrefUtil.getDefaultCountry(this));
-        newsViewModel.setCountry(country);
+        if(getString(R.string.pref_country).equals(s)) {
+            String country = sharedPreferences.getString(s, PrefUtil.getDefaultCountry(this));
+            newsViewModel.setCountry(country);
+        }
+        else if(getString(R.string.pref_ui_sync).equals(s))
+            syncWithUI = sharedPreferences.getBoolean(s, false);
     }
 
     private void scrollToCurrentNews(String title) {
@@ -304,7 +309,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             super.onMetadataChanged(metadata);
             String title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE);
-            scrollToCurrentNews(title);
+            if(syncWithUI)
+                scrollToCurrentNews(title);
         }
     }
 }

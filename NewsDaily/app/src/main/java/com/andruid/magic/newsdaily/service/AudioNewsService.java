@@ -10,6 +10,8 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.media.MediaBrowserCompat.MediaItem;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -64,8 +66,9 @@ import static com.andruid.magic.newsloader.data.Constants.PAGE_SIZE;
 public class AudioNewsService extends MediaBrowserServiceCompat implements Player.EventListener,
         NewsRepository.NewsLoadedListener, TtsApi.AudioConversionListener {
     private static final String MEDIA_SERVICE = "AudioNewsService";
-    public static final int NEWS_FETCH_DISTANCE = 3;
-    public static final int MEDIA_NOTI_ID = 1;
+    public static final int NEWS_FETCH_DISTANCE = 3, MEDIA_NOTI_ID = 1;
+    private static final int MSG_INIT_NEWS = 0, MSG_STOP_SERVICE = 1, MSG_UPDATE_SOURCE = 2;
+    private static final int WAIT_QUEUE_TIMEOUT_MS = 3000;
     private MediaSessionCompat mediaSessionCompat;
     private MediaSessionCallback mediaSessionCallback;
     private SimpleExoPlayer exoPlayer;
@@ -83,11 +86,13 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         }
     };
     private String category;
+    private Handler audioNewsHandler;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Timber.d("service created");
+        audioNewsHandler = new Handler(new AudioNewsHandler());
         initMediaSession();
         initExoPlayer();
     }
@@ -165,16 +170,12 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Timber.tag("medialog").d("on start command");
         if(ACTION_PREPARE_AUDIO.equals(intent.getAction())) {
             Bundle extras = intent.getExtras();
             if(extras != null)
                 category = extras.getString(EXTRA_CATEGORY);
-            if(TtsApi.getInstance().isReady()) {
-                audioNewsList.clear();
-                concatenatingMediaSource.clear();
-                loadNews();
-            }
+            if(TtsApi.getInstance().isReady())
+                audioNewsHandler.sendEmptyMessage(MSG_INIT_NEWS);
             else
                 Toast.makeText(getApplicationContext(), "Text to speech not available", Toast.LENGTH_SHORT).show();
             registerReceiver(mNoisyReceiver, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
@@ -187,7 +188,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
-        mediaSessionCallback.onStop();
+        audioNewsHandler.sendEmptyMessage(MSG_STOP_SERVICE);
     }
 
     @Override
@@ -196,14 +197,13 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         mediaSessionConnector.setPlayer(null, null);
         unregisterReceiver(mNoisyReceiver);
         exoPlayer.release();
-        exoPlayer = null;
     }
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         if(playbackState==Player.STATE_READY){
-            if(mediaButtonIntent!=null){
-                MediaButtonReceiver.handleIntent(mediaSessionCompat,mediaButtonIntent);
+            if(mediaButtonIntent != null){
+                MediaButtonReceiver.handleIntent(mediaSessionCompat, mediaButtonIntent);
                 mediaButtonIntent = null;
             }
         }
@@ -213,15 +213,19 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         MediaMetadataCompat metadataCompat = mediaSessionCompat.getController().getMetadata();
         if(metadataCompat == null || category == null)
             return;
-        notificationBuilder = NotificationUtil.buildNotification(this, icon, category,
-                metadataCompat, mediaSessionCompat.getSessionToken());
-        Notification notification = Objects.requireNonNull(notificationBuilder).build();
-        if(playWhenReady)
-            startForeground(MEDIA_NOTI_ID, notification);
-        else {
-            NotificationManagerCompat.from(this).notify(MEDIA_NOTI_ID, notification);
-            stopForeground(false);
-        }
+        int finalIcon = icon;
+        new Thread(() -> {
+            notificationBuilder = NotificationUtil.buildNotification(AudioNewsService.this,
+                    finalIcon, category,
+                    metadataCompat, mediaSessionCompat.getSessionToken());
+            Notification notification = Objects.requireNonNull(notificationBuilder).build();
+            if(playWhenReady)
+                startForeground(MEDIA_NOTI_ID, notification);
+            else {
+                NotificationManagerCompat.from(AudioNewsService.this).notify(MEDIA_NOTI_ID, notification);
+                stopForeground(false);
+            }
+        }).start();
     }
 
     @Override
@@ -278,13 +282,15 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     @Override
     public void onAudioCreated(File file) {
         String utteranceId = FileUtils.getUtteranceId(file.getName());
-        Timber.tag("ttslog").d("Utterance done %s", utteranceId);
+        Timber.d("Utterance done %s", utteranceId);
         MediaSource mediaSource = new ExtractorMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(Uri.fromFile(file));
         concatenatingMediaSource.addMediaSource(mediaSource);
-        exoPlayer.prepare(concatenatingMediaSource, false, false);
-        if(utteranceId.equals("0"))
+        audioNewsHandler.sendEmptyMessageDelayed(MSG_UPDATE_SOURCE, WAIT_QUEUE_TIMEOUT_MS);
+        if(utteranceId.equals("0")) {
+            audioNewsHandler.sendEmptyMessage(MSG_UPDATE_SOURCE);
             mediaSessionCallback.onPlay();
+        }
     }
 
     @Override
@@ -292,10 +298,9 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
-    private final class MediaSessionCallback extends MediaSessionCompat.Callback {
+    private class MediaSessionCallback extends MediaSessionCompat.Callback {
         @Override
         public void onPlay() {
-            Timber.tag("medialog").d("play");
             super.onPlay();
             if(audioNewsList == null)
                 return;
@@ -308,22 +313,13 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
 
         @Override
         public void onPause() {
-            Timber.tag("medialog").d("pause");
             super.onPause();
             exoPlayer.setPlayWhenReady(false);
             setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED, exoPlayer.getCurrentWindowIndex());
         }
 
         @Override
-        public void onStop() {
-            super.onStop();
-            stopForeground(true);
-            stopSelf();
-        }
-
-        @Override
         public void onSkipToNext() {
-            Timber.tag("medialog").d("next");
             super.onSkipToNext();
             if(exoPlayer.hasNext())
                 exoPlayer.next();
@@ -331,10 +327,35 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
 
         @Override
         public void onSkipToPrevious() {
-            Timber.tag("medialog").d("prev");
             super.onSkipToPrevious();
             if(exoPlayer.hasPrevious())
                 exoPlayer.previous();
+        }
+    }
+
+    private class AudioNewsHandler implements Handler.Callback {
+
+        @Override
+        public boolean handleMessage(@NonNull Message message) {
+            switch (message.what){
+                case MSG_INIT_NEWS:
+                    audioNewsHandler.removeCallbacksAndMessages(null);
+                    audioNewsList.clear();
+                    concatenatingMediaSource.clear();
+                    page = FIRST_PAGE;
+                    loadNews();
+                    break;
+                case MSG_STOP_SERVICE:
+                    audioNewsHandler.removeCallbacksAndMessages(null);
+                    stopForeground(true);
+                    stopSelf();
+                    break;
+                case MSG_UPDATE_SOURCE:
+                    audioNewsHandler.removeMessages(MSG_UPDATE_SOURCE);
+                    exoPlayer.prepare(concatenatingMediaSource, false, false);
+                    break;
+            }
+            return false;
         }
     }
 }

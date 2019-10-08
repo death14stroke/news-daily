@@ -10,4 +10,15 @@
             app:iconSpaceReserved="false"
             style="@style/AppPreference.DialogPreference"/>
     </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Audio playback"
+        app:iconSpaceReserved="false">
+        <SwitchPreference
+            android:key="@string/pref_ui_sync"
+            android:title="Sync audio with screen"
+            android:switchTextOn="@string/pref_ui_text_on"
+            android:switchTextOff="@string/pref_ui_text_off"
+            app:iconSpaceReserved="false"
+            android:defaultValue="false"/>
+    </PreferenceCategory>
 </PreferenceScreen>

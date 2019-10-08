@@ -83,6 +83,8 @@
                     android:layout_height="wrap_content"
                     style="@style/URLTextTheme"
                     tools:text="www.google.com"
+                    android:maxLines="3"
+                    android:ellipsize="end"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:readMore="@{news.url}"/>
             </androidx.constraintlayout.widget.ConstraintLayout>

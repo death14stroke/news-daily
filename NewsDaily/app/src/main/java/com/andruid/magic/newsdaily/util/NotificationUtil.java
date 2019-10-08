@@ -31,10 +31,10 @@ public class NotificationUtil {
     public static NotificationCompat.Builder buildNotification(Context context, int icon, String category,
                                                                MediaMetadataCompat metadataCompat,
                                                                MediaSessionCompat.Token token){
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.setAction(ACTION_NOTI_CLICK);
-        intent.putExtra(EXTRA_CATEGORY, category);
-
+        Intent intent = new Intent(context, MainActivity.class)
+                .setAction(ACTION_NOTI_CLICK)
+                .putExtra(EXTRA_CATEGORY, category)
+                .setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if(notificationManager==null)
             return null;
@@ -42,12 +42,11 @@ public class NotificationUtil {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             importance = NotificationManager.IMPORTANCE_HIGH;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME,importance);
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance);
             notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.CYAN);
+            notificationChannel.setLightColor(Color.GREEN);
             notificationManager.createNotificationChannel(notificationChannel);
         }
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID);
         builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(token)
@@ -66,25 +65,17 @@ public class NotificationUtil {
         String albumArtUri = metadataCompat.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI);
         PendingIntent pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
                 PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS);
-        builder.addAction(android.R.drawable.ic_media_previous,"previous",pendingIntent);
+        builder.addAction(android.R.drawable.ic_media_previous, "previous", pendingIntent);
         pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
                 PlaybackStateCompat.ACTION_PLAY_PAUSE);
-        builder.addAction(icon,"play",pendingIntent);
+        builder.addAction(icon,"play", pendingIntent);
         pendingIntent = MediaButtonReceiver.buildMediaButtonPendingIntent(context,
                 PlaybackStateCompat.ACTION_SKIP_TO_NEXT);
-        builder.addAction(android.R.drawable.ic_media_next,"next",pendingIntent);
-        Thread thread = new Thread(() -> {
-            try {
-                Bitmap bitmap = Picasso.get().load(albumArtUri).get();
-                builder.setLargeIcon(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        thread.start();
+        builder.addAction(android.R.drawable.ic_media_next, "next", pendingIntent);
         try {
-            thread.join();
-        } catch (InterruptedException e) {
+            Bitmap bitmap = Picasso.get().load(albumArtUri).get();
+            builder.setLargeIcon(bitmap);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return builder;
