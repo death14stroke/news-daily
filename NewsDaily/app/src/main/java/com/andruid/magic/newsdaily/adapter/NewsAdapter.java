@@ -43,7 +43,9 @@ public class NewsAdapter extends PagedListAdapter<News, NewsViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
         News news = getItem(position);
-        holder.bind(news);
+        if (news != null) {
+            holder.bind(news);
+        }
     }
 
     public List<News> getNewsList(){

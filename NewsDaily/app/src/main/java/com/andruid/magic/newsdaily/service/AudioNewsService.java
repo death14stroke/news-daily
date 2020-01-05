@@ -28,7 +28,7 @@ import androidx.preference.PreferenceManager;
 
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.model.AudioNews;
-import com.andruid.magic.newsdaily.util.MediaUtil;
+import com.andruid.magic.newsdaily.util.Extensions;
 import com.andruid.magic.newsdaily.util.NotificationUtil;
 import com.andruid.magic.newsdaily.util.PrefUtil;
 import com.andruid.magic.newsloader.api.NewsRepository;
@@ -131,7 +131,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         mediaSessionConnector.setQueueNavigator(new TimelineQueueNavigator(mediaSessionCompat) {
             @Override
             public MediaDescriptionCompat getMediaDescription(Player player, int windowIndex) {
-                return MediaUtil.getMediaDescription(audioNewsList.get(windowIndex));
+                return Extensions.getMediaDescription(audioNewsList.get(windowIndex));
             }
         });
         mediaSessionConnector.setPlayer(exoPlayer,null);
@@ -147,7 +147,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         if(pos >= audioNewsList.size() || pos < 0)
             return;
         AudioNews audioNews = audioNewsList.get(pos);
-        mediaSessionCompat.setMetadata(MediaUtil.buildMetaData(audioNews));
+        mediaSessionCompat.setMetadata(Extensions.buildMetaData(audioNews));
     }
 
     private void setMediaPlaybackState(int state, int pos) {
@@ -198,7 +198,11 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     public void onDestroy() {
         mediaSessionCompat.release();
         mediaSessionConnector.setPlayer(null, null);
-        unregisterReceiver(mNoisyReceiver);
+        try {
+            unregisterReceiver(mNoisyReceiver);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
         exoPlayer.release();
         audioNewsHandlerThread.quit();
     }
@@ -232,7 +236,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
                 loadNews();
             }
             AudioNews audioNews = audioNewsList.get(pos);
-            MediaMetadataCompat mediaMetadataCompat = MediaUtil.buildMetaData(audioNews);
+            MediaMetadataCompat mediaMetadataCompat = Extensions.buildMetaData(audioNews);
             mediaSessionCompat.setMetadata(mediaMetadataCompat);
             Timber.d("sending message noti show in pos discontinuity");
             Message message = audioNewsHandler.obtainMessage(MSG_SHOW_NOTI, android.R.drawable.ic_media_pause,
@@ -247,7 +251,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
         for(int i=0; i<newsList.size(); i++){
             News news = newsList.get(i);
             String text = news.getDesc();
-            audioNewsList.add(new AudioNews("", news));
+            audioNewsList.add(new AudioNews(news.getUrl(), news));
             if(text.isEmpty())
                 text = "No description available";
             TtsApi.getInstance().convertToAudioFile(text, String.valueOf(pos+i), this);

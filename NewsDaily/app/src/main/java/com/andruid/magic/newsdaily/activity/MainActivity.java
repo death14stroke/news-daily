@@ -31,8 +31,8 @@ import com.andruid.magic.newsdaily.eventbus.NewsEvent;
 import com.andruid.magic.newsdaily.headlines.NewsViewModel;
 import com.andruid.magic.newsdaily.headlines.NewsViewModelFactory;
 import com.andruid.magic.newsdaily.service.AudioNewsService;
+import com.andruid.magic.newsdaily.util.CategoryUtil;
 import com.andruid.magic.newsdaily.util.PrefUtil;
-import com.andruid.magic.newsdaily.util.StringUtils;
 import com.andruid.magic.newsloader.model.News;
 import com.cleveroad.loopbar.widget.OnItemClickListener;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;
@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     private void loadCategories() {
-        categories = StringUtils.getCategories();
+        categories = CategoryUtil.getCategories();
         category = categories.get(0);
         loadNews(category);
     }

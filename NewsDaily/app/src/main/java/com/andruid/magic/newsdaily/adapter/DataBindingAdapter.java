@@ -1,4 +1,4 @@
-package com.andruid.magic.newsdaily.util;
+package com.andruid.magic.newsdaily.adapter;
 
 import android.widget.TextView;
 
