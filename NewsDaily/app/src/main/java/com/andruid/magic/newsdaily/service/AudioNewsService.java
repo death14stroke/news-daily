@@ -246,7 +246,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
             News news = newsList.get(i);
             String text = news.getDesc();
             audioNewsList.add(new AudioNews("", news));
-            if(text == null || text.isEmpty())
+            if(text.isEmpty())
                 text = "No description available";
             TtsApi.getInstance().convertToAudioFile(text, String.valueOf(pos+i), this);
         }
