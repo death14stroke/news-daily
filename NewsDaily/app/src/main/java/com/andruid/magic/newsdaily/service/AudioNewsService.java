@@ -51,6 +51,8 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -283,7 +285,7 @@ public class AudioNewsService extends MediaBrowserServiceCompat implements Playe
     }
 
     @Override
-    public void onFailure(String msg) {
+    public void onFailure(@NotNull String msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
