@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.andruid.magic.newsdaily.R;
 import com.andruid.magic.newsdaily.adapter.NewsAdapter;
 import com.andruid.magic.newsdaily.articles.ArticlesViewModel;
-import com.andruid.magic.newsdaily.articles.ArticlesViewModelFactory;
 import com.andruid.magic.newsdaily.databinding.ActivitySearchBinding;
 import com.andruid.magic.newsdaily.util.RxSearchObservable;
 import com.yuyakaido.android.cardstackview.CardStackLayoutManager;

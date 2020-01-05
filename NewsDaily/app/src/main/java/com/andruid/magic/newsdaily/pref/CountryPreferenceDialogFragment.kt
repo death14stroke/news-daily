@@ -33,7 +33,8 @@ class CountryPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         val binding = PrefDialogCountryBinding.bind(view)
         try {
             val countries = getCountries(context?.assets)
-            val countryAdapter = CountryAdapter(countries)
+            val countryAdapter = CountryAdapter()
+            countryAdapter.submitList(countries)
             binding.recyclerView.apply {
                 adapter = countryAdapter
                 layoutManager = LinearLayoutManager(context)

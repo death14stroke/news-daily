@@ -8,7 +8,7 @@ import org.greenrobot.eventbus.EventBus
 
 class CountryViewHolder(val binding : LayoutCountryBinding) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bindCountry(country: Country) {
+    fun bind(country: Country) {
         binding.apply {
             this.country = country
             root.setOnClickListener {
