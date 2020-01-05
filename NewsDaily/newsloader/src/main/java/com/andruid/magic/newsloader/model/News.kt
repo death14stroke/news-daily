@@ -7,7 +7,7 @@ import kotlinx.android.parcel.Parcelize
 data class News(
         val sourceName : String,
         val title : String,
-        val desc : String,
+        val desc : String?,
         val url : String,
         val imageUrl : String,
         val published : Long

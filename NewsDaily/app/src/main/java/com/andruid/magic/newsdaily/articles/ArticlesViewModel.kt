@@ -11,7 +11,7 @@ import com.andruid.magic.newsloader.model.News
 
 class ArticlesViewModel(private val language : String) : ViewModel() {
     private val queryLiveData: MutableLiveData<String> = MutableLiveData()
-    private var pagedListLiveData : LiveData<PagedList<News>>
+    var pagedListLiveData : LiveData<PagedList<News>>
 
     init {
         val pagedListConfig = PagedList.Config.Builder()

@@ -14,7 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.media.session.MediaButtonReceiver
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.activity.MainActivity
-import com.andruid.magic.newsdaily.data.Constants
+import com.andruid.magic.newsdaily.data.AppConstants
 import com.squareup.picasso.Picasso
 import java.io.IOException
 
@@ -27,8 +27,8 @@ class NotificationUtil {
                               metadataCompat: MediaMetadataCompat, token: MediaSessionCompat.Token
         ) : NotificationCompat.Builder {
             val intent = Intent(context, MainActivity::class.java)
-                    .setAction(Constants.ACTION_NOTI_CLICK)
-                    .putExtra(Constants.EXTRA_CATEGORY, category)
+                    .setAction(AppConstants.ACTION_NOTI_CLICK)
+                    .putExtra(AppConstants.EXTRA_CATEGORY, category)
                     .setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE)
                     as NotificationManager
@@ -36,7 +36,7 @@ class NotificationUtil {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                 importance = NotificationManager.IMPORTANCE_HIGH
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val notificationChannel = NotificationChannel(CHANNEL_ID, Constants.CHANNEL_NAME,
+                val notificationChannel = NotificationChannel(CHANNEL_ID, AppConstants.CHANNEL_NAME,
                         importance).apply {
                     enableLights(true)
                     lightColor = Color.GREEN

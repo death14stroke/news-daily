@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.os.RemoteException
 import android.speech.tts.TextToSpeech
 import android.support.v4.media.MediaBrowserCompat
@@ -22,7 +21,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.adapter.NewsAdapter
-import com.andruid.magic.newsdaily.data.Constants
+import com.andruid.magic.newsdaily.data.AppConstants
 import com.andruid.magic.newsdaily.databinding.ActivityMainBinding
 import com.andruid.magic.newsdaily.eventbus.NewsEvent
 import com.andruid.magic.newsdaily.headlines.NewsViewModel
@@ -55,8 +54,8 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnSharedPreferenc
     private var syncWithUI = false
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -125,8 +124,8 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnSharedPreferenc
         if (requestCode == MY_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
                 val intent = Intent(this, AudioNewsService::class.java)
-                        .putExtra(Constants.EXTRA_CATEGORY, category)
-                intent.action = Constants.ACTION_PREPARE_AUDIO
+                        .putExtra(AppConstants.EXTRA_CATEGORY, category)
+                intent.action = AppConstants.ACTION_PREPARE_AUDIO
                 startService(intent)
             } else {
                 val installTTSIntent = Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
@@ -138,9 +137,9 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnSharedPreferenc
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNewsEvent(newsEvent: NewsEvent) {
         val action = newsEvent.action
-        if (Constants.ACTION_SHARE_NEWS == action)
+        if (AppConstants.ACTION_SHARE_NEWS == action)
             shareNews(newsEvent.news)
-        else if (Constants.ACTION_OPEN_URL == action)
+        else if (AppConstants.ACTION_OPEN_URL == action)
             loadUrl(newsEvent.news.url)
     }
 
@@ -160,7 +159,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnSharedPreferenc
 
     private fun loadUrl(url: String) {
         val intent = Intent(this, WebViewActivity::class.java)
-                .putExtra(Constants.EXTRA_NEWS_URL, url)
+                .putExtra(AppConstants.EXTRA_NEWS_URL, url)
         startActivity(intent)
     }
 
@@ -173,15 +172,17 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnSharedPreferenc
     }
 
     private fun setUpCardStackView() {
-        val swipeSetting = SwipeAnimationSetting.Builder()
-                .setDirection(Direction.Bottom)
-                .setInterpolator(AccelerateInterpolator())
-                .setDuration(Duration.Normal.duration)
-                .build()
-        cardStackLayoutManager.setSwipeAnimationSetting(swipeSetting)
-        cardStackLayoutManager.setCanScrollHorizontal(false)
-        cardStackLayoutManager.setDirections(Direction.VERTICAL)
-        cardStackLayoutManager.setStackFrom(StackFrom.Bottom)
+        cardStackLayoutManager.apply {
+            val swipeSetting = SwipeAnimationSetting.Builder()
+                    .setDirection(Direction.Bottom)
+                    .setInterpolator(AccelerateInterpolator())
+                    .setDuration(Duration.Normal.duration)
+                    .build()
+            setSwipeAnimationSetting(swipeSetting)
+            setCanScrollHorizontal(false)
+            setDirections(Direction.VERTICAL)
+            setStackFrom(StackFrom.Bottom)
+        }
 
         binding.cardStackView.layoutManager = cardStackLayoutManager
         binding.cardStackView.adapter = newsAdapter
@@ -199,9 +200,9 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnSharedPreferenc
         loadNews(category)
     }
 
-    fun loadNews(category : String) { newsViewModel.setCategory(category) }
+    private fun loadNews(category : String) { newsViewModel.setCategory(category) }
 
-    fun loadCategories() {
+    private fun loadCategories() {
         categories = getCategories()
         category = categories[0]
         loadNews(category)
@@ -219,8 +220,12 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnSharedPreferenc
     private fun scrollToCurrentNews(title: String) {
         val newsList = newsAdapter.getNewsList()
         newsList?.apply {
-            val optionalInt = IntRange(0, size).first { pos: Int -> this[pos].title == title }
-            cardStackLayoutManager.scrollToPosition(optionalInt)
+            try {
+                val optionalInt = IntRange(0, size - 1).first { pos: Int -> this[pos].title == title }
+                cardStackLayoutManager.scrollToPosition(optionalInt)
+            } catch (e :NoSuchElementException) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -232,8 +237,7 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnSharedPreferenc
                         mediaBrowserCompat.sessionToken)
                 mediaControllerCompat.registerCallback(mediaControllerCallback)
                 MediaControllerCompat.setMediaController(this@MainActivity, mediaControllerCompat)
-                val metadata: MediaMetadataCompat = mediaControllerCompat.metadata
-                mediaControllerCallback.onMetadataChanged(metadata)
+                mediaControllerCompat.metadata?.apply { mediaControllerCallback.onMetadataChanged(this) }
             } catch (e: RemoteException) {
                 e.printStackTrace()
             }
@@ -241,11 +245,12 @@ class MainActivity : AppCompatActivity(), OnItemClickListener, OnSharedPreferenc
     }
 
     inner class MediaControllerCallback : MediaControllerCompat.Callback() {
-        override fun onMetadataChanged(metadata: MediaMetadataCompat) {
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
-            val title = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
-            if (syncWithUI)
-                scrollToCurrentNews(title)
+            metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)?.apply {
+                if (syncWithUI)
+                    scrollToCurrentNews(this)
+            }
         }
     }
 }

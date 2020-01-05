@@ -7,7 +7,7 @@ import android.graphics.drawable.GradientDrawable
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
-import com.andruid.magic.newsdaily.data.Constants
+import com.andruid.magic.newsdaily.data.AppConstants
 import com.andruid.magic.newsdaily.databinding.LayoutNewsBinding
 import com.andruid.magic.newsdaily.eventbus.NewsEvent
 import com.andruid.magic.newsloader.model.News
@@ -56,10 +56,10 @@ class NewsViewHolder(val binding : LayoutNewsBinding) : RecyclerView.ViewHolder(
             executePendingBindings()
 
             shareBtn.setOnClickListener {
-                EventBus.getDefault().post(NewsEvent(news, Constants.ACTION_SHARE_NEWS))
+                EventBus.getDefault().post(NewsEvent(news, AppConstants.ACTION_SHARE_NEWS))
             }
             goToUrlTV.setOnClickListener {
-                EventBus.getDefault().post(NewsEvent(news, Constants.ACTION_OPEN_URL))
+                EventBus.getDefault().post(NewsEvent(news, AppConstants.ACTION_OPEN_URL))
             }
         }
     }

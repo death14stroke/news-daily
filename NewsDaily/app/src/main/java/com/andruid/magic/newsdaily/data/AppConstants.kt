@@ -1,6 +1,6 @@
 package com.andruid.magic.newsdaily.data
 
-class Constants {
+class AppConstants {
     companion object {
         const val ACTION_SHARE_NEWS = "action_share_news"
         const val ACTION_OPEN_URL = "action_open_url"
