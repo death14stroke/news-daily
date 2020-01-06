@@ -13,12 +13,10 @@ class IntroActivity : AppIntro() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addPage("Categories", "Get news from 7 different categories - General, Business, " +
-                "Entertainment, Health, Science, Sports and Technology", R.mipmap.ic_launcher,
+        addPage(getString(R.string.categories), getString(R.string.categories_desc), R.mipmap.ic_launcher,
                 R.color.colorSplash, R.color.colorPrimaryDark, R.color.colorPrimary)
-        addPage("Audio news", "Want to keep updated but no time to read? Listen to latest" +
-                " news while working", R.drawable.ic_speak, R.color.colorBg2, R.color.colorDesc2,
-                R.color.colorTitle2)
+        addPage(getString(R.string.audio_news), getString(R.string.audio_news_desc),
+                R.drawable.ic_speak, R.color.colorBg2, R.color.colorDesc2, R.color.colorTitle2)
         showSkipButton(true)
         isProgressButtonEnabled = true
         setVibrate(true)
