@@ -1,0 +1,71 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="titleTextColor">@android:color/white</item>
+    </style>
+    <style name="AppTheme.FullScreen" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+    <style name="CardViewTheme" parent="CardView.Light">
+        <item name="cardCornerRadius">@dimen/cardCornerRadius</item>
+        <item name="cardElevation">@dimen/cardElevation</item>
+    </style>
+
+    <style name="InfoTextTheme">
+        <item name="android:textColor">@color/colorPrimaryLight</item>
+        <item name="android:textSize">@dimen/infoTextSize</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:padding">@dimen/textPadding</item>
+    </style>
+
+    <style name="TitleTextTheme">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/titleTextSize</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:padding">@dimen/textPadding</item>
+        <item name="android:layout_marginTop">@dimen/topMargin</item>
+    </style>
+
+    <style name="DescTextTheme">
+        <item name="android:textSize">@dimen/descTextSize</item>
+        <item name="android:padding">@dimen/textPadding</item>
+        <item name="android:layout_marginTop">@dimen/topMargin</item>
+        <item name="android:textColor">@color/colorPrimaryText</item>
+    </style>
+
+    <style name="URLTextTheme">
+        <item name="android:textColor">@color/colorTextIcons</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:padding">@dimen/textPadding</item>
+    </style>
+    <style name="MaterialSearchViewStyle">
+        <item name="searchBackground">@color/colorPrimary</item>
+        <item name="searchVoiceIcon">@drawable/ic_action_voice_search</item>
+        <item name="searchCloseIcon">@drawable/ic_action_navigation_close_inverted</item>
+        <item name="searchBackIcon">@drawable/ic_action_navigation_arrow_back_inverted</item>
+        <item name="searchSuggestionIcon">@drawable/ic_suggestion</item>
+        <item name="searchSuggestionBackground">@android:color/white</item>
+        <item name="android:textColor">@color/colorPrimaryLight</item>
+        <item name="android:textColorHint">@color/colorSecondaryText</item>
+        <item name="android:hint">@string/search</item>
+    </style>
+    <style name="AppPreference">
+        <item name="android:layout" tools:ignore="PrivateResource">
+            @layout/preference_material
+        </item>
+    </style>
+    <style name="AppPreference.DialogPreference">
+        <item name="negativeButtonText">@android:string/cancel</item>
+    </style>
+</resources>

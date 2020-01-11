@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_home"
+    app:startDestination="@+id/nav_general">
+
+    <fragment
+        android:id="@+id/nav_general"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:label="@string/general"
+        tools:layout="@layout/fragment_news" />
+
+    <fragment
+        android:id="@+id/nav_business"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:label="@string/business"
+        tools:layout="@layout/fragment_news" />
+
+    <fragment
+        android:id="@+id/nav_entertainment"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:label="@string/entertainment"
+        tools:layout="@layout/fragment_news" />
+
+    <fragment
+        android:id="@+id/nav_health"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:label="@string/health"
+        tools:layout="@layout/fragment_news" />
+
+    <fragment
+        android:id="@+id/nav_science"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:label="@string/science"
+        tools:layout="@layout/fragment_news" />
+
+    <fragment
+        android:id="@+id/nav_sports"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:label="@string/sports"
+        tools:layout="@layout/fragment_news" />
+
+    <fragment
+        android:id="@+id/nav_tech"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:label="@string/technology"
+        tools:layout="@layout/fragment_news" />
+</navigation>
