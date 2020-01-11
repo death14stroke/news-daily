@@ -2,6 +2,7 @@ package com.andruid.magic.newsdaily.ui.activity
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.findNavController
@@ -11,9 +12,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.databinding.ActivityHomeBinding
+import com.andruid.magic.newsdaily.ui.util.NavArgsUtil.buildNavArgs
+import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityHomeBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
 
@@ -21,13 +24,17 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_home)
         binding.apply {
-            setSupportActionBar(appBar.toolbar)
+            setSupportActionBar(toolbar)
 
-            appBar.fab.setOnClickListener { view ->
+            fab.setOnClickListener { view ->
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
             }
             val navController = findNavController(R.id.nav_host_fragment)
+            navController.setGraph(
+                R.navigation.navigation_home,
+                buildNavArgs(getString(R.string.general))
+            )
             // Passing each menu ID as a set of Ids because each
             // menu should be considered as top level destinations.
             appBarConfiguration = AppBarConfiguration(
@@ -38,6 +45,7 @@ class HomeActivity : AppCompatActivity() {
             )
             setupActionBarWithNavController(navController, appBarConfiguration)
             navView.setupWithNavController(navController)
+            navView.setNavigationItemSelectedListener(this@HomeActivity)
         }
     }
 
@@ -50,5 +58,27 @@ class HomeActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment)
+        navController.navigate(
+            item.itemId, buildNavArgs(
+                getString(
+                    when (item.itemId) {
+                        R.id.nav_general -> R.string.general
+                        R.id.nav_business -> R.string.business
+                        R.id.nav_entertainment -> R.string.entertainment
+                        R.id.nav_health -> R.string.health
+                        R.id.nav_science -> R.string.science
+                        R.id.nav_sports -> R.string.sports
+                        R.id.nav_tech -> R.string.technology
+                        else -> R.string.general
+                    }
+                )
+            )
+        )
+        binding.drawerLayout.closeDrawers()
+        return true
     }
 }

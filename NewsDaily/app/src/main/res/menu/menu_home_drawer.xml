@@ -6,30 +6,37 @@
     <group android:checkableBehavior="single">
         <item android:id="@+id/nav_general"
             android:icon="@drawable/ic_general"
+            android:checked="false"
             android:title="@string/general" />
 
         <item android:id="@+id/nav_business"
             android:icon="@drawable/ic_business"
+            android:checked="false"
             android:title="@string/business"/>
 
         <item android:id="@+id/nav_entertainment"
             android:icon="@drawable/ic_entertainment"
+            android:checked="false"
             android:title="@string/entertainment"/>
 
         <item android:id="@+id/nav_health"
             android:icon="@drawable/ic_health"
+            android:checked="false"
             android:title="@string/health"/>
 
         <item android:id="@+id/nav_science"
             android:icon="@drawable/ic_science"
+            android:checked="false"
             android:title="@string/science"/>
 
         <item android:id="@+id/nav_sports"
             android:icon="@drawable/ic_sports"
+            android:checked="false"
             android:title="@string/sports"/>
 
         <item android:id="@+id/nav_tech"
             android:icon="@drawable/ic_tech"
+            android:checked="false"
             android:title="@string/technology"/>
     </group>
 </menu>
