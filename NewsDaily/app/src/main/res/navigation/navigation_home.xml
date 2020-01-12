@@ -12,8 +12,8 @@
         tools:layout="@layout/fragment_news">
         <argument
             android:name="category"
-            app:argType="string"
-            android:defaultValue="general" />
+            android:defaultValue="general"
+            app:argType="string" />
     </fragment>
 
     <fragment
@@ -81,4 +81,19 @@
             android:defaultValue="technology"
             app:argType="string" />
     </fragment>
+
+    <fragment
+        android:id="@+id/nav_webview"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.WebViewFragment"
+        android:label="{newsUrl}" >
+        <argument
+            android:name="newsUrl"
+            app:argType="string"
+            android:defaultValue="www.google.com" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_global_nav_webview"
+        app:destination="@id/nav_webview"
+        app:launchSingleTop="true" />
 </navigation>

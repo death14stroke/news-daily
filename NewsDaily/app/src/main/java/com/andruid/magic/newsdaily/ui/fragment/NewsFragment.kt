@@ -10,6 +10,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.data.Constants
 import com.andruid.magic.newsdaily.databinding.FragmentNewsBinding
@@ -27,15 +28,6 @@ class NewsFragment : Fragment() {
     private lateinit var binding: FragmentNewsBinding
     private lateinit var viewModel: NewsViewModel
 
-    private val cardStackLayoutManager by lazy { CardStackLayoutManager(context,
-        object : CardStackListener {
-            override fun onCardDisappeared(view: View?, position: Int) {}
-            override fun onCardDragging(direction: Direction?, ratio: Float) {}
-            override fun onCardSwiped(direction: Direction?) {}
-            override fun onCardCanceled() {}
-            override fun onCardAppeared(view: View?, position: Int) {}
-            override fun onCardRewound() {}
-        }) }
     private val newsAdapter = NewsAdapter()
 
     private var safeArgs: NewsFragmentArgs? = null
@@ -57,11 +49,17 @@ class NewsFragment : Fragment() {
         return binding.root
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.unbind()
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         safeArgs?.let {
             viewModel = ViewModelProvider(this, BaseViewModelFactory {
-                NewsViewModel(it.category) }).get(NewsViewModel::class.java)
+                NewsViewModel(it.category)
+            }).get(NewsViewModel::class.java)
             viewModel.getNews().observe(this, Observer {
                 newsAdapter.submitList(it)
             })
@@ -80,16 +78,15 @@ class NewsFragment : Fragment() {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNewsEvent(newsEvent: NewsEvent) {
-        when(newsEvent.action) {
+        when (newsEvent.action) {
             Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.news)
             Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news.url)
         }
     }
 
     private fun loadUrl(url: String) {
-        /*val intent = Intent(this, WebViewActivity::class.java)
-            .putExtra(Constants.EXTRA_NEWS_URL, url)
-        startActivity(intent)*/
+        val directions = NewsFragmentDirections.actionGlobalNavWebview(url)
+        findNavController().navigate(directions)
     }
 
     private fun shareNews(news: News) {
@@ -101,6 +98,15 @@ class NewsFragment : Fragment() {
     }
 
     private fun setUpCardStackView() {
+        val cardStackLayoutManager = CardStackLayoutManager(context,
+            object : CardStackListener {
+                override fun onCardDisappeared(view: View?, position: Int) {}
+                override fun onCardDragging(direction: Direction?, ratio: Float) {}
+                override fun onCardSwiped(direction: Direction?) {}
+                override fun onCardCanceled() {}
+                override fun onCardAppeared(view: View?, position: Int) {}
+                override fun onCardRewound() {}
+            })
         cardStackLayoutManager.apply {
             val swipeSetting = SwipeAnimationSetting.Builder()
                 .setDirection(Direction.Bottom)

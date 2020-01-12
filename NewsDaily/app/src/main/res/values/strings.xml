@@ -22,4 +22,9 @@
 
     <string name="default_country">in</string>
     <string name="default_category">general</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="copy_url">Copy URL</string>
 </resources>

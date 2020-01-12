@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -43,6 +44,10 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     R.id.nav_health, R.id.nav_science, R.id.nav_sports, R.id.nav_tech
                 ), drawerLayout
             )
+            navController.addOnDestinationChangedListener { _, destination, _ ->
+                if(destination.id == R.id.nav_webview)
+                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            }
             setupActionBarWithNavController(navController, appBarConfiguration)
             navView.setupWithNavController(navController)
             navView.setNavigationItemSelectedListener(this@HomeActivity)
