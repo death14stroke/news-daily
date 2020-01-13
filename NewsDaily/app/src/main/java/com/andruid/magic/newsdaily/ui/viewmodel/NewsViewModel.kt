@@ -5,7 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
-import com.andruid.magic.newsdaily.paging.NewsDataSourceFactory
+import com.andruid.magic.newsdaily.paging.BaseDataSourceFactory
+import com.andruid.magic.newsdaily.paging.NewsDataSource
 import com.andruid.magic.newsloader.data.Constants
 import com.andruid.magic.newsloader.model.News
 
@@ -17,8 +18,8 @@ class NewsViewModel(category: String) : ViewModel() {
             .setPageSize(Constants.PAGE_SIZE)
             .setEnablePlaceholders(false)
             .build()
-        newsLiveData = LivePagedListBuilder(NewsDataSourceFactory(viewModelScope,
-                "in", category), config)
+        newsLiveData = LivePagedListBuilder(BaseDataSourceFactory {
+            NewsDataSource(viewModelScope, "in", category) }, config)
             .build()
     }
 

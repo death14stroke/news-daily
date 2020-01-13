@@ -2,6 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
@@ -19,12 +20,22 @@
                 android:layout_height="wrap_content"
                 android:theme="@style/AppTheme.AppBarOverlay">
 
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/toolbar"
+                <FrameLayout
+                    android:id="@+id/toolBar_container"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:background="?attr/colorPrimary"
-                    app:popupTheme="@style/AppTheme.PopupOverlay" />
+                    android:layout_height="?attr/actionBarSize">
+
+                    <androidx.appcompat.widget.Toolbar
+                        android:id="@+id/toolBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="?attr/actionBarSize" />
+
+                    <com.miguelcatalan.materialsearchview.MaterialSearchView
+                        android:id="@+id/searchView"
+                        style="@style/MaterialSearchViewStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </FrameLayout>
 
             </com.google.android.material.appbar.AppBarLayout>
 
@@ -36,7 +47,6 @@
                 <fragment
                     android:id="@+id/nav_host_fragment"
                     android:name="androidx.navigation.fragment.NavHostFragment"
-                    class="androidx.navigation.fragment.NavHostFragment"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:defaultNavHost="true"
@@ -45,14 +55,6 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:navGraph="@navigation/navigation_home" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="@dimen/fab_margin"
-                app:srcCompat="@android:drawable/ic_dialog_email" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

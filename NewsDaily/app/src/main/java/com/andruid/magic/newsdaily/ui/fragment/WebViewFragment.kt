@@ -1,6 +1,5 @@
 package com.andruid.magic.newsdaily.ui.fragment
 
-
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -13,10 +12,10 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.activity.addCallback
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.databinding.FragmentWebViewBinding
 import com.andruid.magic.newsdaily.ui.util.MyWebChromeClient
@@ -31,16 +30,11 @@ class WebViewFragment : Fragment() {
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_web_view, container,
-            false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_web_view, container, false)
+
         setWebView()
         loadNewsUrl()
-
-        requireActivity().onBackPressedDispatcher.addCallback(this) {
-            findNavController().navigateUp()
-        }
         return binding.root
     }
 
@@ -64,7 +58,8 @@ class WebViewFragment : Fragment() {
                 Toast.makeText(context, "Copied url", Toast.LENGTH_SHORT).show()
             }
         }
-        return true
+        return NavigationUI.onNavDestinationSelected(item, findNavController()) ||
+                super.onOptionsItemSelected(item)
     }
 
     private fun loadNewsUrl() {
@@ -81,10 +76,7 @@ class WebViewFragment : Fragment() {
         binding.webView.apply {
             webChromeClient = MyWebChromeClient(binding.progressBar)
             webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(
-                    view: WebView,
-                    request: WebResourceRequest
-                ): Boolean {
+                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     view.loadUrl(request.url.toString())
                     return true
                 }

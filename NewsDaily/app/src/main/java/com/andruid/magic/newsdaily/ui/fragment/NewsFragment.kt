@@ -85,7 +85,7 @@ class NewsFragment : Fragment() {
     }
 
     private fun loadUrl(url: String) {
-        val directions = NewsFragmentDirections.actionGlobalNavWebview(url)
+        val directions = NewsFragmentDirections.actionNewsToWebview(url)
         findNavController().navigate(directions)
     }
 
@@ -98,15 +98,14 @@ class NewsFragment : Fragment() {
     }
 
     private fun setUpCardStackView() {
-        val cardStackLayoutManager = CardStackLayoutManager(context,
-            object : CardStackListener {
-                override fun onCardDisappeared(view: View?, position: Int) {}
-                override fun onCardDragging(direction: Direction?, ratio: Float) {}
-                override fun onCardSwiped(direction: Direction?) {}
-                override fun onCardCanceled() {}
-                override fun onCardAppeared(view: View?, position: Int) {}
-                override fun onCardRewound() {}
-            })
+        val cardStackLayoutManager = CardStackLayoutManager(context, object : CardStackListener {
+            override fun onCardDisappeared(view: View?, position: Int) {}
+            override fun onCardDragging(direction: Direction?, ratio: Float) {}
+            override fun onCardSwiped(direction: Direction?) {}
+            override fun onCardCanceled() {}
+            override fun onCardAppeared(view: View?, position: Int) {}
+            override fun onCardRewound() {}
+        })
         cardStackLayoutManager.apply {
             val swipeSetting = SwipeAnimationSetting.Builder()
                 .setDirection(Direction.Bottom)

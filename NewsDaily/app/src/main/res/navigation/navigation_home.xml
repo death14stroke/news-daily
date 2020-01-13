@@ -85,15 +85,38 @@
     <fragment
         android:id="@+id/nav_webview"
         android:name="com.andruid.magic.newsdaily.ui.fragment.WebViewFragment"
-        android:label="{newsUrl}" >
+        android:label="{newsUrl}">
         <argument
             android:name="newsUrl"
-            app:argType="string"
-            android:defaultValue="www.google.com" />
+            android:defaultValue="www.google.com"
+            app:argType="string" />
     </fragment>
 
     <action
-        android:id="@+id/action_global_nav_webview"
+        android:id="@+id/action_news_to_webview"
         app:destination="@id/nav_webview"
-        app:launchSingleTop="true" />
+        app:enterAnim="@anim/slide_in_right"
+        app:exitAnim="@anim/slide_out_left"
+        app:popEnterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right" />
+
+    <fragment
+        android:id="@+id/nav_search"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search" />
+
+    <fragment
+        android:id="@+id/action_settings"
+        android:name="com.andruid.magic.newsdaily.ui.fragment.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" />
+
+    <action
+        android:id="@+id/action_news_to_search"
+        app:destination="@id/nav_search"
+        app:enterAnim="@anim/slide_in_right"
+        app:exitAnim="@anim/slide_out_left"
+        app:popEnterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right" />
 </navigation>
