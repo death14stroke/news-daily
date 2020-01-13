@@ -9,6 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.databinding.FragmentSearchBinding
 import com.andruid.magic.newsdaily.eventbus.SearchEvent
@@ -25,8 +26,43 @@ class SearchFragment : Fragment() {
     private lateinit var viewModel: ArticlesViewModel
 
     private val newsAdapter = NewsAdapter()
+    private val adapterObserver = object : RecyclerView.AdapterDataObserver() {
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            super.onItemRangeInserted(positionStart, itemCount)
+            updateEmpty()
+        }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?)
+        override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+            super.onItemRangeChanged(positionStart, itemCount)
+            updateEmpty()
+        }
+
+        override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+            super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+            updateEmpty()
+        }
+
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            super.onItemRangeRemoved(positionStart, itemCount)
+            updateEmpty()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        newsAdapter.registerAdapterDataObserver(adapterObserver)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        newsAdapter.unregisterAdapterDataObserver(adapterObserver)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    )
             : View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_search, container, false)
         setUpCardStackView()
@@ -78,13 +114,21 @@ class SearchFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this, BaseViewModelFactory { ArticlesViewModel() })
             .get(ArticlesViewModel::class.java)
-        viewModel.pagedListLiveData.observe(this, Observer {
-            newsAdapter.submitList(it)
+        viewModel.pagedListLiveData.observe(this, Observer { news ->
+            newsAdapter.submitList(news) { updateEmpty() }
         })
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onSearchEvent(searchEvent: SearchEvent) {
-        viewModel.setQuery(searchEvent.query)
+    fun onSearchEvent(searchEvent: SearchEvent) = viewModel.setQuery(searchEvent.query)
+
+    private fun updateEmpty() {
+        if (newsAdapter.itemCount == 0) {
+            binding.emptyTV.visibility = View.VISIBLE
+            binding.cardStackView.visibility = View.GONE
+        } else {
+            binding.emptyTV.visibility = View.GONE
+            binding.cardStackView.visibility = View.VISIBLE
+        }
     }
 }

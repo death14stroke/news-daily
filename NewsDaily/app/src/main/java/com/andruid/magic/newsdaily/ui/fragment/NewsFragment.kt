@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.data.Constants
 import com.andruid.magic.newsdaily.databinding.FragmentNewsBinding
@@ -29,23 +30,51 @@ class NewsFragment : Fragment() {
     private lateinit var viewModel: NewsViewModel
 
     private val newsAdapter = NewsAdapter()
+    private val adapterObserver = object : RecyclerView.AdapterDataObserver() {
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            super.onItemRangeInserted(positionStart, itemCount)
+            if (newsAdapter.itemCount != 0)
+                hideProgress()
+        }
+
+        override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+            super.onItemRangeChanged(positionStart, itemCount)
+            if (newsAdapter.itemCount != 0)
+                hideProgress()
+        }
+
+        override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+            super.onItemRangeMoved(fromPosition, toPosition, itemCount)
+            if (newsAdapter.itemCount != 0)
+                hideProgress()
+        }
+
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            super.onItemRangeRemoved(positionStart, itemCount)
+            if (newsAdapter.itemCount != 0)
+                hideProgress()
+        }
+    }
 
     private var safeArgs: NewsFragmentArgs? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let { safeArgs = NewsFragmentArgs.fromBundle(it) }
+        newsAdapter.registerAdapterDataObserver(adapterObserver)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        newsAdapter.unregisterAdapterDataObserver(adapterObserver)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_news, container,
-            false
-        )
-        setUpCardStackView()
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_news, container, false)
+        setupCardStackView()
         return binding.root
     }
 
@@ -58,10 +87,13 @@ class NewsFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         safeArgs?.let {
             viewModel = ViewModelProvider(this, BaseViewModelFactory {
-                NewsViewModel(it.category)
+                NewsViewModel(it.category, requireActivity().application)
             }).get(NewsViewModel::class.java)
-            viewModel.getNews().observe(this, Observer {
-                newsAdapter.submitList(it)
+            viewModel.getNews().observe(this, Observer { news ->
+                newsAdapter.submitList(news) {
+                    if (!news.isEmpty())
+                        hideProgress()
+                }
             })
         }
     }
@@ -89,6 +121,11 @@ class NewsFragment : Fragment() {
         findNavController().navigate(directions)
     }
 
+    private fun hideProgress() {
+        binding.progressBar.visibility = View.GONE
+        binding.cardStackView.visibility = View.VISIBLE
+    }
+
     private fun shareNews(news: News) {
         val intent = Intent(Intent.ACTION_SEND)
             .setType("text/plain")
@@ -97,7 +134,7 @@ class NewsFragment : Fragment() {
         startActivity(Intent.createChooser(intent, "Share news via..."))
     }
 
-    private fun setUpCardStackView() {
+    private fun setupCardStackView() {
         val cardStackLayoutManager = CardStackLayoutManager(context, object : CardStackListener {
             override fun onCardDisappeared(view: View?, position: Int) {}
             override fun onCardDragging(direction: Direction?, ratio: Float) {}

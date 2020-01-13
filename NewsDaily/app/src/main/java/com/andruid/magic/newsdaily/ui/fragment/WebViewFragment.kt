@@ -18,7 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.databinding.FragmentWebViewBinding
-import com.andruid.magic.newsdaily.ui.util.MyWebChromeClient
+import com.andruid.magic.newsdaily.custom.MyWebChromeClient
 
 class WebViewFragment : Fragment() {
     private lateinit var binding: FragmentWebViewBinding
@@ -32,7 +32,6 @@ class WebViewFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_web_view, container, false)
-
         setWebView()
         loadNewsUrl()
         return binding.root
@@ -62,9 +61,7 @@ class WebViewFragment : Fragment() {
                 super.onOptionsItemSelected(item)
     }
 
-    private fun loadNewsUrl() {
-        binding.webView.loadUrl(safeArgs.newsUrl)
-    }
+    private fun loadNewsUrl() = binding.webView.loadUrl(safeArgs.newsUrl)
 
     override fun onDestroy() {
         super.onDestroy()
@@ -74,7 +71,8 @@ class WebViewFragment : Fragment() {
     @SuppressLint("SetJavaScriptEnabled")
     private fun setWebView() {
         binding.webView.apply {
-            webChromeClient = MyWebChromeClient(binding.progressBar)
+            webChromeClient =
+                MyWebChromeClient(binding.progressBar)
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     view.loadUrl(request.url.toString())

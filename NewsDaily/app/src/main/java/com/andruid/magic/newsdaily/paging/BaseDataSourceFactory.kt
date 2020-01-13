@@ -5,7 +5,5 @@ import com.andruid.magic.newsloader.model.News
 
 class BaseDataSourceFactory<T : DataSource<Int, News>>(val creator: () -> T) :
     DataSource.Factory<Int, News>() {
-    override fun create(): DataSource<Int, News> {
-        return creator()
-    }
+    override fun create(): DataSource<Int, News> = creator()
 }

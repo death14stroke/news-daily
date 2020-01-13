@@ -3,6 +3,8 @@ package com.andruid.magic.newsdaily.ui.util
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
+import com.squareup.picasso.Picasso
+import de.hdodenhof.circleimageview.CircleImageView
 import java.text.DateFormat
 
 object DataBindingAdapter {
@@ -20,4 +22,11 @@ object DataBindingAdapter {
         val str = "<u>$url</u>"
         textView.text = HtmlCompat.fromHtml(str, HtmlCompat.FROM_HTML_MODE_LEGACY)
     }
+
+    @JvmStatic
+    @BindingAdapter("imageRes")
+    fun loadFlagRes(imageView: CircleImageView, res: Int) =
+        Picasso.get()
+            .load(res)
+            .into(imageView)
 }

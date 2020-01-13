@@ -8,24 +8,20 @@ import com.andruid.magic.newsloader.model.News
 
 class NewsAdapter : PagedListAdapter<News, NewsViewHolder>(NewsDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsViewHolder {
-        return NewsViewHolder.from(parent)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NewsViewHolder.from(parent)
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
         val news = getItem(position)
-        news?.apply { holder.bind(this) }
+        news?.let { holder.bind(it) }
     }
 
     fun getNewsList(): List<News> = currentList?.snapshot()?.toList() ?: emptyList()
 
     class NewsDiffCallback : DiffUtil.ItemCallback<News>() {
-        override fun areItemsTheSame(oldItem: News, newItem: News): Boolean {
-            return oldItem.title == newItem.title
-        }
+        override fun areItemsTheSame(oldItem: News, newItem: News) =
+            oldItem.title == newItem.title
 
-        override fun areContentsTheSame(oldItem: News, newItem: News): Boolean {
-            return oldItem == newItem
-        }
+        override fun areContentsTheSame(oldItem: News, newItem: News) =
+            oldItem == newItem
     }
 }

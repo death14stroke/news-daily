@@ -10,6 +10,7 @@ import com.andruid.magic.newsloader.model.News
 
 class ArticlesViewModel : ViewModel() {
     private val queryLiveData: MutableLiveData<String> = MutableLiveData()
+
     var pagedListLiveData : LiveData<PagedList<News>>
 
     init {
@@ -23,5 +24,5 @@ class ArticlesViewModel : ViewModel() {
         }
     }
 
-    fun setQuery(query : String) { queryLiveData.postValue(query) }
+    fun setQuery(query : String) = queryLiveData.postValue(query)
 }

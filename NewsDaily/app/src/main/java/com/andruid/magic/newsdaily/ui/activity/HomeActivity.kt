@@ -13,7 +13,7 @@ import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.databinding.ActivityHomeBinding
 import com.andruid.magic.newsdaily.eventbus.SearchEvent
 import com.andruid.magic.newsdaily.ui.fragment.NewsFragmentDirections
-import com.andruid.magic.newsdaily.ui.util.RxSearchObservable.fromView
+import com.andruid.magic.newsdaily.custom.RxSearchObservable.fromView
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -28,6 +28,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var disposable: Disposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.AppTheme_NoActionBar)
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_home)
 
@@ -65,7 +66,8 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 override fun onSearchViewClosed() {
-                    navController.navigateUp()
+                    if(navController.currentDestination!!.id == R.id.nav_search)
+                        navController.navigateUp()
                 }
             })
         }
@@ -78,16 +80,13 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
         if (binding.searchView.isSearchOpen)
             binding.searchView.closeSearch()
         else
             super.onBackPressed()
     }
 
-    private fun loadArticles(query: String) {
-        EventBus.getDefault().post(SearchEvent(query))
-    }
+    private fun loadArticles(query: String) = EventBus.getDefault().post(SearchEvent(query))
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         MenuInflater(this).inflate(R.menu.menu_news, menu)

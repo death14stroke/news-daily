@@ -1,4 +1,4 @@
-package com.andruid.magic.newsdaily.ui.util
+package com.andruid.magic.newsdaily.custom
 
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import io.reactivex.Observable

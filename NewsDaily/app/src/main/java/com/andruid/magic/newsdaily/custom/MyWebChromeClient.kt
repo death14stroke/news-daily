@@ -1,4 +1,4 @@
-package com.andruid.magic.newsdaily.ui.util
+package com.andruid.magic.newsdaily.custom
 
 import android.view.View
 import android.webkit.WebChromeClient
