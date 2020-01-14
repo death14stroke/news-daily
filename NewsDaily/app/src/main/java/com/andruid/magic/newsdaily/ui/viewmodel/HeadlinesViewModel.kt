@@ -15,7 +15,7 @@ import com.andruid.magic.newsloader.data.Constants
 import com.andruid.magic.newsloader.model.News
 import kotlinx.coroutines.cancel
 
-class NewsViewModel(category: String, application: Application) : AndroidViewModel(application) {
+class HeadlinesViewModel(category: String, application: Application) : AndroidViewModel(application) {
     val newsLiveData: LiveData<PagedList<News>>
     var pos = 0
 

@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -28,7 +29,7 @@ import com.andruid.magic.newsdaily.eventbus.NewsEvent
 import com.andruid.magic.newsdaily.service.AudioNewsService
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
 import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
-import com.andruid.magic.newsdaily.ui.viewmodel.NewsViewModel
+import com.andruid.magic.newsdaily.ui.viewmodel.HeadlinesViewModel
 import com.andruid.magic.newsloader.model.News
 import com.yuyakaido.android.cardstackview.*
 import org.greenrobot.eventbus.EventBus
@@ -41,11 +42,12 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     }
 
     private lateinit var binding: FragmentNewsBinding
-    private lateinit var viewModel: NewsViewModel
+    private lateinit var viewModel: HeadlinesViewModel
     private lateinit var mediaControllerCompat: MediaControllerCompat
 
     private val mediaControllerCallback = MediaControllerCallback()
-    private val newsAdapter = NewsAdapter()
+
+    private val newsAdapter by lazy { NewsAdapter(requireActivity() as AppCompatActivity) }
     private val mediaBrowserCompat by lazy {
         MediaBrowserCompat(
             context, ComponentName(
@@ -159,14 +161,14 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         super.onActivityCreated(savedInstanceState)
         safeArgs?.let {
             viewModel = ViewModelProvider(this, BaseViewModelFactory {
-                NewsViewModel(it.category, requireActivity().application)
-            }).get(NewsViewModel::class.java)
+                HeadlinesViewModel(it.category, requireActivity().application)
+            }).get(it.category, HeadlinesViewModel::class.java)
             viewModel.newsLiveData.observe(this, Observer { news ->
                 newsAdapter.submitList(news) {
                     if (!news.isEmpty())
                         hideProgress()
                     Log.d("newslog", "scrolling to ${viewModel.pos} for ${it.category}")
-                        binding.cardStackView.scrollToPosition(viewModel.pos)
+                    binding.cardStackView.scrollToPosition(viewModel.pos)
                 }
             })
         }
@@ -180,7 +182,7 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     override fun onPause() {
         super.onPause()
         EventBus.getDefault().unregister(this)
-        viewModel.pos = binding.cardStackView.top
+        viewModel.pos = (binding.cardStackView.layoutManager as CardStackLayoutManager).topPosition
         Log.d("newslog", "saving to viewModel ${viewModel.pos} for ${safeArgs?.category}")
     }
 
@@ -212,13 +214,13 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
 
     private fun setupCardStackView() {
         val cardStackLayoutManager = CardStackLayoutManager(context, object : CardStackListener {
-                override fun onCardDisappeared(view: View?, position: Int) {}
-                override fun onCardDragging(direction: Direction?, ratio: Float) {}
-                override fun onCardSwiped(direction: Direction?) {}
-                override fun onCardCanceled() {}
-                override fun onCardAppeared(view: View?, position: Int) {}
-                override fun onCardRewound() {}
-            })
+            override fun onCardDisappeared(view: View?, position: Int) {}
+            override fun onCardDragging(direction: Direction?, ratio: Float) {}
+            override fun onCardSwiped(direction: Direction?) {}
+            override fun onCardCanceled() {}
+            override fun onCardAppeared(view: View?, position: Int) {}
+            override fun onCardRewound() {}
+        })
         cardStackLayoutManager.apply {
             val swipeSetting = SwipeAnimationSetting.Builder()
                 .setDirection(Direction.Bottom)

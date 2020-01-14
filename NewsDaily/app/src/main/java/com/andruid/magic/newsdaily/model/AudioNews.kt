@@ -15,7 +15,8 @@ data class AudioNews(
 fun AudioNews.getMediaDescription(): MediaDescriptionCompat {
     val extras = bundleOf(
         MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI to news.imageUrl,
-        MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI to news.imageUrl
+        MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI to news.imageUrl,
+        MediaMetadataCompat.METADATA_KEY_ALBUM to news.sourceName
     )
     return MediaDescriptionCompat.Builder()
         .setMediaId(uri)

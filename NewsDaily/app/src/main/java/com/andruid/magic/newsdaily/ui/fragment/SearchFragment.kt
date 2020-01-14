@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -32,7 +33,7 @@ class SearchFragment : Fragment() {
     private lateinit var binding: FragmentSearchBinding
     private lateinit var viewModel: ArticlesViewModel
 
-    private val newsAdapter = NewsAdapter()
+    private val newsAdapter by lazy { NewsAdapter(requireActivity() as AppCompatActivity) }
     private val adapterObserver = object : RecyclerView.AdapterDataObserver() {
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
             super.onItemRangeInserted(positionStart, itemCount)
@@ -97,7 +98,7 @@ class SearchFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         EventBus.getDefault().unregister(this)
-        viewModel.pos = binding.cardStackView.top
+        viewModel.pos = (binding.cardStackView.layoutManager as CardStackLayoutManager).topPosition
         Log.d("newslog", "saving to viewModel ${viewModel.pos} for search")
     }
 

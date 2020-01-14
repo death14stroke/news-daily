@@ -1,5 +1,6 @@
 package com.andruid.magic.newsdaily.ui.viewholder
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -10,35 +11,31 @@ import androidx.databinding.DataBindingUtil
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
-import com.andruid.magic.newsdaily.data.Constants
 import com.andruid.magic.newsdaily.databinding.LayoutNewsBinding
-import com.andruid.magic.newsdaily.eventbus.NewsEvent
-import com.andruid.magic.newsloader.model.News
+import com.andruid.magic.newsdaily.ui.viewmodel.NewsItemViewModel
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import org.greenrobot.eventbus.EventBus
 
-class NewsViewHolder(private val binding: LayoutNewsBinding) : RecyclerView.ViewHolder(binding.root) {
+class NewsViewHolder(private val binding: LayoutNewsBinding) :
+    RecyclerView.ViewHolder(binding.root) {
     companion object {
         @JvmStatic
         fun from(parent: ViewGroup): NewsViewHolder {
             val inflater = LayoutInflater.from(parent.context)
-            val binding = DataBindingUtil.inflate<LayoutNewsBinding>(inflater,
-                R.layout.layout_news, parent, false)
+            val binding = DataBindingUtil.inflate<LayoutNewsBinding>(
+                inflater,
+                R.layout.layout_news, parent, false
+            )
             return NewsViewHolder(binding)
         }
     }
 
-    fun bind(news: News) {
+    @SuppressLint("ClickableViewAccessibility")
+    fun bind(viewModel: NewsItemViewModel) {
+        binding.viewModel = viewModel
+        binding.executePendingBindings()
+
         binding.apply {
-            this.news = news
-            executePendingBindings()
-
-            shareBtn.setOnClickListener {
-                EventBus.getDefault().post(NewsEvent(news, Constants.ACTION_SHARE_NEWS)) }
-            goToUrlTV.setOnClickListener {
-                EventBus.getDefault().post(NewsEvent(news, Constants.ACTION_OPEN_URL)) }
-
             val target = object : Target {
                 override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
                     imageView.setImageBitmap(bitmap)
@@ -56,7 +53,8 @@ class NewsViewHolder(private val binding: LayoutNewsBinding) : RecyclerView.View
                         }
                 }
 
-                override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) = e.printStackTrace()
+                override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) =
+                    e.printStackTrace()
 
                 override fun onPrepareLoad(placeHolderDrawable: Drawable) =
                     imageView.setImageDrawable(placeHolderDrawable)
@@ -64,7 +62,7 @@ class NewsViewHolder(private val binding: LayoutNewsBinding) : RecyclerView.View
             imageView.tag = target
 
             Picasso.get()
-                .load(news.imageUrl)
+                .load(viewModel.news.imageUrl)
                 .resize(300, 300)
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(target)

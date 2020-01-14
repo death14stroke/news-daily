@@ -34,7 +34,8 @@
         </service>
 
         <activity android:name=".ui.activity.SplashActivity"
-            android:theme="@style/AppTheme.Splash">
+            android:theme="@style/AppTheme.Splash"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -44,11 +45,13 @@
         <activity
             android:name=".ui.activity.IntroActivity"
             android:theme="@style/AppTheme.FullScreen"
+            android:screenOrientation="portrait"
             android:launchMode="singleTop"/>
 
         <activity
             android:name=".ui.activity.HomeActivity"
             android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
