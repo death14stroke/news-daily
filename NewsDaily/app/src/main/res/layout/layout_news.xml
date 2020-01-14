@@ -84,6 +84,8 @@
                     style="@style/URLTextTheme"
                     tools:text="www.google.com"
                     android:maxLines="3"
+                    android:lines="3"
+                    android:gravity="center_vertical"
                     android:ellipsize="end"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:readMore="@{news.url}"/>

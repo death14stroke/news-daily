@@ -10,6 +10,7 @@ import com.blongho.country_data.World
 class NewsApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+
         NewsRepository.init(this)
         World.init(this)
         TtsApi.init(this)

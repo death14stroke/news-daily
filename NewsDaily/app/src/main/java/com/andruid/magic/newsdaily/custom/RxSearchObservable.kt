@@ -8,6 +8,7 @@ object RxSearchObservable {
     @JvmStatic
     fun fromView(searchView: MaterialSearchView): Observable<String> {
         val subject = PublishSubject.create<String>()
+
         searchView.setOnQueryTextListener(object : MaterialSearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(s: String): Boolean {
                 subject.onComplete()

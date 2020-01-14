@@ -16,7 +16,7 @@ import org.greenrobot.eventbus.Subscribe
 import java.io.IOException
 
 class CountryPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
-    var country: String = ""
+    private var country: String = ""
 
     companion object {
         private val TAG = CountryPreferenceDialogFragment::class.java.simpleName

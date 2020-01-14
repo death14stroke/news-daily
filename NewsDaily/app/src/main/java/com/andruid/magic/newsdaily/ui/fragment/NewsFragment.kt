@@ -9,6 +9,7 @@ import android.speech.tts.TextToSpeech
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,17 +46,6 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
 
     private val mediaControllerCallback = MediaControllerCallback()
     private val newsAdapter = NewsAdapter()
-
-    private val cardStackLayoutManager by lazy {
-        CardStackLayoutManager(context, object : CardStackListener {
-            override fun onCardDisappeared(view: View?, position: Int) {}
-            override fun onCardDragging(direction: Direction?, ratio: Float) {}
-            override fun onCardSwiped(direction: Direction?) {}
-            override fun onCardCanceled() {}
-            override fun onCardAppeared(view: View?, position: Int) {}
-            override fun onCardRewound() {}
-        })
-    }
     private val mediaBrowserCompat by lazy {
         MediaBrowserCompat(
             context, ComponentName(
@@ -124,8 +114,8 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         newsList.apply {
             try {
                 val optionalInt =
-                    IntRange(0, size - 1).first { pos: Int -> this[pos].title == title }
-                cardStackLayoutManager.scrollToPosition(optionalInt)
+                    IntRange(0, size - 1).firstOrNull { pos: Int -> this[pos].title == title }
+                binding.cardStackView.scrollToPosition(optionalInt ?: 0)
             } catch (e: NoSuchElementException) {
                 e.printStackTrace()
             }
@@ -171,10 +161,12 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
             viewModel = ViewModelProvider(this, BaseViewModelFactory {
                 NewsViewModel(it.category, requireActivity().application)
             }).get(NewsViewModel::class.java)
-            viewModel.getNews().observe(this, Observer { news ->
+            viewModel.newsLiveData.observe(this, Observer { news ->
                 newsAdapter.submitList(news) {
                     if (!news.isEmpty())
                         hideProgress()
+                    Log.d("newslog", "scrolling to ${viewModel.pos} for ${it.category}")
+                        binding.cardStackView.scrollToPosition(viewModel.pos)
                 }
             })
         }
@@ -188,18 +180,20 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     override fun onPause() {
         super.onPause()
         EventBus.getDefault().unregister(this)
+        viewModel.pos = binding.cardStackView.top
+        Log.d("newslog", "saving to viewModel ${viewModel.pos} for ${safeArgs?.category}")
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNewsEvent(newsEvent: NewsEvent) {
         when (newsEvent.action) {
             Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.news)
-            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news.url)
+            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news)
         }
     }
 
-    private fun loadUrl(url: String) {
-        val directions = NewsFragmentDirections.actionNewsToWebview(url)
+    private fun loadUrl(news: News) {
+        val directions = NewsFragmentDirections.actionNewsToWebview(news.url)
         findNavController().navigate(directions)
     }
 
@@ -217,6 +211,14 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     }
 
     private fun setupCardStackView() {
+        val cardStackLayoutManager = CardStackLayoutManager(context, object : CardStackListener {
+                override fun onCardDisappeared(view: View?, position: Int) {}
+                override fun onCardDragging(direction: Direction?, ratio: Float) {}
+                override fun onCardSwiped(direction: Direction?) {}
+                override fun onCardCanceled() {}
+                override fun onCardAppeared(view: View?, position: Int) {}
+                override fun onCardRewound() {}
+            })
         cardStackLayoutManager.apply {
             val swipeSetting = SwipeAnimationSetting.Builder()
                 .setDirection(Direction.Bottom)

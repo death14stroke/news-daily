@@ -59,8 +59,8 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
         private const val MSG_SHOW_NOTI = 3
         private const val WAIT_QUEUE_TIMEOUT_MS = 5000
 
-        const val NEWS_FETCH_DISTANCE = 3
-        const val MEDIA_NOTI_ID = 1
+        private const val NEWS_FETCH_DISTANCE = 3
+        private const val MEDIA_NOTI_ID = 1
     }
 
     private val job = Job()

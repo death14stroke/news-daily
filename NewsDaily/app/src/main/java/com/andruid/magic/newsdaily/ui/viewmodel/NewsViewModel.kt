@@ -1,6 +1,7 @@
 package com.andruid.magic.newsdaily.ui.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
@@ -12,9 +13,11 @@ import com.andruid.magic.newsdaily.paging.BaseDataSourceFactory
 import com.andruid.magic.newsdaily.paging.NewsDataSource
 import com.andruid.magic.newsloader.data.Constants
 import com.andruid.magic.newsloader.model.News
+import kotlinx.coroutines.cancel
 
 class NewsViewModel(category: String, application: Application) : AndroidViewModel(application) {
-    private val newsLiveData: LiveData<PagedList<News>>
+    val newsLiveData: LiveData<PagedList<News>>
+    var pos = 0
 
     init {
         val config = PagedList.Config.Builder()
@@ -31,5 +34,9 @@ class NewsViewModel(category: String, application: Application) : AndroidViewMod
             .build()
     }
 
-    fun getNews() = newsLiveData
+    override fun onCleared() {
+        super.onCleared()
+        Log.d("newslog", "onCleared: viewmodel destroyed")
+        viewModelScope.cancel()
+    }
 }

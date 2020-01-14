@@ -7,22 +7,29 @@ import com.andruid.magic.newsdaily.paging.ArticlesDataSource
 import com.andruid.magic.newsdaily.paging.BaseDataSourceFactory
 import com.andruid.magic.newsloader.data.Constants
 import com.andruid.magic.newsloader.model.News
+import kotlinx.coroutines.cancel
 
 class ArticlesViewModel : ViewModel() {
     private val queryLiveData: MutableLiveData<String> = MutableLiveData()
 
-    var pagedListLiveData : LiveData<PagedList<News>>
+    val searchLiveData : LiveData<PagedList<News>>
+    var pos = 0
 
     init {
         val pagedListConfig = PagedList.Config.Builder()
             .setEnablePlaceholders(false)
             .setPageSize(Constants.PAGE_SIZE)
             .build()
-        pagedListLiveData = Transformations.switchMap(queryLiveData) { query: String? ->
+        searchLiveData = Transformations.switchMap(queryLiveData) { query: String? ->
             LivePagedListBuilder(BaseDataSourceFactory { ArticlesDataSource(viewModelScope,
                 "en",query ?: "") }, pagedListConfig).build()
         }
     }
 
     fun setQuery(query : String) = queryLiveData.postValue(query)
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.cancel()
+    }
 }

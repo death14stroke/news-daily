@@ -6,9 +6,7 @@ object Constants {
     const val ACTION_NOTI_CLICK = "com.andruid.magic.newsdaily.NOTI_CLICK"
     const val ACTION_PREPARE_AUDIO = "com.andruid.magic.newsdaily.PREPARE_AUDIO"
 
-    const val EXTRA_NEWS_URL = "news_url"
     const val EXTRA_CATEGORY = "category"
-    const val EXTRA_COUNTRY = "country"
 
     const val CHANNEL_NAME = "Read Headlines"
 }

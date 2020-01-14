@@ -17,8 +17,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.andruid.magic.newsdaily.R
-import com.andruid.magic.newsdaily.databinding.FragmentWebViewBinding
 import com.andruid.magic.newsdaily.custom.MyWebChromeClient
+import com.andruid.magic.newsdaily.databinding.FragmentWebViewBinding
 
 class WebViewFragment : Fragment() {
     private lateinit var binding: FragmentWebViewBinding
@@ -30,7 +30,11 @@ class WebViewFragment : Fragment() {
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_web_view, container, false)
         setWebView()
         loadNewsUrl()
@@ -40,6 +44,13 @@ class WebViewFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_web, menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        menu.findItem(R.id.action_intro)?.isVisible = false
+        menu.findItem(R.id.action_settings)?.isVisible = false
+        menu.findItem(R.id.action_search).isVisible = false
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -74,7 +85,10 @@ class WebViewFragment : Fragment() {
             webChromeClient =
                 MyWebChromeClient(binding.progressBar)
             webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView,
+                    request: WebResourceRequest
+                ): Boolean {
                     view.loadUrl(request.url.toString())
                     return true
                 }
@@ -84,6 +98,7 @@ class WebViewFragment : Fragment() {
                 builtInZoomControls = true
                 useWideViewPort = true
                 loadWithOverviewMode = true
+                allowUniversalAccessFromFileURLs = true
             }
         }
     }

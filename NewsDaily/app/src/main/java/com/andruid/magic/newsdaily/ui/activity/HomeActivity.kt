@@ -28,7 +28,6 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var disposable: Disposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.AppTheme_NoActionBar)
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_home)
 
@@ -51,7 +50,12 @@ class HomeActivity : AppCompatActivity() {
             )
             navController.addOnDestinationChangedListener { _, destination, _ ->
                 when (destination.id) {
-                    R.id.nav_webview, R.id.nav_search, R.id.action_settings ->
+                    R.id.nav_webview -> {
+                        if(binding.searchView.isSearchOpen)
+                            binding.searchView.closeSearch()
+                        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+                    }
+                    R.id.nav_search, R.id.action_settings, R.id.action_intro ->
                         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                     else -> drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 }

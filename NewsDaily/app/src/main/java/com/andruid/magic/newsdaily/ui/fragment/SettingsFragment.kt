@@ -21,6 +21,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         super.onPrepareOptionsMenu(menu)
         menu.findItem(R.id.action_search).isVisible = false
         menu.findItem(R.id.action_settings).isVisible = false
+        menu.findItem(R.id.action_intro).isVisible = false
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

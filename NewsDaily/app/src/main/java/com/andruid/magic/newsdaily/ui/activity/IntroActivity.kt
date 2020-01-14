@@ -1,14 +1,16 @@
 package com.andruid.magic.newsdaily.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.andruid.magic.newsdaily.R
-import com.github.paolorotolo.appintro.AppIntro2
-import com.github.paolorotolo.appintro.AppIntro2Fragment
+import com.andruid.magic.newsdaily.util.PrefUtil
+import com.github.paolorotolo.appintro.AppIntro
+import com.github.paolorotolo.appintro.AppIntroFragment
 import com.github.paolorotolo.appintro.model.SliderPagerBuilder
 
-class IntroActivity : AppIntro2() {
+class IntroActivity : AppIntro() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addPage(
@@ -41,7 +43,7 @@ class IntroActivity : AppIntro2() {
             .descColor(ContextCompat.getColor(this, descColor))
             .titleColor(ContextCompat.getColor(this, titleColor))
             .build()
-        addSlide(AppIntro2Fragment.newInstance(sliderPage))
+        addSlide(AppIntroFragment.newInstance(sliderPage))
     }
 
     override fun onSkipPressed(currentFragment: Fragment?) {
@@ -51,13 +53,14 @@ class IntroActivity : AppIntro2() {
 
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
+        PrefUtil.updateFirstTimePref(this)
         goToHomeScreen()
     }
 
     private fun goToHomeScreen() {
-        /*val intent = Intent(this, MainActivity::class.java)
-            .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        val intent = Intent(this, HomeActivity::class.java)
+            .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         startActivity(intent)
-        finish()*/
+        finish()
     }
 }

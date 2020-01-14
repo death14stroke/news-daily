@@ -1,7 +1,10 @@
 package com.andruid.magic.newsdaily.ui.fragment
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
@@ -9,13 +12,17 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
+import com.andruid.magic.newsdaily.data.Constants
 import com.andruid.magic.newsdaily.databinding.FragmentSearchBinding
+import com.andruid.magic.newsdaily.eventbus.NewsEvent
 import com.andruid.magic.newsdaily.eventbus.SearchEvent
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
 import com.andruid.magic.newsdaily.ui.viewmodel.ArticlesViewModel
 import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
+import com.andruid.magic.newsloader.model.News
 import com.yuyakaido.android.cardstackview.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -51,11 +58,19 @@ class SearchFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         newsAdapter.registerAdapterDataObserver(adapterObserver)
+        setHasOptionsMenu(true)
+        retainInstance = true
     }
 
     override fun onDestroy() {
         super.onDestroy()
         newsAdapter.unregisterAdapterDataObserver(adapterObserver)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        menu.findItem(R.id.action_intro)?.isVisible = false
+        menu.findItem(R.id.action_settings)?.isVisible = false
     }
 
     override fun onCreateView(
@@ -82,6 +97,8 @@ class SearchFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         EventBus.getDefault().unregister(this)
+        viewModel.pos = binding.cardStackView.top
+        Log.d("newslog", "saving to viewModel ${viewModel.pos} for search")
     }
 
     private fun setUpCardStackView() {
@@ -114,13 +131,39 @@ class SearchFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this, BaseViewModelFactory { ArticlesViewModel() })
             .get(ArticlesViewModel::class.java)
-        viewModel.pagedListLiveData.observe(this, Observer { news ->
+        viewModel.searchLiveData.observe(this, Observer { news ->
             newsAdapter.submitList(news) { updateEmpty() }
+            Log.d("newslog", "scrolling to ${viewModel.pos} for search")
+            binding.cardStackView.scrollToPosition(viewModel.pos)
         })
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onSearchEvent(searchEvent: SearchEvent) = viewModel.setQuery(searchEvent.query)
+    fun onSearchEvent(searchEvent: SearchEvent) {
+        requireActivity().title = "Search for ${searchEvent.query}"
+        viewModel.setQuery(searchEvent.query)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onNewsEvent(newsEvent: NewsEvent) {
+        when (newsEvent.action) {
+            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.news)
+            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news.url)
+        }
+    }
+
+    private fun loadUrl(url: String) {
+        val directions = SearchFragmentDirections.actionNewsToWebview(url)
+        findNavController().navigate(directions)
+    }
+
+    private fun shareNews(news: News) {
+        val intent = Intent(Intent.ACTION_SEND)
+            .setType("text/plain")
+            .putExtra(Intent.EXTRA_SUBJECT, news.title)
+            .putExtra(Intent.EXTRA_TEXT, news.url)
+        startActivity(Intent.createChooser(intent, "Share news via..."))
+    }
 
     private fun updateEmpty() {
         if (newsAdapter.itemCount == 0) {

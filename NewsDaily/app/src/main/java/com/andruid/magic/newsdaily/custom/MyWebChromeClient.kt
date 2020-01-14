@@ -8,6 +8,7 @@ import android.widget.ProgressBar
 class MyWebChromeClient(private val progressBar: ProgressBar) : WebChromeClient() {
     override fun onProgressChanged(view: WebView?, newProgress: Int) {
         super.onProgressChanged(view, newProgress)
+
         progressBar.progress = newProgress
         if (newProgress == 100)
             progressBar.visibility = View.GONE

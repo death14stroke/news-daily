@@ -7,7 +7,6 @@ import com.andruid.magic.newsdaily.ui.viewholder.NewsViewHolder
 import com.andruid.magic.newsloader.model.News
 
 class NewsAdapter : PagedListAdapter<News, NewsViewHolder>(NewsDiffCallback()) {
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NewsViewHolder.from(parent)
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
