@@ -23,10 +23,7 @@ class NewsViewModel(category: String, application: Application) : AndroidViewMod
             .build()
 
         val country = PreferenceManager.getDefaultSharedPreferences(application)
-            .getString(
-                application.getString(R.string.pref_country),
-                application.getString(R.string.default_country)
-            )
+            .getString(application.getString(R.string.pref_country), application.getString(R.string.default_country))
 
         newsLiveData = LivePagedListBuilder(BaseDataSourceFactory {
             NewsDataSource(viewModelScope, country!!, category)

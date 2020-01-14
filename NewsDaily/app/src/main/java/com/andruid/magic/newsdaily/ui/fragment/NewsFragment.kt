@@ -1,7 +1,14 @@
 package com.andruid.magic.newsdaily.ui.fragment
 
+import android.content.ComponentName
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.RemoteException
+import android.speech.tts.TextToSpeech
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaControllerCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,11 +18,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.data.Constants
 import com.andruid.magic.newsdaily.databinding.FragmentNewsBinding
 import com.andruid.magic.newsdaily.eventbus.NewsEvent
+import com.andruid.magic.newsdaily.service.AudioNewsService
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
 import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
 import com.andruid.magic.newsdaily.ui.viewmodel.NewsViewModel
@@ -25,11 +34,37 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
-class NewsFragment : Fragment() {
+class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
+    companion object {
+        private const val MY_DATA_CHECK_CODE = 0
+    }
+
     private lateinit var binding: FragmentNewsBinding
     private lateinit var viewModel: NewsViewModel
+    private lateinit var mediaControllerCompat: MediaControllerCompat
 
+    private val mediaControllerCallback = MediaControllerCallback()
     private val newsAdapter = NewsAdapter()
+
+    private val cardStackLayoutManager by lazy {
+        CardStackLayoutManager(context, object : CardStackListener {
+            override fun onCardDisappeared(view: View?, position: Int) {}
+            override fun onCardDragging(direction: Direction?, ratio: Float) {}
+            override fun onCardSwiped(direction: Direction?) {}
+            override fun onCardCanceled() {}
+            override fun onCardAppeared(view: View?, position: Int) {}
+            override fun onCardRewound() {}
+        })
+    }
+    private val mediaBrowserCompat by lazy {
+        MediaBrowserCompat(
+            context, ComponentName(
+                context!!,
+                AudioNewsService::class.java
+            ), MBConnectionCallback(), null
+        )
+    }
+
     private val adapterObserver = object : RecyclerView.AdapterDataObserver() {
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
             super.onItemRangeInserted(positionStart, itemCount)
@@ -57,16 +92,59 @@ class NewsFragment : Fragment() {
     }
 
     private var safeArgs: NewsFragmentArgs? = null
+    private var syncWithUI = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let { safeArgs = NewsFragmentArgs.fromBundle(it) }
         newsAdapter.registerAdapterDataObserver(adapterObserver)
+
+        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        preferences.registerOnSharedPreferenceChangeListener(this@NewsFragment)
+
+        syncWithUI = preferences.getBoolean(getString(R.string.pref_ui_sync), false)
+
+        mediaBrowserCompat.connect()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         newsAdapter.unregisterAdapterDataObserver(adapterObserver)
+        mediaControllerCompat.unregisterCallback(mediaControllerCallback)
+        mediaBrowserCompat.disconnect()
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, s: String) {
+        if (getString(R.string.pref_ui_sync) == s)
+            syncWithUI = sharedPreferences.getBoolean(s, false)
+    }
+
+    private fun scrollToCurrentNews(title: String) {
+        val newsList = newsAdapter.getNewsList()
+        newsList.apply {
+            try {
+                val optionalInt =
+                    IntRange(0, size - 1).first { pos: Int -> this[pos].title == title }
+                cardStackLayoutManager.scrollToPosition(optionalInt)
+            } catch (e: NoSuchElementException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                val intent = Intent(context, AudioNewsService::class.java)
+                    .putExtra(Constants.EXTRA_CATEGORY, safeArgs?.category ?: "general")
+                intent.action = Constants.ACTION_PREPARE_AUDIO
+                context?.startService(intent)
+            } else {
+                val installTTSIntent = Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+                startActivity(installTTSIntent)
+            }
+        }
     }
 
     override fun onCreateView(
@@ -74,6 +152,10 @@ class NewsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_news, container, false)
+        binding.speakBtn.setOnClickListener {
+            val checkTTSIntent = Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA)
+            startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE)
+        }
         setupCardStackView()
         return binding.root
     }
@@ -135,14 +217,6 @@ class NewsFragment : Fragment() {
     }
 
     private fun setupCardStackView() {
-        val cardStackLayoutManager = CardStackLayoutManager(context, object : CardStackListener {
-            override fun onCardDisappeared(view: View?, position: Int) {}
-            override fun onCardDragging(direction: Direction?, ratio: Float) {}
-            override fun onCardSwiped(direction: Direction?) {}
-            override fun onCardCanceled() {}
-            override fun onCardAppeared(view: View?, position: Int) {}
-            override fun onCardRewound() {}
-        })
         cardStackLayoutManager.apply {
             val swipeSetting = SwipeAnimationSetting.Builder()
                 .setDirection(Direction.Bottom)
@@ -158,6 +232,35 @@ class NewsFragment : Fragment() {
         binding.cardStackView.apply {
             layoutManager = cardStackLayoutManager
             adapter = newsAdapter
+        }
+    }
+
+    inner class MBConnectionCallback : MediaBrowserCompat.ConnectionCallback() {
+        override fun onConnected() {
+            super.onConnected()
+            try {
+                mediaControllerCompat =
+                    MediaControllerCompat(context, mediaBrowserCompat.sessionToken)
+                mediaControllerCompat.registerCallback(mediaControllerCallback)
+                MediaControllerCompat.setMediaController(requireActivity(), mediaControllerCompat)
+                mediaControllerCompat.metadata?.apply {
+                    mediaControllerCallback.onMetadataChanged(
+                        this
+                    )
+                }
+            } catch (e: RemoteException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    inner class MediaControllerCallback : MediaControllerCompat.Callback() {
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+            super.onMetadataChanged(metadata)
+            metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)?.let {
+                if (syncWithUI)
+                    scrollToCurrentNews(it)
+            }
         }
     }
 }
