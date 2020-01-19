@@ -23,7 +23,7 @@ import com.andruid.magic.newsdaily.eventbus.SearchEvent
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
 import com.andruid.magic.newsdaily.ui.viewmodel.ArticlesViewModel
 import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
-import com.andruid.magic.newsloader.model.News
+import com.andruid.magic.newsloader.model.NewsOnline
 import com.yuyakaido.android.cardstackview.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -148,8 +148,8 @@ class SearchFragment : Fragment() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNewsEvent(newsEvent: NewsEvent) {
         when (newsEvent.action) {
-            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.news)
-            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news.url)
+            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.newsOnline)
+            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.newsOnline.url)
         }
     }
 
@@ -158,12 +158,12 @@ class SearchFragment : Fragment() {
         findNavController().navigate(directions)
     }
 
-    private fun shareNews(news: News) {
+    private fun shareNews(newsOnline: NewsOnline) {
         val intent = Intent(Intent.ACTION_SEND)
             .setType("text/plain")
-            .putExtra(Intent.EXTRA_SUBJECT, news.title)
-            .putExtra(Intent.EXTRA_TEXT, news.url)
-        startActivity(Intent.createChooser(intent, "Share news via..."))
+            .putExtra(Intent.EXTRA_SUBJECT, newsOnline.title)
+            .putExtra(Intent.EXTRA_TEXT, newsOnline.url)
+        startActivity(Intent.createChooser(intent, "Share newsOnline via..."))
     }
 
     private fun updateEmpty() {

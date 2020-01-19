@@ -63,7 +63,7 @@ class WebViewFragment : Fragment() {
             R.id.menu_copy -> {
                 val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE)
                         as ClipboardManager
-                val clip = ClipData.newPlainText("news", safeArgs.newsUrl)
+                val clip = ClipData.newPlainText("newsOnline", safeArgs.newsUrl)
                 clipboard.setPrimaryClip(clip)
                 Toast.makeText(context, "Copied url", Toast.LENGTH_SHORT).show()
             }

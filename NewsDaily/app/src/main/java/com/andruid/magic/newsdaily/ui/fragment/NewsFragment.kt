@@ -30,7 +30,7 @@ import com.andruid.magic.newsdaily.service.AudioNewsService
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
 import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
 import com.andruid.magic.newsdaily.ui.viewmodel.HeadlinesViewModel
-import com.andruid.magic.newsloader.model.News
+import com.andruid.magic.newsloader.model.NewsOnline
 import com.yuyakaido.android.cardstackview.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -163,7 +163,7 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
             viewModel = ViewModelProvider(this, BaseViewModelFactory {
                 HeadlinesViewModel(it.category, requireActivity().application)
             }).get(it.category, HeadlinesViewModel::class.java)
-            viewModel.newsLiveData.observe(this, Observer { news ->
+            viewModel.newsOnlineLiveData.observe(this, Observer { news ->
                 newsAdapter.submitList(news) {
                     if (!news.isEmpty())
                         hideProgress()
@@ -189,13 +189,13 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNewsEvent(newsEvent: NewsEvent) {
         when (newsEvent.action) {
-            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.news)
-            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news)
+            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.newsOnline)
+            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.newsOnline)
         }
     }
 
-    private fun loadUrl(news: News) {
-        val directions = NewsFragmentDirections.actionNewsToWebview(news.url)
+    private fun loadUrl(newsOnline: NewsOnline) {
+        val directions = NewsFragmentDirections.actionNewsToWebview(newsOnline.url)
         findNavController().navigate(directions)
     }
 
@@ -204,12 +204,12 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         binding.cardStackView.visibility = View.VISIBLE
     }
 
-    private fun shareNews(news: News) {
+    private fun shareNews(newsOnline: NewsOnline) {
         val intent = Intent(Intent.ACTION_SEND)
             .setType("text/plain")
-            .putExtra(Intent.EXTRA_SUBJECT, news.title)
-            .putExtra(Intent.EXTRA_TEXT, news.url)
-        startActivity(Intent.createChooser(intent, "Share news via..."))
+            .putExtra(Intent.EXTRA_SUBJECT, newsOnline.title)
+            .putExtra(Intent.EXTRA_TEXT, newsOnline.url)
+        startActivity(Intent.createChooser(intent, "Share newsOnline via..."))
     }
 
     private fun setupCardStackView() {

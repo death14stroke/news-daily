@@ -1,8 +1,8 @@
 package com.andruid.magic.newsdaily.service
 
 import android.app.PendingIntent
-import android.content.*
-import android.media.AudioManager
+import android.content.ComponentName
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -31,15 +31,14 @@ import com.andruid.magic.newsloader.data.Constants.PAGE_SIZE
 import com.andruid.magic.texttoaudiofile.api.TtsApi
 import com.andruid.magic.texttoaudiofile.util.FileUtils.getUtteranceId
 import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
-import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.*
@@ -82,10 +81,8 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
         MediaSessionCompat(applicationContext, MEDIA_SERVICE, mediaButtonReceiver, pendingIntent)
     }
     private val exoPlayer by lazy {
-        ExoPlayerFactory.newSimpleInstance(
-            this,
-            DefaultTrackSelector()
-        )
+        SimpleExoPlayer.Builder(this)
+            .build()
     }
     private val dataSourceFactory by lazy {
         DefaultDataSourceFactory(
@@ -99,12 +96,6 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
     private val concatenatingMediaSource = ConcatenatingMediaSource()
     private var mediaSessionCallback = MediaSessionCallback()
     private val audioNewsList = mutableListOf<AudioNews>()
-
-    private val mNoisyReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            mediaSessionCallback.onPause()
-        }
-    }
 
     override fun onCreate() {
         super.onCreate()
@@ -121,6 +112,8 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
                 .setContentType(C.CONTENT_TYPE_MUSIC)
                 .build()
             setAudioAttributes(audioAttributes, true)
+            setHandleAudioBecomingNoisy(true)
+            setHandleWakeLock(true)
             addListener(this@AudioNewsService)
         }
     }
@@ -140,7 +133,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
                     return audioNewsList[windowIndex].getMediaDescription()
                 }
             })
-            setPlayer(exoPlayer, null)
+            setPlayer(exoPlayer)
         }
     }
 
@@ -152,7 +145,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
             val resp = withContext(Dispatchers.IO) {
                 NewsRepository.getInstance().loadHeadlines(country!!, category, page, PAGE_SIZE)
             }
-            val newsList = resp.body()?.newsList
+            val newsList = resp.body()?.newsOnlineList
             newsList?.let {
                 val pos = audioNewsList.size
                 for (i in newsList.indices) {
@@ -219,7 +212,6 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
                     applicationContext, "Text to speech not available",
                     Toast.LENGTH_SHORT
                 ).show()
-            registerReceiver(mNoisyReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
         } else
             MediaButtonReceiver.handleIntent(mediaSessionCompat, intent)
         return START_NOT_STICKY
@@ -233,12 +225,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
     override fun onDestroy() {
         job.cancel()
         mediaSessionCompat.release()
-        mediaSessionConnector.setPlayer(null, null)
-        try {
-            unregisterReceiver(mNoisyReceiver)
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
-        }
+        mediaSessionConnector.setPlayer(null)
         exoPlayer.release()
     }
 
@@ -295,7 +282,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
     override fun onAudioCreated(file: File) {
         val utteranceId = getUtteranceId(file.name)
         Log.d(TAG, "Utterance done $utteranceId")
-        val mediaSource: MediaSource = ExtractorMediaSource.Factory(dataSourceFactory)
+        val mediaSource: MediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(Uri.fromFile(file))
         concatenatingMediaSource.addMediaSource(mediaSource)
         audioNewsHandler.sendEmptyMessageDelayed(MSG_UPDATE_SOURCE, WAIT_QUEUE_TIMEOUT_MS.toLong())
@@ -371,8 +358,10 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
                         if (playWhenReady)
                             startForeground(MEDIA_NOTI_ID, notificationBuilder.build())
                         else {
-                            NotificationManagerCompat.from(this@AudioNewsService).notify(MEDIA_NOTI_ID,
-                                notificationBuilder.build())
+                            NotificationManagerCompat.from(this@AudioNewsService).notify(
+                                MEDIA_NOTI_ID,
+                                notificationBuilder.build()
+                            )
                             stopForeground(false)
                         }
                     }

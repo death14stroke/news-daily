@@ -3,7 +3,7 @@ package com.andruid.magic.newsdaily.paging
 import androidx.paging.PageKeyedDataSource
 import com.andruid.magic.newsloader.api.NewsRepository.Companion.getInstance
 import com.andruid.magic.newsloader.data.Constants
-import com.andruid.magic.newsloader.model.News
+import com.andruid.magic.newsloader.model.NewsOnline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -11,11 +11,11 @@ class NewsDataSource(
     private val scope: CoroutineScope,
     private val country: String,
     private val category: String
-) : PageKeyedDataSource<Int, News>() {
+) : PageKeyedDataSource<Int, NewsOnline>() {
 
     override fun loadInitial(
         params: LoadInitialParams<Int>,
-        callback: LoadInitialCallback<Int, News>
+        callback: LoadInitialCallback<Int, NewsOnline>
     ) {
         scope.launch {
             try {
@@ -27,7 +27,7 @@ class NewsDataSource(
                 )
                 when {
                     response.isSuccessful -> {
-                        val newsList = response.body()?.newsList
+                        val newsList = response.body()?.newsOnlineList
                         val hasMore = response.body()?.hasMore
                         callback.onResult(
                             newsList ?: listOf(), null,
@@ -41,7 +41,7 @@ class NewsDataSource(
         }
     }
 
-    override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Int, News>) {
+    override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Int, NewsOnline>) {
         scope.launch {
             try {
                 val response = getInstance().loadHeadlines(
@@ -52,7 +52,7 @@ class NewsDataSource(
                 )
                 when {
                     response.isSuccessful -> {
-                        val newsList = response.body()?.newsList
+                        val newsList = response.body()?.newsOnlineList
                         val hasMore = response.body()?.hasMore
                         val key = if (hasMore!!) params.key + 1 else null
                         callback.onResult(newsList ?: listOf(), key)
@@ -64,7 +64,7 @@ class NewsDataSource(
         }
     }
 
-    override fun loadBefore(params: LoadParams<Int>, callback: LoadCallback<Int, News>) {
+    override fun loadBefore(params: LoadParams<Int>, callback: LoadCallback<Int, NewsOnline>) {
         scope.launch {
             try {
                 val response = getInstance().loadHeadlines(
@@ -75,7 +75,7 @@ class NewsDataSource(
                 )
                 when {
                     response.isSuccessful -> {
-                        val newsList = response.body()?.newsList
+                        val newsList = response.body()?.newsOnlineList
                         val adjacentKey = if (params.key > Constants.FIRST_PAGE)
                             params.key - 1
                         else null

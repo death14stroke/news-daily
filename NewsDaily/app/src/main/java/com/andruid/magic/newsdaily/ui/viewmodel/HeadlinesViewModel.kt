@@ -12,11 +12,11 @@ import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.paging.BaseDataSourceFactory
 import com.andruid.magic.newsdaily.paging.NewsDataSource
 import com.andruid.magic.newsloader.data.Constants
-import com.andruid.magic.newsloader.model.News
+import com.andruid.magic.newsloader.model.NewsOnline
 import kotlinx.coroutines.cancel
 
 class HeadlinesViewModel(category: String, application: Application) : AndroidViewModel(application) {
-    val newsLiveData: LiveData<PagedList<News>>
+    val newsOnlineLiveData: LiveData<PagedList<NewsOnline>>
     var pos = 0
 
     init {
@@ -28,7 +28,7 @@ class HeadlinesViewModel(category: String, application: Application) : AndroidVi
         val country = PreferenceManager.getDefaultSharedPreferences(application)
             .getString(application.getString(R.string.pref_country), application.getString(R.string.default_country))
 
-        newsLiveData = LivePagedListBuilder(BaseDataSourceFactory {
+        newsOnlineLiveData = LivePagedListBuilder(BaseDataSourceFactory {
             NewsDataSource(viewModelScope, country!!, category)
         }, config)
             .build()

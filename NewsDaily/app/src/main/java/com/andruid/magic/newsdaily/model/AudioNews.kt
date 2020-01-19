@@ -3,34 +3,33 @@ package com.andruid.magic.newsdaily.model
 import android.net.Uri
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
-import android.util.Log
 import androidx.core.os.bundleOf
-import com.andruid.magic.newsloader.model.News
+import com.andruid.magic.newsloader.model.NewsOnline
 
 data class AudioNews(
     val uri: String,
-    val news: News
+    val newsOnline: NewsOnline
 )
 
 fun AudioNews.getMediaDescription(): MediaDescriptionCompat {
     val extras = bundleOf(
-        MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI to news.imageUrl,
-        MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI to news.imageUrl,
-        MediaMetadataCompat.METADATA_KEY_ALBUM to news.sourceName
+        MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI to newsOnline.imageUrl,
+        MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI to newsOnline.imageUrl,
+        MediaMetadataCompat.METADATA_KEY_ALBUM to newsOnline.sourceName
     )
     return MediaDescriptionCompat.Builder()
         .setMediaId(uri)
-        .setIconUri(Uri.parse(news.imageUrl ?: ""))
-        .setTitle(news.title)
-        .setDescription(news.desc)
+        .setIconUri(Uri.parse(newsOnline.imageUrl ?: ""))
+        .setTitle(newsOnline.title)
+        .setDescription(newsOnline.desc)
         .setExtras(extras)
         .build()
 }
 
 fun AudioNews.buildMetaData(): MediaMetadataCompat {
     return MediaMetadataCompat.Builder()
-        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, news.imageUrl)
-        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, news.sourceName)
-        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, news.title)
+        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, newsOnline.imageUrl)
+        .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, newsOnline.sourceName)
+        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, newsOnline.title)
         .build()
 }

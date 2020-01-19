@@ -22,14 +22,14 @@
     <string name="first_start" translatable="false">firstStart</string>
     <string name="pref_ui_sync" translatable="false">pref_ui_sync</string>
 
-    <string name="pref_ui_text_on">Auto swipe news cards</string>
-    <string name="pref_ui_text_off">Don\'t auto swipe news cards</string>
+    <string name="pref_ui_text_on">Auto swipe newsOnline cards</string>
+    <string name="pref_ui_text_off">Don\'t auto swipe newsOnline cards</string>
 
     <string name="categories">Categories</string>
-    <string name="categories_desc">Get news from 7 different categories - General, Business, Entertainment,
+    <string name="categories_desc">Get newsOnline from 7 different categories - General, Business, Entertainment,
         Health, Science, Sports and Technology</string>
-    <string name="audio_news">Audio news</string>
-    <string name="audio_news_desc">Want to keep updated but no time to read? Listen to latest news
+    <string name="audio_news">Audio newsOnline</string>
+    <string name="audio_news_desc">Want to keep updated but no time to read? Listen to latest newsOnline
         while working</string>
     <string name="share">Share</string>
 

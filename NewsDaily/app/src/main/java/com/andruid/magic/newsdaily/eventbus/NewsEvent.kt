@@ -1,8 +1,8 @@
 package com.andruid.magic.newsdaily.eventbus
 
-import com.andruid.magic.newsloader.model.News
+import com.andruid.magic.newsloader.model.NewsOnline
 
 data class NewsEvent(
-    val news: News,
+    val newsOnline: NewsOnline,
     val action: String
 )

@@ -6,6 +6,6 @@ import com.google.gson.annotations.SerializedName
 data class ApiResponse(
     @Expose
     @SerializedName("news")
-    val newsList: List<News>,
+    val newsOnlineList: List<NewsOnline>,
     val hasMore: Boolean
 )

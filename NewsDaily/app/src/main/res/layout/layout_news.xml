@@ -21,7 +21,7 @@
                 app:layout_constraintBottom_toTopOf="@id/textCL"
                 app:layout_constraintHeight_percent=".4"
                 android:scaleType="fitXY"
-                android:contentDescription="@{viewModel.news.title}" />
+                android:contentDescription="@{viewModel.newsOnline.title}" />
             <ImageButton
                 android:id="@+id/shareBtn"
                 android:layout_width="wrap_content"
@@ -36,7 +36,7 @@
                 android:id="@+id/dateTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:dateFromMs="@{viewModel.news.published}"
+                app:dateFromMs="@{viewModel.newsOnline.published}"
                 style="@style/InfoTextTheme"
                 tools:text="25-Jul-19"
                 android:background="@drawable/round_rect_left"
@@ -46,7 +46,7 @@
                 android:id="@+id/sourceTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{viewModel.news.sourceName}"
+                android:text="@{viewModel.newsOnline.sourceName}"
                 style="@style/InfoTextTheme"
                 tools:text="News source"
                 android:background="@drawable/round_rect_right"
@@ -67,12 +67,12 @@
                     app:layout_constraintTop_toTopOf="parent"
                     style="@style/TitleTextTheme"
                     tools:text="News title"
-                    android:text="@{viewModel.news.title}"/>
+                    android:text="@{viewModel.newsOnline.title}"/>
                 <TextView
                     android:id="@+id/descTV"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@{viewModel.news.desc}"
+                    android:text="@{viewModel.newsOnline.desc}"
                     tools:text="News description"
                     style="@style/DescTextTheme"
                     app:layout_constraintTop_toBottomOf="@id/titleTV" />
@@ -88,7 +88,7 @@
                     android:gravity="center_vertical"
                     android:ellipsize="end"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:readMore="@{viewModel.news.url}"/>
+                    app:readMore="@{viewModel.newsOnline.url}"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

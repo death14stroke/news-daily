@@ -6,13 +6,13 @@ import androidx.paging.PagedList
 import com.andruid.magic.newsdaily.paging.ArticlesDataSource
 import com.andruid.magic.newsdaily.paging.BaseDataSourceFactory
 import com.andruid.magic.newsloader.data.Constants
-import com.andruid.magic.newsloader.model.News
+import com.andruid.magic.newsloader.model.NewsOnline
 import kotlinx.coroutines.cancel
 
 class ArticlesViewModel : ViewModel() {
     private val queryLiveData: MutableLiveData<String> = MutableLiveData()
 
-    val searchLiveData : LiveData<PagedList<News>>
+    val searchLiveData : LiveData<PagedList<NewsOnline>>
     var pos = 0
 
     init {

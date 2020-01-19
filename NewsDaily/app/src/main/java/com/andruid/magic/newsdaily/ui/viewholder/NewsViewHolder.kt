@@ -62,7 +62,7 @@ class NewsViewHolder(private val binding: LayoutNewsBinding) :
             imageView.tag = target
 
             Picasso.get()
-                .load(viewModel.news.imageUrl)
+                .load(viewModel.newsOnline.imageUrl)
                 .resize(300, 300)
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(target)
