@@ -24,6 +24,7 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.data.Constants
+import com.andruid.magic.newsdaily.database.entity.News
 import com.andruid.magic.newsdaily.databinding.FragmentNewsBinding
 import com.andruid.magic.newsdaily.eventbus.NewsEvent
 import com.andruid.magic.newsdaily.service.AudioNewsService
@@ -163,7 +164,7 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
             viewModel = ViewModelProvider(this, BaseViewModelFactory {
                 HeadlinesViewModel(it.category, requireActivity().application)
             }).get(it.category, HeadlinesViewModel::class.java)
-            viewModel.newsOnlineLiveData.observe(this, Observer { news ->
+            viewModel.newsLiveData.observe(this, Observer { news ->
                 newsAdapter.submitList(news) {
                     if (!news.isEmpty())
                         hideProgress()
@@ -189,13 +190,13 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNewsEvent(newsEvent: NewsEvent) {
         when (newsEvent.action) {
-            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.newsOnline)
-            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.newsOnline)
+            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.news)
+            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news)
         }
     }
 
-    private fun loadUrl(newsOnline: NewsOnline) {
-        val directions = NewsFragmentDirections.actionNewsToWebview(newsOnline.url)
+    private fun loadUrl(news: News) {
+        val directions = NewsFragmentDirections.actionNewsToWebview(news.url)
         findNavController().navigate(directions)
     }
 
@@ -204,11 +205,11 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         binding.cardStackView.visibility = View.VISIBLE
     }
 
-    private fun shareNews(newsOnline: NewsOnline) {
+    private fun shareNews(news: News) {
         val intent = Intent(Intent.ACTION_SEND)
             .setType("text/plain")
-            .putExtra(Intent.EXTRA_SUBJECT, newsOnline.title)
-            .putExtra(Intent.EXTRA_TEXT, newsOnline.url)
+            .putExtra(Intent.EXTRA_SUBJECT, news.title)
+            .putExtra(Intent.EXTRA_TEXT, news.url)
         startActivity(Intent.createChooser(intent, "Share newsOnline via..."))
     }
 

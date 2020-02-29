@@ -17,7 +17,7 @@ class DbRepository {
 
         @JvmStatic
         fun getInstance(): DbRepository {
-            if(!::INSTANCE.isInitialized)
+            if (!::INSTANCE.isInitialized)
                 throw Exception("must call init() first in application class")
             return INSTANCE
         }
@@ -25,8 +25,8 @@ class DbRepository {
 
     fun insertAll(newsList: List<News>) = database.newsDao().insertAll(newsList)
 
+    fun getNews(category: String) = database.newsDao().getNews(category)
+
     fun insertCat(catNewsList: List<CategorizedNews>) =
         database.catNewsDao().insertAll(catNewsList)
-
-    fun getCatNews(category: String) = database.catNewsDao().getNewsIdForCat(category)
 }

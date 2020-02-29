@@ -148,22 +148,14 @@ class SearchFragment : Fragment() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNewsEvent(newsEvent: NewsEvent) {
         when (newsEvent.action) {
-            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.newsOnline)
-            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.newsOnline.url)
+            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.news)
+            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news.url)
         }
     }
 
     private fun loadUrl(url: String) {
         val directions = SearchFragmentDirections.actionNewsToWebview(url)
         findNavController().navigate(directions)
-    }
-
-    private fun shareNews(newsOnline: NewsOnline) {
-        val intent = Intent(Intent.ACTION_SEND)
-            .setType("text/plain")
-            .putExtra(Intent.EXTRA_SUBJECT, newsOnline.title)
-            .putExtra(Intent.EXTRA_TEXT, newsOnline.url)
-        startActivity(Intent.createChooser(intent, "Share newsOnline via..."))
     }
 
     private fun updateEmpty() {
