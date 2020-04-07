@@ -7,8 +7,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
+import androidx.preference.PreferenceManager
+import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.database.DbRepository
 import com.andruid.magic.newsdaily.database.entity.News
+import com.andruid.magic.newsdaily.paging.BaseDataSourceFactory
+import com.andruid.magic.newsdaily.paging.NewsDataSource
 import com.andruid.magic.newsloader.data.Constants
 import kotlinx.coroutines.cancel
 
@@ -22,16 +26,17 @@ class HeadlinesViewModel(category: String, application: Application) :
             .setPageSize(Constants.PAGE_SIZE)
             .setEnablePlaceholders(false)
             .build()
-        /*val country = PreferenceManager.getDefaultSharedPreferences(application)
+        val country = PreferenceManager.getDefaultSharedPreferences(application)
             .getString(application.getString(R.string.pref_country), application.getString(R.string.default_country))
-        newsOnlineLiveData = LivePagedListBuilder(BaseDataSourceFactory {
+        newsLiveData = LivePagedListBuilder(BaseDataSourceFactory {
             NewsDataSource(viewModelScope, country!!, category)
         }, config)
-            .build()*/
-        newsLiveData = LivePagedListBuilder(
+            .build()
+        Log.d("NewsFragmentlog", "viewmodel: called init");
+        /*newsLiveData = LivePagedListBuilder(
             DbRepository.getInstance().getNews(category),
             config
-        ).build()
+        ).build()*/
     }
 
     override fun onCleared() {

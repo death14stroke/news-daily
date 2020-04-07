@@ -1,9 +1,10 @@
 package com.andruid.magic.newsdaily.paging
 
 import androidx.paging.PageKeyedDataSource
+import com.andruid.magic.newsdaily.database.entity.News
+import com.andruid.magic.newsdaily.database.entity.toNews
 import com.andruid.magic.newsloader.api.NewsRepository
 import com.andruid.magic.newsloader.data.Constants
-import com.andruid.magic.newsloader.model.NewsOnline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -11,11 +12,11 @@ class ArticlesDataSource(
     private val scope: CoroutineScope,
     private val language: String,
     private val query: String
-) : PageKeyedDataSource<Int, NewsOnline>() {
+) : PageKeyedDataSource<Int, News>() {
 
     override fun loadInitial(
         params: LoadInitialParams<Int>,
-        callback: LoadInitialCallback<Int, NewsOnline>
+        callback: LoadInitialCallback<Int, News>
     ) {
         scope.launch {
             try {
@@ -27,7 +28,8 @@ class ArticlesDataSource(
                 )
                 when {
                     response.isSuccessful -> {
-                        val newsList = response.body()?.newsOnlineList
+                        val newsList =
+                            response.body()?.newsOnlineList?.map { newsOnline -> newsOnline.toNews() }
                         val hasMore = response.body()?.hasMore
                         callback.onResult(
                             newsList ?: listOf(), null,
@@ -41,7 +43,7 @@ class ArticlesDataSource(
         }
     }
 
-    override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Int, NewsOnline>) {
+    override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Int, News>) {
         scope.launch {
             try {
                 val response = NewsRepository.getInstance().loadArticles(
@@ -52,7 +54,8 @@ class ArticlesDataSource(
                 )
                 when {
                     response.isSuccessful -> {
-                        val newsList = response.body()?.newsOnlineList
+                        val newsList =
+                            response.body()?.newsOnlineList?.map { newsOnline -> newsOnline.toNews() }
                         val hasMore = response.body()?.hasMore
                         val key = if (hasMore!!) params.key + 1 else null
                         callback.onResult(newsList ?: listOf(), key)
@@ -64,7 +67,7 @@ class ArticlesDataSource(
         }
     }
 
-    override fun loadBefore(params: LoadParams<Int>, callback: LoadCallback<Int, NewsOnline>) {
+    override fun loadBefore(params: LoadParams<Int>, callback: LoadCallback<Int, News>) {
         scope.launch {
             try {
                 val response = NewsRepository.getInstance().loadArticles(
@@ -75,7 +78,8 @@ class ArticlesDataSource(
                 )
                 when {
                     response.isSuccessful -> {
-                        val newsList = response.body()?.newsOnlineList
+                        val newsList =
+                            response.body()?.newsOnlineList?.map { newsOnline -> newsOnline.toNews() }
                         val adjacentKey = if (params.key > Constants.FIRST_PAGE)
                             params.key - 1
                         else null

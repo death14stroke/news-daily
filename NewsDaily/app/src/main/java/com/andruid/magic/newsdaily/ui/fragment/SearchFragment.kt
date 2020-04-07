@@ -1,6 +1,7 @@
 package com.andruid.magic.newsdaily.ui.fragment
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -17,23 +19,26 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.data.Constants
+import com.andruid.magic.newsdaily.database.entity.News
 import com.andruid.magic.newsdaily.databinding.FragmentSearchBinding
 import com.andruid.magic.newsdaily.eventbus.NewsEvent
 import com.andruid.magic.newsdaily.eventbus.SearchEvent
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
+import com.andruid.magic.newsdaily.ui.util.CustomTabHelper
 import com.andruid.magic.newsdaily.ui.viewmodel.ArticlesViewModel
 import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
-import com.andruid.magic.newsloader.model.NewsOnline
 import com.yuyakaido.android.cardstackview.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import splitties.resources.color
 
 class SearchFragment : Fragment() {
     private lateinit var binding: FragmentSearchBinding
     private lateinit var viewModel: ArticlesViewModel
 
     private val newsAdapter by lazy { NewsAdapter(requireActivity() as AppCompatActivity) }
+    private val customTabHelper = CustomTabHelper()
     private val adapterObserver = object : RecyclerView.AdapterDataObserver() {
         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
             super.onItemRangeInserted(positionStart, itemCount)
@@ -132,7 +137,7 @@ class SearchFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this, BaseViewModelFactory { ArticlesViewModel() })
             .get(ArticlesViewModel::class.java)
-        viewModel.searchLiveData.observe(this, Observer { news ->
+        viewModel.searchLiveData.observe(viewLifecycleOwner, Observer { news ->
             newsAdapter.submitList(news) { updateEmpty() }
             Log.d("newslog", "scrolling to ${viewModel.pos} for search")
             binding.cardStackView.scrollToPosition(viewModel.pos)
@@ -153,9 +158,32 @@ class SearchFragment : Fragment() {
         }
     }
 
+    private fun shareNews(news: News) {
+        val intent = Intent(Intent.ACTION_SEND)
+            .setType("text/plain")
+            .putExtra(Intent.EXTRA_SUBJECT, news.title)
+            .putExtra(Intent.EXTRA_TEXT, news.url)
+        startActivity(Intent.createChooser(intent, "Share news via..."))
+    }
+
     private fun loadUrl(url: String) {
-        val directions = SearchFragmentDirections.actionNewsToWebview(url)
-        findNavController().navigate(directions)
+        val builder = CustomTabsIntent.Builder()
+            .setToolbarColor(color(R.color.colorPrimary))
+            .setSecondaryToolbarColor(color(R.color.colorAccent))
+            .addDefaultShareMenuItem()
+            .setShowTitle(true)
+            .setStartAnimations(requireContext(), R.anim.slide_in_right, R.anim.slide_out_left)
+            .setExitAnimations(requireContext(), R.anim.slide_in_left, R.anim.slide_out_right)
+        val packageName = customTabHelper.getPackageNameToUse(requireContext(), url)
+
+        if (packageName == null) {
+            val directions = NewsFragmentDirections.actionNewsToWebview(url)
+            findNavController().navigate(directions)
+        } else {
+            val customTabsIntent = builder.build()
+            customTabsIntent.intent.setPackage(packageName)
+            customTabsIntent.launchUrl(requireContext(), Uri.parse(url))
+        }
     }
 
     private fun updateEmpty() {

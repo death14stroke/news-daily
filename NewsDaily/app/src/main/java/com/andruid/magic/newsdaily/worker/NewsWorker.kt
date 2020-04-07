@@ -11,6 +11,7 @@ import com.andruid.magic.newsdaily.database.entity.toCatNews
 import com.andruid.magic.newsdaily.database.entity.toNews
 import com.andruid.magic.newsdaily.util.PrefUtil
 import com.andruid.magic.newsloader.api.NewsRepository
+import com.andruid.magic.newsloader.data.Constants.FIRST_PAGE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -34,13 +35,14 @@ class NewsWorker(appContext: Context, params: WorkerParameters) :
             withContext(Dispatchers.IO) {
                 val resp = NewsRepository.getInstance().loadHeadlines(
                     country!!, category,
-                    0, 100
+                    FIRST_PAGE, 100
                 )
                 if (resp.isSuccessful) {
                     resp.body()?.let {
                         val news = it.newsOnlineList.map { newsOnline -> newsOnline.toNews() }
                         DbRepository.getInstance().insertAll(news)
                         val catNews = news.map { n -> n.toCatNews(category) }
+                        Log.d("NewsFragmentlog", "in worker: resp successful for $category");
                         DbRepository.getInstance().insertCat(catNews)
                     }
                 }

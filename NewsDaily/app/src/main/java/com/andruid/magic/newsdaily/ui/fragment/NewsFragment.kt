@@ -3,6 +3,7 @@ package com.andruid.magic.newsdaily.ui.fragment
 import android.content.ComponentName
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.os.RemoteException
 import android.speech.tts.TextToSpeech
@@ -15,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -29,16 +31,18 @@ import com.andruid.magic.newsdaily.databinding.FragmentNewsBinding
 import com.andruid.magic.newsdaily.eventbus.NewsEvent
 import com.andruid.magic.newsdaily.service.AudioNewsService
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
+import com.andruid.magic.newsdaily.ui.util.CustomTabHelper
 import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
 import com.andruid.magic.newsdaily.ui.viewmodel.HeadlinesViewModel
-import com.andruid.magic.newsloader.model.NewsOnline
 import com.yuyakaido.android.cardstackview.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import splitties.resources.color
 
 class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
+        private val TAG = "${NewsFragment::class.java.simpleName}log"
         private const val MY_DATA_CHECK_CODE = 0
     }
 
@@ -47,6 +51,7 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     private lateinit var mediaControllerCompat: MediaControllerCompat
 
     private val mediaControllerCallback = MediaControllerCallback()
+    private val customTabHelper = CustomTabHelper()
 
     private val newsAdapter by lazy { NewsAdapter(requireActivity() as AppCompatActivity) }
     private val mediaBrowserCompat by lazy {
@@ -89,7 +94,9 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let { safeArgs = NewsFragmentArgs.fromBundle(it) }
+        Log.d(TAG, "onCreate: news fragment")
+        arguments?.let { safeArgs = NewsFragmentArgs.fromBundle(it)
+            Log.d(TAG, "safeArgs: getting new safeArgs: ${safeArgs!!.category}");}
         newsAdapter.registerAdapterDataObserver(adapterObserver)
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -160,11 +167,13 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        Log.d(TAG, "onActivityCreated: news fragment")
         safeArgs?.let {
+            Log.d(TAG, "onActivityCreated: category = ${it.category}")
             viewModel = ViewModelProvider(this, BaseViewModelFactory {
                 HeadlinesViewModel(it.category, requireActivity().application)
             }).get(it.category, HeadlinesViewModel::class.java)
-            viewModel.newsLiveData.observe(this, Observer { news ->
+            viewModel.newsLiveData.observe(viewLifecycleOwner, Observer { news ->
                 newsAdapter.submitList(news) {
                     if (!news.isEmpty())
                         hideProgress()
@@ -191,13 +200,28 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     fun onNewsEvent(newsEvent: NewsEvent) {
         when (newsEvent.action) {
             Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.news)
-            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news)
+            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news.url)
         }
     }
 
-    private fun loadUrl(news: News) {
-        val directions = NewsFragmentDirections.actionNewsToWebview(news.url)
-        findNavController().navigate(directions)
+    private fun loadUrl(url: String) {
+        val builder = CustomTabsIntent.Builder()
+            .setToolbarColor(color(R.color.colorPrimary))
+            .setSecondaryToolbarColor(color(R.color.colorAccent))
+            .addDefaultShareMenuItem()
+            .setShowTitle(true)
+            .setStartAnimations(requireContext(), R.anim.slide_in_right, R.anim.slide_out_left)
+            .setExitAnimations(requireContext(), R.anim.slide_in_left, R.anim.slide_out_right)
+        val packageName = customTabHelper.getPackageNameToUse(requireContext(), url)
+
+        if (packageName == null) {
+            val directions = NewsFragmentDirections.actionNewsToWebview(url)
+            findNavController().navigate(directions)
+        } else {
+            val customTabsIntent = builder.build()
+            customTabsIntent.intent.setPackage(packageName)
+            customTabsIntent.launchUrl(requireContext(), Uri.parse(url))
+        }
     }
 
     private fun hideProgress() {
@@ -210,7 +234,7 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
             .setType("text/plain")
             .putExtra(Intent.EXTRA_SUBJECT, news.title)
             .putExtra(Intent.EXTRA_TEXT, news.url)
-        startActivity(Intent.createChooser(intent, "Share newsOnline via..."))
+        startActivity(Intent.createChooser(intent, "Share news via..."))
     }
 
     private fun setupCardStackView() {
