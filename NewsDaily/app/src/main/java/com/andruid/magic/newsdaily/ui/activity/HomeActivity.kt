@@ -5,15 +5,14 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
 import com.andruid.magic.newsdaily.R
+import com.andruid.magic.newsdaily.custom.RxSearchObservable.fromView
 import com.andruid.magic.newsdaily.databinding.ActivityHomeBinding
 import com.andruid.magic.newsdaily.eventbus.SearchEvent
 import com.andruid.magic.newsdaily.ui.fragment.NewsFragmentDirections
-import com.andruid.magic.newsdaily.custom.RxSearchObservable.fromView
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -29,7 +28,8 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_home)
+        binding = ActivityHomeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         binding.apply {
             setSupportActionBar(toolBar)
@@ -51,7 +51,7 @@ class HomeActivity : AppCompatActivity() {
             navController.addOnDestinationChangedListener { _, destination, _ ->
                 when (destination.id) {
                     R.id.nav_webview -> {
-                        if(binding.searchView.isSearchOpen)
+                        if (binding.searchView.isSearchOpen)
                             binding.searchView.closeSearch()
                         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                     }
@@ -63,14 +63,14 @@ class HomeActivity : AppCompatActivity() {
             setupActionBarWithNavController(navController, appBarConfiguration)
             navView.setupWithNavController(navController)
 
-            searchView.setOnSearchViewListener(object: MaterialSearchView.SearchViewListener {
+            searchView.setOnSearchViewListener(object : MaterialSearchView.SearchViewListener {
                 override fun onSearchViewShown() {
-                    if(navController.currentDestination!!.id != R.id.nav_search)
+                    if (navController.currentDestination!!.id != R.id.nav_search)
                         navController.navigate(NewsFragmentDirections.actionNewsToSearch())
                 }
 
                 override fun onSearchViewClosed() {
-                    if(navController.currentDestination!!.id == R.id.nav_search)
+                    if (navController.currentDestination!!.id == R.id.nav_search)
                         navController.navigateUp()
                 }
             })
@@ -79,7 +79,6 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.unbind()
         disposable.dispose()
     }
 

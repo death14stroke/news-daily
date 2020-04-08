@@ -17,7 +17,6 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -95,8 +94,10 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate: news fragment")
-        arguments?.let { safeArgs = NewsFragmentArgs.fromBundle(it)
-            Log.d(TAG, "safeArgs: getting new safeArgs: ${safeArgs!!.category}");}
+        arguments?.let {
+            safeArgs = NewsFragmentArgs.fromBundle(it)
+            Log.d(TAG, "safeArgs: getting new safeArgs: ${safeArgs!!.category}")
+        }
         newsAdapter.registerAdapterDataObserver(adapterObserver)
 
         val preferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -151,18 +152,13 @@ class NewsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListe
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_news, container, false)
+        binding = FragmentNewsBinding.inflate(inflater, container, false)
         binding.speakBtn.setOnClickListener {
             val checkTTSIntent = Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA)
             startActivityForResult(checkTTSIntent, MY_DATA_CHECK_CODE)
         }
         setupCardStackView()
         return binding.root
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding.unbind()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

@@ -12,7 +12,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
@@ -35,7 +34,7 @@ class WebViewFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_web_view, container, false)
+        binding = FragmentWebViewBinding.inflate(inflater, container, false)
         setWebView()
         loadNewsUrl()
         return binding.root
@@ -73,11 +72,6 @@ class WebViewFragment : Fragment() {
     }
 
     private fun loadNewsUrl() = binding.webView.loadUrl(safeArgs.newsUrl)
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.unbind()
-    }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setWebView() {

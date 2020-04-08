@@ -1,5 +1,6 @@
 package com.andruid.magic.newsdaily.paging
 
+import android.util.Log
 import androidx.paging.PageKeyedDataSource
 import com.andruid.magic.newsdaily.database.entity.News
 import com.andruid.magic.newsdaily.database.entity.toNews
@@ -30,6 +31,7 @@ class ArticlesDataSource(
                     response.isSuccessful -> {
                         val newsList =
                             response.body()?.newsOnlineList?.map { newsOnline -> newsOnline.toNews() }
+                        Log.d("searchLog", "searchLog: found = ${newsList?.size}");
                         val hasMore = response.body()?.hasMore
                         callback.onResult(
                             newsList ?: listOf(), null,
