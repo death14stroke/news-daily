@@ -1,192 +1,60 @@
 package com.andruid.magic.newsdaily.ui.fragment
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateInterpolator
-import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
-import com.andruid.magic.newsdaily.data.Constants
-import com.andruid.magic.newsdaily.database.entity.News
-import com.andruid.magic.newsdaily.databinding.FragmentSearchBinding
-import com.andruid.magic.newsdaily.eventbus.NewsEvent
-import com.andruid.magic.newsdaily.eventbus.SearchEvent
-import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
-import com.andruid.magic.newsdaily.ui.util.CustomTabHelper
-import com.andruid.magic.newsdaily.ui.viewmodel.ArticlesViewModel
-import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
-import com.yuyakaido.android.cardstackview.*
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
-import splitties.resources.color
 
+// TODO: Rename parameter arguments, choose names that match
+// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM2 = "param2"
+
+/**
+ * A simple [Fragment] subclass.
+ * Use the [SearchFragment.newInstance] factory method to
+ * create an instance of this fragment.
+ */
 class SearchFragment : Fragment() {
-    private lateinit var binding: FragmentSearchBinding
-    private lateinit var viewModel: ArticlesViewModel
-
-    private val newsAdapter by lazy { NewsAdapter(requireActivity() as AppCompatActivity) }
-    private val customTabHelper = CustomTabHelper()
-    private val adapterObserver = object : RecyclerView.AdapterDataObserver() {
-        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-            super.onItemRangeInserted(positionStart, itemCount)
-            updateEmpty()
-        }
-
-        override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
-            super.onItemRangeChanged(positionStart, itemCount)
-            updateEmpty()
-        }
-
-        override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
-            super.onItemRangeMoved(fromPosition, toPosition, itemCount)
-            updateEmpty()
-        }
-
-        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-            super.onItemRangeRemoved(positionStart, itemCount)
-            updateEmpty()
-        }
-    }
+    // TODO: Rename and change types of parameters
+    private var param1: String? = null
+    private var param2: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        newsAdapter.registerAdapterDataObserver(adapterObserver)
-        setHasOptionsMenu(true)
-        retainInstance = true
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        newsAdapter.unregisterAdapterDataObserver(adapterObserver)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.action_intro)?.isVisible = false
-        menu.findItem(R.id.action_settings)?.isVisible = false
+        arguments?.let {
+            param1 = it.getString(ARG_PARAM1)
+            param2 = it.getString(ARG_PARAM2)
+        }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    )
-            : View? {
-        binding = FragmentSearchBinding.inflate(inflater, container, false)
-        setUpCardStackView()
-        return binding.root
+    ): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_search, container, false)
     }
 
-    override fun onResume() {
-        super.onResume()
-        EventBus.getDefault().register(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        EventBus.getDefault().unregister(this)
-        viewModel.pos = (binding.cardStackView.layoutManager as CardStackLayoutManager).topPosition
-        Log.d("newslog", "saving to viewModel ${viewModel.pos} for search")
-    }
-
-    private fun setUpCardStackView() {
-        val cardStackLayoutManager = CardStackLayoutManager(context, object : CardStackListener {
-            override fun onCardDragging(direction: Direction, ratio: Float) {}
-            override fun onCardSwiped(direction: Direction) {}
-            override fun onCardRewound() {}
-            override fun onCardCanceled() {}
-            override fun onCardAppeared(view: View, position: Int) {}
-            override fun onCardDisappeared(view: View, position: Int) {}
-        })
-        cardStackLayoutManager.apply {
-            val swipeSetting = SwipeAnimationSetting.Builder()
-                .setDirection(Direction.Bottom)
-                .setInterpolator(AccelerateInterpolator())
-                .setDuration(Duration.Normal.duration)
-                .build()
-            setSwipeAnimationSetting(swipeSetting)
-            setCanScrollHorizontal(false)
-            setDirections(Direction.VERTICAL)
-            setStackFrom(StackFrom.Bottom)
-        }
-        binding.cardStackView.apply {
-            layoutManager = cardStackLayoutManager
-            adapter = newsAdapter
-        }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this, BaseViewModelFactory { ArticlesViewModel() })
-            .get(ArticlesViewModel::class.java)
-        viewModel.searchLiveData.observe(viewLifecycleOwner, Observer { news ->
-            newsAdapter.submitList(news) { updateEmpty() }
-            Log.d("newslog", "scrolling to ${viewModel.pos} for search")
-            binding.cardStackView.scrollToPosition(viewModel.pos)
-        })
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onSearchEvent(searchEvent: SearchEvent) {
-        requireActivity().title = "Search for ${searchEvent.query}"
-        viewModel.setQuery(searchEvent.query)
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onNewsEvent(newsEvent: NewsEvent) {
-        when (newsEvent.action) {
-            Constants.ACTION_SHARE_NEWS -> shareNews(newsEvent.news)
-            Constants.ACTION_OPEN_URL -> loadUrl(newsEvent.news.url)
-        }
-    }
-
-    private fun shareNews(news: News) {
-        val intent = Intent(Intent.ACTION_SEND)
-            .setType("text/plain")
-            .putExtra(Intent.EXTRA_SUBJECT, news.title)
-            .putExtra(Intent.EXTRA_TEXT, news.url)
-        startActivity(Intent.createChooser(intent, "Share news via..."))
-    }
-
-    private fun loadUrl(url: String) {
-        val builder = CustomTabsIntent.Builder()
-            .setToolbarColor(color(R.color.colorPrimary))
-            .setSecondaryToolbarColor(color(R.color.colorAccent))
-            .addDefaultShareMenuItem()
-            .setShowTitle(true)
-            .setStartAnimations(requireContext(), R.anim.slide_in_right, R.anim.slide_out_left)
-            .setExitAnimations(requireContext(), R.anim.slide_in_left, R.anim.slide_out_right)
-        val packageName = customTabHelper.getPackageNameToUse(requireContext(), url)
-
-        if (packageName == null) {
-            val directions = NewsFragmentDirections.actionNewsToWebview(url)
-            findNavController().navigate(directions)
-        } else {
-            val customTabsIntent = builder.build()
-            customTabsIntent.intent.setPackage(packageName)
-            customTabsIntent.launchUrl(requireContext(), Uri.parse(url))
-        }
-    }
-
-    private fun updateEmpty() {
-        if (newsAdapter.itemCount == 0) {
-            binding.emptyTV.visibility = View.VISIBLE
-            binding.cardStackView.visibility = View.GONE
-        } else {
-            binding.emptyTV.visibility = View.GONE
-            binding.cardStackView.visibility = View.VISIBLE
-        }
+    companion object {
+        /**
+         * Use this factory method to create a new instance of
+         * this fragment using the provided parameters.
+         *
+         * @param param1 Parameter 1.
+         * @param param2 Parameter 2.
+         * @return A new instance of fragment SearchFragment.
+         */
+        // TODO: Rename and change types and number of parameters
+        @JvmStatic
+        fun newInstance(param1: String, param2: String) =
+            SearchFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_PARAM1, param1)
+                    putString(ARG_PARAM2, param2)
+                }
+            }
     }
 }

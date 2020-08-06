@@ -1,2 +1,3 @@
-include ':app', ':countrydata', ':newsloader', ':texttoaudiofile'
-rootProject.name='NewsDaily'
+include ':newsloader'
+include ':app'
+rootProject.name = "NewsDaily"
