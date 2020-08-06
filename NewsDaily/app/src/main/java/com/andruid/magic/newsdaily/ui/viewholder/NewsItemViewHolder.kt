@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.database.entity.NewsItem
 import com.andruid.magic.newsdaily.databinding.LayoutNewsBinding
-import com.andruid.magic.newsdaily.ui.viewmodel.NewsItemViewModel
+import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 
@@ -29,10 +29,11 @@ class NewsItemViewHolder(private val binding: LayoutNewsBinding) :
         }
     }
 
-    fun bind(viewModel: NewsItemViewModel) {
-        loadImage(binding, viewModel.news)
+    fun bind(news: NewsItem, newsClickListener: NewsAdapter.NewsClickListener) {
+        loadImage(binding, news)
 
-        binding.viewModel = viewModel
+        binding.news = news
+        binding.newsClickListener = newsClickListener
         binding.executePendingBindings()
     }
 

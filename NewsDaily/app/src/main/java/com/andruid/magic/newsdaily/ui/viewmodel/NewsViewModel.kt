@@ -17,8 +17,6 @@ class NewsViewModel(private val category: String) : ViewModel() {
 
     private fun initPager(): Pager<Int, NewsItem> {
         val config = PagingConfig(10)
-        return Pager(config) {
-            DbRepository.getNews(category)
-        }
+        return Pager(config) { DbRepository.getNews(category) }
     }
 }

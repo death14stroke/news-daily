@@ -6,8 +6,12 @@
     <data>
 
         <variable
-            name="viewModel"
-            type="com.andruid.magic.newsdaily.ui.viewmodel.NewsItemViewModel" />
+            name="news"
+            type="com.andruid.magic.newsdaily.database.entity.NewsItem" />
+
+        <variable
+            name="newsClickListener"
+            type="com.andruid.magic.newsdaily.ui.adapter.NewsAdapter.NewsClickListener" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -25,7 +29,7 @@
                 android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:contentDescription="@{viewModel.news.title}"
+                android:contentDescription="@{news.title}"
                 android:scaleType="fitXY"
                 app:layout_constraintBottom_toTopOf="@id/textCL"
                 app:layout_constraintHeight_percent=".4"
@@ -37,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/share"
-                android:onClick="@{() -> viewModel.shareNews()}"
+                android:onClick="@{() -> newsClickListener.onShareNews(news)}"
                 android:src="@android:drawable/ic_menu_share"
                 app:layout_constraintEnd_toEndOf="@id/imageView"
                 app:layout_constraintTop_toTopOf="@id/imageView" />
@@ -48,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/round_rect_left"
-                app:dateFromMs="@{viewModel.news.published}"
+                app:dateFromMs="@{news.published}"
                 app:layout_constraintBottom_toBottomOf="@id/imageView"
                 app:layout_constraintEnd_toEndOf="@id/imageView"
                 tools:text="25-Jul-19" />
@@ -59,7 +63,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/round_rect_right"
-                android:text="@{viewModel.news.sourceName}"
+                android:text="@{news.sourceName}"
                 app:layout_constraintBottom_toBottomOf="@id/imageView"
                 app:layout_constraintStart_toStartOf="@id/imageView"
                 tools:text="News source" />
@@ -78,7 +82,7 @@
                     style="@style/TitleTextTheme"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@{viewModel.news.title}"
+                    android:text="@{news.title}"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="News title" />
 
@@ -87,7 +91,7 @@
                     style="@style/DescTextTheme"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@{viewModel.news.desc}"
+                    android:text="@{news.desc}"
                     app:layout_constraintTop_toBottomOf="@id/titleTV"
                     tools:text="News description" />
 
@@ -100,9 +104,9 @@
                     android:gravity="center_vertical"
                     android:lines="3"
                     android:maxLines="3"
-                    android:onClick="@{() -> viewModel.openUrl()}"
+                    android:onClick="@{() -> newsClickListener.onOpenNews(news.url)}"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:readMore="@{viewModel.news.url}"
+                    app:readMore="@{news.url}"
                     tools:text="www.google.com" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

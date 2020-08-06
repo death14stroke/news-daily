@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_open_browser"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="@string/fallback_menu_item_open_in_browser"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_copy"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="@string/fallback_menu_item_copy_link"
+        app:showAsAction="never" />
+</menu>
