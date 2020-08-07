@@ -20,9 +20,7 @@ class NewsAdapter(private val newsClickListener: NewsClickListener) :
         NewsItemViewHolder.from(parent)
 
     override fun onBindViewHolder(holder: NewsItemViewHolder, position: Int) {
-        getItem(position)?.let { news ->
-            holder.bind(news, newsClickListener)
-        }
+        getItem(position)?.let { news -> holder.bind(news, newsClickListener) }
     }
 
     interface NewsClickListener {

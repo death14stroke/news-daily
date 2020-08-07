@@ -1,15 +1,23 @@
 package com.andruid.magic.newsdaily.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
 import com.andruid.magic.newsdaily.R
+import com.andruid.magic.newsdaily.data.ACTION_SEARCH_ARTICLES
+import com.andruid.magic.newsdaily.data.EXTRA_QUERY
 import com.andruid.magic.newsdaily.databinding.ActivityHomeBinding
+import com.andruid.magic.newsdaily.ui.custom.DebouncingQueryTextListener
+import com.andruid.magic.newsdaily.ui.fragment.NewsFragmentDirections
+import com.miguelcatalan.materialsearchview.MaterialSearchView
 
 class HomeActivity : AppCompatActivity() {
     private val navController by lazy { findNavController(R.id.nav_host_fragment) }
@@ -24,6 +32,7 @@ class HomeActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolBar)
         initDrawer()
+        initSearchView()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -67,5 +76,29 @@ class HomeActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setupWithNavController(navController)
+    }
+
+    private fun initSearchView() {
+        binding.searchView.setOnQueryTextListener(DebouncingQueryTextListener(lifecycleScope) { newText ->
+            val intent = Intent(ACTION_SEARCH_ARTICLES)
+                .putExtra(EXTRA_QUERY, newText)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        })
+
+        binding.searchView.setOnSearchViewListener(object : MaterialSearchView.SearchViewListener {
+            override fun onSearchViewShown() {
+                if (navController.currentDestination!!.id != R.id.nav_search)
+                    navController.navigate(NewsFragmentDirections.actionNewsToSearch())
+            }
+
+            override fun onSearchViewClosed() {
+                if (navController.currentDestination!!.id == R.id.nav_search)
+                    navController.navigateUp()
+            }
+        })
+    }
+
+    fun closeSearchView() {
+        binding.searchView.closeSearch()
     }
 }

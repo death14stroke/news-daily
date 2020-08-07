@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -31,6 +32,8 @@ class NewsItemViewHolder(private val binding: LayoutNewsBinding) :
 
     fun bind(news: NewsItem, newsClickListener: NewsAdapter.NewsClickListener) {
         loadImage(binding, news)
+
+        Log.d("newsLog", "image url = ${news.imageUrl}")
 
         binding.news = news
         binding.newsClickListener = newsClickListener

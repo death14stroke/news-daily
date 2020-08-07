@@ -1,6 +1,7 @@
 package com.andruid.magic.newsdaily.database.entity
 
 import androidx.room.Entity
+import com.andruid.magic.newsloader.data.model.News
 
 @Entity(tableName = "offline_news", primaryKeys = ["title", "category"])
 data class NewsItem(
@@ -12,3 +13,15 @@ data class NewsItem(
     val published: Long,
     val category: String
 )
+
+fun News.toNewsItem(category: String): NewsItem {
+    return NewsItem(
+        title = title,
+        sourceName = sourceName,
+        desc = desc,
+        url = url,
+        imageUrl = imageUrl,
+        published = published,
+        category = category
+    )
+}
