@@ -1,6 +1,8 @@
 package com.andruid.magic.newsdaily.util
 
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.DrawableRes
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
 import java.text.DateFormat
@@ -17,4 +19,9 @@ fun TextView.formatDate(ms: Long) {
 fun TextView.readMoreUrl(url: String) {
     val str = "<u>$url</u>"
     text = HtmlCompat.fromHtml(str, HtmlCompat.FROM_HTML_MODE_LEGACY)
+}
+
+@BindingAdapter("imageRes")
+fun ImageView.loadImage(@DrawableRes res: Int) {
+    setImageResource(res)
 }

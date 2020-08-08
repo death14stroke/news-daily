@@ -1,8 +1,12 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">
+            shortEdges
+        </item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
@@ -45,5 +49,15 @@
         <item name="android:textColor">@color/colorTextIcons</item>
         <item name="android:textStyle">bold</item>
         <item name="android:padding">@dimen/textPadding</item>
+    </style>
+
+    <style name="AppPreference">
+        <item name="android:layout" tools:ignore="PrivateResource">
+            @layout/preference_material
+        </item>
+    </style>
+
+    <style name="AppPreference.DialogPreference">
+        <item name="negativeButtonText">@android:string/cancel</item>
     </style>
 </resources>

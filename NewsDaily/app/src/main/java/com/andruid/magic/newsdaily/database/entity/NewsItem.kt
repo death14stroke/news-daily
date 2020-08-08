@@ -11,10 +11,11 @@ data class NewsItem(
     val url: String,
     val imageUrl: String?,
     val published: Long,
+    val country: String,
     val category: String
 )
 
-fun News.toNewsItem(category: String): NewsItem {
+fun News.toNewsItem(country: String = "global", category: String = "search"): NewsItem {
     return NewsItem(
         title = title,
         sourceName = sourceName,
@@ -22,6 +23,7 @@ fun News.toNewsItem(category: String): NewsItem {
         url = url,
         imageUrl = imageUrl,
         published = published,
-        category = category
+        category = category,
+        country = country
     )
 }

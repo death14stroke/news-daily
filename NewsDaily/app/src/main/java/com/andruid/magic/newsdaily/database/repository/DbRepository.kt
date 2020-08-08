@@ -16,6 +16,6 @@ object DbRepository {
         database.newsDao().insert(newsList)
     }
 
-    fun getNews(category: String): PagingSource<Int, NewsItem> =
-        database.newsDao().getNewsForCategory(category)
+    fun getNews(country: String, category: String): PagingSource<Int, NewsItem> =
+        database.newsDao().getNewsForCategory(country, category)
 }

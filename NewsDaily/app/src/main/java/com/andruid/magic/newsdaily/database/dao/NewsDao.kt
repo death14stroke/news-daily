@@ -12,6 +12,6 @@ interface NewsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(newsItems: List<NewsItem>)
 
-    @Query("SELECT * FROM offline_news WHERE category = :category ORDER BY published DESC")
-    fun getNewsForCategory(category: String): PagingSource<Int, NewsItem>
+    @Query("SELECT * FROM offline_news WHERE country = :country AND category = :category ORDER BY published DESC")
+    fun getNewsForCategory(country: String, category: String): PagingSource<Int, NewsItem>
 }

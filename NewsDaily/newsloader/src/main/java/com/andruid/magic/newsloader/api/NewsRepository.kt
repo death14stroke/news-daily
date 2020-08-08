@@ -1,4 +1,4 @@
-package com.andruid.magic.newsloader.data.api
+package com.andruid.magic.newsloader.api
 
 import android.app.Application
 import com.andruid.magic.newsloader.data.model.ApiResponse

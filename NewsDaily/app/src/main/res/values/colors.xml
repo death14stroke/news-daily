@@ -10,4 +10,8 @@
     <color name="colorBg2">#039BE5</color>
     <color name="colorTranslucentBg">#6D000F25</color>
     <color name="colorTextIcons">#FFFFFF</color>
+
+    <color name="colorSplash">#86DA00</color>
+    <color name="colorTitle2">#1A237E</color>
+    <color name="colorDesc2">#00062B</color>
 </resources>

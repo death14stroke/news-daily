@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="country"
+            type="com.blongho.country_data.Country" />
+        <variable
+            name="countryClickListener"
+            type="com.andruid.magic.newsdaily.ui.adapter.CountryAdapter.CountryClickListener" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{() -> countryClickListener.onCountryClick(country)}"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:padding="5dp"
+        tools:ignore="UnusedAttribute">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/flagIV"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="@string/app_name"
+            app:imageRes="@{country.flagResource}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/in" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/countryTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="@{country.name}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/flagIV"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

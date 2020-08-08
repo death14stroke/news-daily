@@ -19,13 +19,13 @@ suspend fun <T> sendNetworkRequest(requestFunc: suspend () -> Response<T>): Resu
         try {
             val response = requestFunc.invoke()
             Log.d("newsLog", "body = ${response.body() ?: "null"}")
-            Result.success(response.body())
+            Result.Success(response.body())
         } catch (e: HttpException) {
-            Result.error<T>(e.message())
+            Result.Error<T>(e.message())
         } catch (e: ConnectException) {
-            Result.error<T>(e.message ?: "ConnectException")
+            Result.Error<T>(e.message ?: "ConnectException")
         } catch (e: IOException) {
-            Result.error<T>(e.message ?: "IOException")
+            Result.Error<T>(e.message ?: "IOException")
         }
     }
 }

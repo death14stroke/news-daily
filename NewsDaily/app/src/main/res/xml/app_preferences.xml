@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="News"
+        app:iconSpaceReserved="false">
+
+        <!--suppress AndroidUnknownAttribute -->
+        <com.andruid.magic.newsdaily.ui.custom.CountryPreference
+            style="@style/AppPreference.DialogPreference"
+            android:defaultValue="@string/default_country"
+            android:key="@string/pref_country"
+            android:title="Country"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Audio playback"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreference
+            android:defaultValue="@bool/def_sync"
+            android:key="@string/pref_ui_sync"
+            android:switchTextOff="@string/pref_ui_text_off"
+            android:switchTextOn="@string/pref_ui_text_on"
+            android:title="Sync audio with screen"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+</PreferenceScreen>
