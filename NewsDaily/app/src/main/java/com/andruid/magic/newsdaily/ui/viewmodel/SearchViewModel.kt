@@ -3,6 +3,7 @@ package com.andruid.magic.newsdaily.ui.viewmodel
 import androidx.lifecycle.*
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import com.andruid.magic.newsdaily.paging.ArticlesPagingSource
 import kotlinx.coroutines.cancel
 
@@ -13,7 +14,8 @@ class SearchViewModel : ViewModel() {
     val articles = Transformations.switchMap(queryLiveData) { query ->
         Pager(config) {
             ArticlesPagingSource(query)
-        }.flow.asLiveData()
+        }.flow.cachedIn(viewModelScope)
+            .asLiveData()
     }
 
     fun setQuery(query: String) = queryLiveData.postValue(query)

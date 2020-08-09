@@ -21,7 +21,8 @@
             <FrameLayout
                 android:id="@+id/toolBar_container"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize">
+                android:layout_height="?attr/actionBarSize"
+                app:titleTextColor="@color/white">
 
                 <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/toolBar"

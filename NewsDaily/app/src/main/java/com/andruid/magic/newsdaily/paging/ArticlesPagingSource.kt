@@ -15,12 +15,14 @@ class ArticlesPagingSource(private val query: String) : PagingSource<Int, NewsIt
 
         return when (result) {
             is Result.Success<ApiResponse> -> {
-                val (newsList, loadMore) = result.data!!
-                LoadResult.Page(
-                    data = newsList.map { news -> news.toNewsItem() },
-                    prevKey = null,
-                    nextKey = if (loadMore) page + 1 else null
-                )
+                return result.data?.let {
+                    val (newsList, loadMore) = it
+                    LoadResult.Page(
+                        data = newsList.map { news -> news.toNewsItem() },
+                        prevKey = null,
+                        nextKey = if (loadMore) page + 1 else null
+                    )
+                } ?: LoadResult.Error(Throwable("No results found"))
             }
             is Result.Error -> {
                 LoadResult.Error(Throwable(result.message))

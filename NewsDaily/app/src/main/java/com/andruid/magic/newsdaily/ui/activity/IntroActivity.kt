@@ -2,11 +2,12 @@ package com.andruid.magic.newsdaily.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.annotation.ColorRes
+import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.fragment.app.Fragment
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.util.color
+import com.andruid.magic.newsdaily.util.getColorFromAttr
 import com.andruid.magic.newsdaily.util.updateFirstTimePref
 import com.github.appintro.AppIntro2
 import com.github.appintro.AppIntroFragment
@@ -20,17 +21,17 @@ class IntroActivity : AppIntro2() {
             getString(R.string.categories),
             getString(R.string.categories_desc),
             R.mipmap.ic_launcher,
-            R.color.colorSplash,
-            R.color.colorPrimaryDark,
-            R.color.colorPrimary
+            color(R.color.colorSplash),
+            getColorFromAttr(R.attr.colorPrimaryDark),
+            getColorFromAttr(R.attr.colorPrimary)
         )
         addPage(
             getString(R.string.audio_news),
             getString(R.string.audio_news_desc),
             R.drawable.ic_speak,
-            R.color.colorBg2,
-            R.color.colorDesc2,
-            R.color.colorTitle2
+            color(R.color.colorBg2),
+            color(R.color.colorDesc2),
+            color(R.color.colorTitle2)
         )
 
         isSkipButtonEnabled = true
@@ -59,17 +60,17 @@ class IntroActivity : AppIntro2() {
         title: String,
         desc: String,
         @DrawableRes image: Int,
-        @ColorRes bgColor: Int,
-        @ColorRes descColor: Int,
-        @ColorRes titleColor: Int
+        @ColorInt bgColor: Int,
+        @ColorInt descColor: Int,
+        @ColorInt titleColor: Int
     ) {
         val sliderPage = SliderPagerBuilder()
             .title(title)
             .description(desc)
             .imageDrawable(image)
-            .backgroundColor(color(bgColor))
-            .descriptionColor(color(descColor))
-            .titleColor(color(titleColor))
+            .backgroundColor(bgColor)
+            .descriptionColor(descColor)
+            .titleColor(titleColor)
             .build()
         addSlide(AppIntroFragment.newInstance(sliderPage))
     }

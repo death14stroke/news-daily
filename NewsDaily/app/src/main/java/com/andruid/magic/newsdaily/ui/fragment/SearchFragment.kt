@@ -58,6 +58,7 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
                 (requireActivity() as HomeActivity).closeSearchView()
             }
         })
+        retainInstance = true
     }
 
     override fun onCreateView(
@@ -66,7 +67,7 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentSearchBinding.inflate(inflater, container, false)
-        newsAdapter.addLoadStateListener { loadState ->
+        newsAdapter.addLoadStateListener {
             updateEmpty(newsAdapter.itemCount == 0)
         }
 

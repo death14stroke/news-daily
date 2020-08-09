@@ -17,18 +17,17 @@
     <com.google.android.material.circularreveal.cardview.CircularRevealCardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp"
-        app:cardUseCompatPadding="true">
+        style="@style/CardViewStyle">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.google.android.material.imageview.ShapeableImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                tools:src="@drawable/ic_launcher_background"
                 android:contentDescription="@{news.title}"
                 android:scaleType="fitXY"
                 app:layout_constraintBottom_toTopOf="@id/textCL"
@@ -48,7 +47,7 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/dateTV"
-                style="@style/InfoTextTheme"
+                style="@style/AppTheme.Info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/round_rect_left"
@@ -59,7 +58,7 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/sourceTV"
-                style="@style/InfoTextTheme"
+                style="@style/AppTheme.Info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/round_rect_right"
@@ -72,14 +71,13 @@
                 android:id="@+id/textCL"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:background="@color/colorPrimaryLight"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHeight_percent=".6"
                 app:layout_constraintTop_toBottomOf="@id/imageView">
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/titleTV"
-                    style="@style/TitleTextTheme"
+                    android:theme="@style/AppTheme.Title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@{news.title}"
@@ -88,7 +86,7 @@
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/descTV"
-                    style="@style/DescTextTheme"
+                    android:theme="@style/AppTheme.Description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@{news.desc}"
@@ -97,7 +95,7 @@
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/goToUrlTV"
-                    style="@style/URLTextTheme"
+                    style="@style/AppTheme.URL"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
