@@ -1,3 +1,4 @@
+include ':texttoaudiofile'
 include ':newsloader'
 include ':app'
 rootProject.name = "NewsDaily"

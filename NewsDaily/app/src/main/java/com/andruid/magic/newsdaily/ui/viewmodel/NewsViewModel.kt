@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.andruid.magic.newsdaily.application.NewsApplication
+import com.andruid.magic.newsdaily.data.PAGE_SIZE
 import com.andruid.magic.newsdaily.database.entity.NewsItem
 import com.andruid.magic.newsdaily.database.repository.DbRepository
 import com.andruid.magic.newsdaily.util.getSelectedCountry
@@ -27,7 +28,7 @@ class NewsViewModel(application: Application, private val category: String) :
             flow<Result<PagingData<NewsItem>>> {
                 emit(Result.Loading(""))
 
-                val config = PagingConfig(10)
+                val config = PagingConfig(PAGE_SIZE)
                 val pager = Pager(config) {
                     DbRepository.getNews(country, category)
                 }

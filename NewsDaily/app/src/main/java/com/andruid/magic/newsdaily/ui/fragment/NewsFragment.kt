@@ -1,5 +1,6 @@
 package com.andruid.magic.newsdaily.ui.fragment
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,7 +12,10 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.PagingData
+import com.andruid.magic.newsdaily.AudioNewsService
 import com.andruid.magic.newsdaily.R
+import com.andruid.magic.newsdaily.data.ACTION_PREPARE_AUDIO
+import com.andruid.magic.newsdaily.data.EXTRA_CATEGORY
 import com.andruid.magic.newsdaily.database.entity.NewsItem
 import com.andruid.magic.newsdaily.databinding.FragmentNewsBinding
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
@@ -45,6 +49,13 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentNewsBinding.inflate(inflater, container, false)
+
+        binding.speakBtn.setOnClickListener {
+            val intent = Intent(requireContext(), AudioNewsService::class.java)
+                .setAction(ACTION_PREPARE_AUDIO)
+                .putExtra(EXTRA_CATEGORY, "general")
+            requireContext().startService(intent)
+        }
 
         initViewPager()
 

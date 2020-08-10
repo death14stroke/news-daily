@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.andruid.magic.newsdaily.R
+import com.andruid.magic.newsdaily.data.PAGE_SIZE_WORKER
 import com.andruid.magic.newsdaily.database.entity.toNewsItem
 import com.andruid.magic.newsdaily.database.repository.DbRepository
 import com.andruid.magic.newsdaily.util.getSelectedCountry
@@ -37,7 +38,7 @@ class NewsWorker(appContext: Context, params: WorkerParameters) :
                     country,
                     category,
                     page++,
-                    50
+                    PAGE_SIZE_WORKER
                 )
             }
 

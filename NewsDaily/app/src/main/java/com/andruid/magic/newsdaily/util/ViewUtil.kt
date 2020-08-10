@@ -6,8 +6,12 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 
+fun Context.toast(message: String, duration: Int = Toast.LENGTH_SHORT) {
+    Toast.makeText(this, message, duration).show()
+}
+
 fun Context.toast(@StringRes stringRes: Int, duration: Int = Toast.LENGTH_SHORT) {
-    Toast.makeText(this, getString(stringRes), duration).show()
+    toast(getString(stringRes), duration)
 }
 
 fun Fragment.toast(@StringRes stringRes: Int, duration: Int = Toast.LENGTH_SHORT) {

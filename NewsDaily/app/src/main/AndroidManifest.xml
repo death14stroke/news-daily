@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".application.NewsApplication"
@@ -14,6 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"
@@ -23,8 +28,21 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".ui.activity.IntroActivity" />
+        <receiver android:name="androidx.media.session.MediaButtonReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
+        <service
+            android:name=".AudioNewsService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+
+        <activity android:name=".ui.activity.IntroActivity" />
         <activity android:name=".ui.activity.HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,4 +51,5 @@
             </intent-filter>
         </activity>
     </application>
+
 </manifest>
