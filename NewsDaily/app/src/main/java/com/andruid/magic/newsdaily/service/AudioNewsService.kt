@@ -1,4 +1,4 @@
-package com.andruid.magic.newsdaily
+package com.andruid.magic.newsdaily.service
 
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -15,7 +15,7 @@ import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
-import androidx.paging.PagingSource
+import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.data.ACTION_PREPARE_AUDIO
 import com.andruid.magic.newsdaily.data.EXTRA_CATEGORY
 import com.andruid.magic.newsdaily.data.PAGE_SIZE
@@ -25,7 +25,7 @@ import com.andruid.magic.newsdaily.data.model.getMediaDescription
 import com.andruid.magic.newsdaily.data.model.toAudioNews
 import com.andruid.magic.newsdaily.database.repository.DbRepository
 import com.andruid.magic.newsdaily.util.buildNotification
-import com.andruid.magic.newsdaily.util.getSelectedCountry
+import com.andruid.magic.newsdaily.util.getDefaultCountry
 import com.andruid.magic.newsdaily.util.toast
 import com.andruid.magic.texttoaudiofile.api.TtsApi
 import com.andruid.magic.texttoaudiofile.data.model.TtsResult
@@ -70,7 +70,10 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
         )
         val pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, 0)
         val mediaButtonReceiver = ComponentName(applicationContext, MediaButtonReceiver::class.java)
-        MediaSessionCompat(applicationContext, MEDIA_SERVICE, mediaButtonReceiver, pendingIntent)
+        MediaSessionCompat(
+            applicationContext,
+            MEDIA_SERVICE, mediaButtonReceiver, pendingIntent
+        )
     }
     private val exoPlayer by lazy {
         SimpleExoPlayer.Builder(this)
@@ -87,10 +90,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
     private val concatenatingMediaSource = ConcatenatingMediaSource()
     private val mediaSessionCallback = MediaSessionCallback()
     private val audioNewsList = mutableListOf<AudioNews>()
-    private val pagingSource by lazy {
-        val country = getSelectedCountry()
-        DbRepository.getNews(country, category)
-    }
+
     private var page = 0
 
     private lateinit var category: String
@@ -154,6 +154,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
             val pos = exoPlayer.currentWindowIndex
             if (pos == audioNewsList.size - NEWS_FETCH_DISTANCE) {
                 launch {
+                    Log.d("audioLog", "reached news fetch distance pos = $pos")
                     loadNews()
                 }
             }
@@ -181,23 +182,18 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
     }
 
     private suspend fun loadNews() {
-        val params = PagingSource.LoadParams.Refresh(page++, PAGE_SIZE, false)
-        val resp = withContext(Dispatchers.IO) { pagingSource.load(params) }
-        if (resp is PagingSource.LoadResult.Page) {
-
-            Log.d(TAG, "news loaded = ${resp.data.size}")
-
-            resp.data.forEach { news ->
-                audioNewsList.add(news.toAudioNews())
-
+        Log.d("audioLog", "load news called page =  $page, page size = $PAGE_SIZE")
+        withContext(Dispatchers.IO) { DbRepository.getNewsForPage(getDefaultCountry(), category, page++, PAGE_SIZE) }
+            .map { news -> news.toAudioNews() }
+            .forEach { news ->
                 val pos = audioNewsList.size
+                Log.d("audioLog", "news = ${news.news.title}")
                 val text =
-                    if (news.desc?.isNotEmpty() == true) news.desc else "No description available"
+                    if (news.news.desc?.isNotEmpty() == true) news.news.desc else "No description available"
 
+                audioNewsList.add(news)
                 addAudioToQueue(text, pos.toString())
             }
-        } else
-            Log.d("audioLog", "could not load data")
     }
 
     private suspend fun addAudioToQueue(text: String, id: String) {

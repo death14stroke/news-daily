@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.andruid.magic.newsdaily.database.entity.NewsItem
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NewsDao {
@@ -14,4 +15,7 @@ interface NewsDao {
 
     @Query("SELECT * FROM offline_news WHERE country = :country AND category = :category ORDER BY published DESC")
     fun getNewsForCategory(country: String, category: String): PagingSource<Int, NewsItem>
+
+    @Query("SELECT * FROM offline_news WHERE country = :country AND category = :category ORDER BY published DESC LIMIT :size OFFSET :offset")
+    fun getNewsForCategoryPage(country: String, category: String, offset: Int, size: Int): List<NewsItem>
 }

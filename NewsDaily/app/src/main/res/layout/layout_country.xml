@@ -23,10 +23,12 @@
         android:padding="5dp"
         tools:ignore="UnusedAttribute">
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/flagIV"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:scaleType="fitXY"
+            app:shapeAppearanceOverlay="@style/CircleImageView"
             android:contentDescription="@string/app_name"
             app:imageRes="@{country.flagResource}"
             app:layout_constraintBottom_toBottomOf="parent"

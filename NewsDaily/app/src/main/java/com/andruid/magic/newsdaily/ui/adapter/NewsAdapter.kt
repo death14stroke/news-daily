@@ -8,7 +8,7 @@ import com.andruid.magic.newsdaily.ui.viewholder.NewsItemViewHolder
 
 private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<NewsItem>() {
     override fun areItemsTheSame(oldItem: NewsItem, newItem: NewsItem) =
-        oldItem.title == newItem.title && oldItem.category == newItem.category
+        oldItem.url == newItem.url && oldItem.category == newItem.category
 
     override fun areContentsTheSame(oldItem: NewsItem, newItem: NewsItem) =
         oldItem == newItem

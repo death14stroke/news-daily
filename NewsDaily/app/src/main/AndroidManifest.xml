@@ -35,7 +35,7 @@
         </receiver>
 
         <service
-            android:name=".AudioNewsService"
+            android:name=".service.AudioNewsService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
@@ -43,7 +43,9 @@
         </service>
 
         <activity android:name=".ui.activity.IntroActivity" />
-        <activity android:name=".ui.activity.HomeActivity">
+
+        <activity android:name=".ui.activity.HomeActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -51,5 +53,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

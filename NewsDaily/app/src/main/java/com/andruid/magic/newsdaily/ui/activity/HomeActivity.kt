@@ -12,7 +12,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
 import com.andruid.magic.newsdaily.R
+import com.andruid.magic.newsdaily.data.ACTION_NOTI_CLICK
 import com.andruid.magic.newsdaily.data.ACTION_SEARCH_ARTICLES
+import com.andruid.magic.newsdaily.data.EXTRA_CATEGORY
 import com.andruid.magic.newsdaily.data.EXTRA_QUERY
 import com.andruid.magic.newsdaily.databinding.ActivityHomeBinding
 import com.andruid.magic.newsdaily.ui.custom.DebouncingQueryTextListener
@@ -33,6 +35,9 @@ class HomeActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolBar)
         initDrawer()
         initSearchView()
+
+        if (intent.action == ACTION_NOTI_CLICK)
+            handleNotiClick(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -51,6 +56,27 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.action == ACTION_NOTI_CLICK)
+            handleNotiClick(intent)
+    }
+
+    private fun handleNotiClick(intent: Intent) {
+        val categories = resources.getStringArray(R.array.categories)
+        val destination = when (intent.getStringExtra(EXTRA_CATEGORY)) {
+            categories[1] -> R.id.nav_business
+            categories[2] -> R.id.nav_entertainment
+            categories[3] -> R.id.nav_health
+            categories[4] -> R.id.nav_science
+            categories[5] -> R.id.nav_sports
+            categories[6] -> R.id.nav_tech
+            else -> R.id.nav_general
+        }
+
+        navController.navigate(destination)
     }
 
     private fun initDrawer() {

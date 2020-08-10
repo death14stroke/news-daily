@@ -2,10 +2,12 @@ package com.andruid.magic.newsdaily.ui.fragment
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.View
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.ui.custom.CountryPreference
+import com.andruid.magic.newsdaily.util.getColorFromAttr
 import com.andruid.magic.newsdaily.util.getSelectedCountry
 
 class SettingsFragment : PreferenceFragmentCompat() {
@@ -16,6 +18,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.setBackgroundColor(requireContext().getColorFromAttr(R.attr.colorSurface))
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
