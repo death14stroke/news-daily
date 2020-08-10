@@ -10,8 +10,10 @@
             shortEdges
         </item>
         <item name="android:navigationBarColor">@color/dark_grey</item>
-        <item name="android:windowTranslucentStatus">true</item>
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowSharedElementsUseOverlay">true</item>
     </style>
 
     <style name="AppTheme.Card" parent="Widget.MaterialComponents.CardView">

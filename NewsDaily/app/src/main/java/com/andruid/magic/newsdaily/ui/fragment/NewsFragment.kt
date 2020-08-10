@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.PagingData
@@ -85,7 +86,6 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
         mediaBrowserCompat.disconnect()
     }
 
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
@@ -115,6 +115,14 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
         }
     }
 
+    override fun onViewImage(view: View, imageUrl: String) {
+        val directions = NewsFragmentDirections.actionNewsToShowImage(imageUrl)
+        val extras = FragmentNavigatorExtras(
+            view to view.transitionName
+        )
+        findNavController().navigate(directions, extras)
+    }
+
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, s: String) {
         if (getString(R.string.pref_country) == s) {
             val country = sharedPreferences.getString(s, requireContext().getSelectedCountry())!!
@@ -142,6 +150,12 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
         binding.viewPager.apply {
             adapter = newsAdapter
             setPageTransformer(AlphaPageTransformer())
+
+            postponeEnterTransition()
+            viewTreeObserver.addOnPreDrawListener {
+                startPostponedEnterTransition()
+                true
+            }
         }
     }
 

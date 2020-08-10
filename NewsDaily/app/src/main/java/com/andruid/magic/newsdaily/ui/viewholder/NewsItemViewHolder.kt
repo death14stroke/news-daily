@@ -30,14 +30,19 @@ class NewsItemViewHolder(private val binding: LayoutNewsBinding) :
         }
     }
 
-    fun bind(news: NewsItem, newsClickListener: NewsAdapter.NewsClickListener) {
-        loadImage(binding, news)
+    fun bind(newsItem: NewsItem, listener: NewsAdapter.NewsClickListener) {
+        loadImage(binding, newsItem).also { Log.d("newsLog", "image url = ${newsItem.imageUrl}") }
 
-        Log.d("newsLog", "image url = ${news.imageUrl}")
+        binding.imageView.transitionName = "iv_${newsItem.imageUrl}"
 
-        binding.news = news
-        binding.newsClickListener = newsClickListener
-        binding.executePendingBindings()
+        with(binding) {
+            news = newsItem
+            newsClickListener = listener
+            imageView.setOnClickListener {
+                listener.onViewImage(it, newsItem.imageUrl ?: "")
+                binding.executePendingBindings()
+            }
+        }
     }
 
     private fun loadImage(binding: LayoutNewsBinding, news: NewsItem) {

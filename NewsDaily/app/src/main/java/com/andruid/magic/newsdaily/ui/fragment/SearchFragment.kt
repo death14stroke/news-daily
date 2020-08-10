@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.data.ACTION_SEARCH_ARTICLES
@@ -121,6 +122,14 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
             val directions = NewsFragmentDirections.actionNewsToWebview(url)
             findNavController().navigate(directions)
         }
+    }
+
+    override fun onViewImage(view: View, imageUrl: String) {
+        val directions = NewsFragmentDirections.actionNewsToShowImage(imageUrl)
+        val extras = FragmentNavigatorExtras(
+            view to "imageViewTransition"
+        )
+        findNavController().navigate(directions, extras)
     }
 
     private fun updateEmpty(empty: Boolean) {

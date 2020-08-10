@@ -85,7 +85,8 @@
     <fragment
         android:id="@+id/nav_webview"
         android:name="com.andruid.magic.newsdaily.ui.fragment.WebViewFragment"
-        android:label="{newsUrl}">
+        android:label="{newsUrl}"
+        tools:layout="@layout/fragment_web_view">
         <argument
             android:name="newsUrl"
             android:defaultValue="www.google.com"
@@ -123,4 +124,18 @@
         android:id="@+id/action_intro"
         android:name="com.andruid.magic.newsdaily.ui.activity.IntroActivity"
         android:label="IntroActivity" />
+
+    <fragment
+        android:id="@+id/nav_show_image"
+        android:label=""
+        android:name="com.andruid.magic.newsdaily.ui.fragment.ShowImageFragment"
+        tools:layout="@layout/fragment_show_image">
+        <argument
+            android:name="imageUrl"
+            app:argType="string" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_news_to_show_image"
+        app:destination="@id/nav_show_image" />
 </navigation>

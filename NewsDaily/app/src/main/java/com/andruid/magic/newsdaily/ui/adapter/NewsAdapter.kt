@@ -1,6 +1,8 @@
 package com.andruid.magic.newsdaily.ui.adapter
 
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.andruid.magic.newsdaily.database.entity.NewsItem
@@ -26,5 +28,6 @@ class NewsAdapter(private val newsClickListener: NewsClickListener) :
     interface NewsClickListener {
         fun onShareNews(news: NewsItem)
         fun onOpenNews(url: String)
+        fun onViewImage(view: View, imageUrl: String)
     }
 }

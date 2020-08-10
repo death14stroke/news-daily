@@ -1,10 +1,13 @@
 package com.andruid.magic.newsdaily.ui.activity
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
@@ -19,6 +22,8 @@ import com.andruid.magic.newsdaily.data.EXTRA_QUERY
 import com.andruid.magic.newsdaily.databinding.ActivityHomeBinding
 import com.andruid.magic.newsdaily.ui.custom.DebouncingQueryTextListener
 import com.andruid.magic.newsdaily.ui.fragment.NewsFragmentDirections
+import com.andruid.magic.newsdaily.util.color
+import com.andruid.magic.newsdaily.util.getColorFromAttr
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 
 class HomeActivity : AppCompatActivity() {
@@ -89,15 +94,22 @@ class HomeActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.nav_webview -> {
-                    if (binding.searchView.isSearchOpen)
-                        binding.searchView.closeSearch()
-                    binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-                }
-                R.id.nav_search, R.id.action_settings, R.id.action_intro ->
+                R.id.nav_search, R.id.nav_webview, R.id.nav_show_image, R.id.action_settings, R.id.action_intro ->
                     binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                 else -> binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
             }
+
+            if (destination.id == R.id.nav_show_image) {
+                supportActionBar?.setBackgroundDrawable(ColorDrawable(color(R.color.dark_grey)))
+                window.statusBarColor = color(R.color.dark_grey)
+            }
+            else {
+                supportActionBar?.setBackgroundDrawable(ColorDrawable(getColorFromAttr(R.attr.colorPrimaryDark)))
+                window.statusBarColor = Color.TRANSPARENT
+            }
+
+            if (destination.id == R.id.nav_webview && binding.searchView.isSearchOpen)
+                binding.searchView.closeSearch()
         }
 
         setupActionBarWithNavController(navController, appBarConfiguration)
