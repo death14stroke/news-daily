@@ -30,4 +30,9 @@ object DbRepository {
         return database.newsDao()
             .getNewsForCategoryPage(country, category, page * pageSize, pageSize)
     }
+
+    fun markNewsAsRead(category: String, url: String) {
+        Log.d("readLog", "marking news as read $url in $category")
+        //database.newsDao().markNewsAsRead(category, url)
+    }
 }

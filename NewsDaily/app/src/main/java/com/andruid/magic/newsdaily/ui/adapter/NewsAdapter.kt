@@ -2,7 +2,6 @@ package com.andruid.magic.newsdaily.ui.adapter
 
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.andruid.magic.newsdaily.database.entity.NewsItem
@@ -23,6 +22,12 @@ class NewsAdapter(private val newsClickListener: NewsClickListener) :
 
     override fun onBindViewHolder(holder: NewsItemViewHolder, position: Int) {
         getItem(position)?.let { news -> holder.bind(news, newsClickListener) }
+    }
+
+    fun getNews(position: Int): NewsItem? {
+        if (position in 0 until itemCount)
+            return getItem(position)
+        return null
     }
 
     interface NewsClickListener {

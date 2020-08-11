@@ -20,7 +20,7 @@ fun Activity.shareNews(news: NewsItem) {
 
 fun Context.openChromeCustomTab(url: String, onFailed: () -> Unit) {
     val builder = CustomTabsIntent.Builder()
-        .setToolbarColor(getColorFromAttr(R.attr.colorPrimary))
+        .setToolbarColor(getColorFromAttr(R.attr.colorPrimaryDark))
         .setSecondaryToolbarColor(getColorFromAttr(R.attr.colorSecondaryVariant))
         .addDefaultShareMenuItem()
         .setShowTitle(true)

@@ -16,7 +16,7 @@ fun TextView.formatDate(ms: Long) {
 }
 
 @BindingAdapter("readMore")
-fun TextView.readMoreUrl(url: String) {
+fun TextView.readMoreUrl(url: String?) {
     val str = "<u>$url</u>"
     text = HtmlCompat.fromHtml(str, HtmlCompat.FROM_HTML_MODE_LEGACY)
 }

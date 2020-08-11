@@ -40,7 +40,7 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
     private val safeArgs by navArgs<NewsFragmentArgs>()
     private val newsAdapter by lazy { NewsAdapter(this) }
     private val newsViewModel by viewModels<NewsViewModel> {
-        BaseViewModelFactory { NewsViewModel(requireActivity().application, safeArgs.category) }
+        BaseViewModelFactory { NewsViewModel(requireContext().getSelectedCountry(), safeArgs.category) }
     }
     private val mediaControllerCallback = MediaControllerCallback()
     private val mediaBrowserCompat by lazy {
