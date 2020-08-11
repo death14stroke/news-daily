@@ -2,6 +2,7 @@ package com.andruid.magic.newsdaily.ui.viewholder
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.util.Log
@@ -49,27 +50,20 @@ class NewsItemViewHolder(private val binding: LayoutNewsBinding) :
         val target = object : Target {
             override fun onBitmapLoaded(bitmap: Bitmap, from: Picasso.LoadedFrom) {
                 binding.imageView.setImageBitmap(bitmap)
-                Palette.from(bitmap)
-                    .generate { palette: Palette? ->
-                        palette?.let {
-                            val startCol = it.getDarkVibrantColor(Color.BLUE)
-                            val centerCol = it.getDarkMutedColor(Color.BLACK)
-                            val gradientColors = intArrayOf(startCol, centerCol, startCol)
-
-                            binding.goToUrlTV.background = GradientDrawable().apply {
-                                colors = gradientColors
-                                orientation = GradientDrawable.Orientation.TL_BR
-                            }
-                        }
-                    }
+                processBitmap(bitmap)
             }
 
             override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) {
+                Log.d("picassoLog", "bitmap failed")
                 binding.imageView.setImageDrawable(errorDrawable)
                 e.printStackTrace()
+
+                if (errorDrawable == null)
+                    return
+                processBitmap((errorDrawable as BitmapDrawable).bitmap)
             }
 
-            override fun onPrepareLoad(placeHolderDrawable: Drawable) =
+            override fun onPrepareLoad(placeHolderDrawable: Drawable?) =
                 binding.imageView.setImageDrawable(placeHolderDrawable)
         }
 
@@ -77,8 +71,24 @@ class NewsItemViewHolder(private val binding: LayoutNewsBinding) :
 
         Picasso.get()
             .load(news.imageUrl)
-            .resize(300, 300)
-            .placeholder(R.drawable.ic_launcher_background)
+            .placeholder(R.drawable.default_news2)
+            .error(R.drawable.default_news2)
             .into(target)
+    }
+
+    private fun processBitmap(bitmap: Bitmap) {
+        Palette.from(bitmap)
+            .generate { palette: Palette? ->
+                palette?.let {
+                    val startCol = it.getDarkVibrantColor(Color.BLUE)
+                    val centerCol = it.getDarkMutedColor(Color.BLACK)
+                    val gradientColors = intArrayOf(startCol, centerCol, startCol)
+
+                    binding.goToUrlTV.background = GradientDrawable().apply {
+                        colors = gradientColors
+                        orientation = GradientDrawable.Orientation.TL_BR
+                    }
+                }
+            }
     }
 }

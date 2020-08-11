@@ -17,8 +17,10 @@ import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.databinding.FragmentShowImageBinding
 import com.igreenwood.loupe.extensions.createLoupe
 import com.igreenwood.loupe.extensions.setOnViewTranslateListener
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
+import java.lang.Exception
 
 class ShowImageFragment : Fragment() {
     private val safeArgs by navArgs<ShowImageFragmentArgs>()
@@ -66,18 +68,18 @@ class ShowImageFragment : Fragment() {
     private fun loadImage() {
         Picasso.get()
             .load(Uri.parse(safeArgs.imageUrl))
-            .into(object : Target {
-                override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
-
-                override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
-                    e?.printStackTrace()
+            .error(R.drawable.default_news2)
+            .into(binding.imageView, object : Callback {
+                override fun onSuccess() {
+                    binding.imageView.transitionName = "iv_${safeArgs.imageUrl}"
+                    startPostponedEnterTransition()
+                    initPinchZooming()
                 }
 
-                override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+                override fun onError(e: Exception?) {
+                    e?.printStackTrace()
                     binding.imageView.transitionName = "iv_${safeArgs.imageUrl}"
-                    binding.imageView.setImageBitmap(bitmap)
                     startPostponedEnterTransition()
-
                     initPinchZooming()
                 }
 
