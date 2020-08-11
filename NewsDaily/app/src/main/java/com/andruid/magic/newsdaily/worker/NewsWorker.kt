@@ -43,12 +43,16 @@ class NewsWorker(appContext: Context, params: WorkerParameters) :
             }
 
             if (result is Success && result.data != null) {
-                val news = result.data!!.newsOnlineList.map { news -> news.toNewsItem(country, category) }
+                val news =
+                    result.data!!.newsOnlineList.map { news -> news.toNewsItem(country, category) }
+                        .also { Log.d("newsLog", "$category news loaded from server") }
                 hasMore = result.data!!.hasMore
 
                 DbRepository.insertAll(news)
-            } else
+            } else {
+                Log.d("newsLog", "could not fetch $category news from server")
                 break
+            }
         }
     }
 }
