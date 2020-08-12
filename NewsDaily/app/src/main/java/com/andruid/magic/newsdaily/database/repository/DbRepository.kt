@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.paging.PagingSource
 import com.andruid.magic.newsdaily.database.NewsDatabase
 import com.andruid.magic.newsdaily.database.entity.NewsItem
+import com.andruid.magic.newsdaily.database.entity.ReadNews
 
 object DbRepository {
     private lateinit var database: NewsDatabase
@@ -20,7 +21,7 @@ object DbRepository {
     fun getNews(country: String, category: String): PagingSource<Int, NewsItem> =
         database.newsDao().getNewsForCategory(country, category)
 
-    fun getNewsForPage(
+    suspend fun getNewsForPage(
         country: String,
         category: String,
         page: Int,
@@ -31,8 +32,11 @@ object DbRepository {
             .getNewsForCategoryPage(country, category, page * pageSize, pageSize)
     }
 
-    fun markNewsAsRead(category: String, url: String) {
+    suspend fun insertReadNews(category: String, url: String) {
         Log.d("readLog", "marking news as read $url in $category")
-        //database.newsDao().markNewsAsRead(category, url)
+        database.newsDao().insertReadNews(ReadNews(url = url, category = category))
     }
+
+    suspend fun isUnread(newsItem: NewsItem) =
+        database.newsDao().findRead(newsItem.category, newsItem.url) == 0
 }

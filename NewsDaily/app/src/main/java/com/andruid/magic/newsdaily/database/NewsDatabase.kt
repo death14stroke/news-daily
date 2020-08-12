@@ -6,8 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.andruid.magic.newsdaily.database.dao.NewsDao
 import com.andruid.magic.newsdaily.database.entity.NewsItem
+import com.andruid.magic.newsdaily.database.entity.ReadNews
 
-@Database(entities = [NewsItem::class], version = 1)
+@Database(entities = [NewsItem::class, ReadNews::class], version = 1)
 abstract class NewsDatabase : RoomDatabase() {
     companion object {
         private const val DATABASE_NAME = "news_db"

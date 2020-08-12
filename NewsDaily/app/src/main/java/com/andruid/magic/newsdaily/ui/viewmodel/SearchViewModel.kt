@@ -11,7 +11,7 @@ class SearchViewModel : ViewModel() {
     private val config = PagingConfig(10)
     private val queryLiveData = MutableLiveData<String>("")
 
-    val articles = Transformations.switchMap(queryLiveData) { query ->
+    val articles = queryLiveData.switchMap { query ->
         Pager(config) {
             ArticlesPagingSource(query)
         }.flow.cachedIn(viewModelScope)

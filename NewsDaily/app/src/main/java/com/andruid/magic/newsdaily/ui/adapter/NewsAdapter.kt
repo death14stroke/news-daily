@@ -8,10 +8,10 @@ import com.andruid.magic.newsdaily.database.entity.NewsItem
 import com.andruid.magic.newsdaily.ui.viewholder.NewsItemViewHolder
 
 private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<NewsItem>() {
-    override fun areItemsTheSame(oldItem: NewsItem, newItem: NewsItem) =
+    override fun areContentsTheSame(oldItem: NewsItem, newItem: NewsItem) =
         oldItem.url == newItem.url && oldItem.category == newItem.category
 
-    override fun areContentsTheSame(oldItem: NewsItem, newItem: NewsItem) =
+    override fun areItemsTheSame(oldItem: NewsItem, newItem: NewsItem) =
         oldItem == newItem
 }
 
@@ -21,13 +21,24 @@ class NewsAdapter(private val newsClickListener: NewsClickListener) :
         NewsItemViewHolder.from(parent)
 
     override fun onBindViewHolder(holder: NewsItemViewHolder, position: Int) {
-        getItem(position)?.let { news -> holder.bind(news, newsClickListener) }
+        getItem(position)?.let { news ->
+            holder.bind(
+                news,
+                newsClickListener
+            )
+        }
     }
 
     fun getNews(position: Int): NewsItem? {
-        if (position in 0 until itemCount)
-            return getItem(position)
-        return null
+        return try {
+            val item = getItem(position)
+            if (item is NewsItem)
+                item
+            else null
+        } catch (e: IndexOutOfBoundsException) {
+            e.printStackTrace()
+            null
+        }
     }
 
     interface NewsClickListener {
