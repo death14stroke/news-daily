@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.andruid.magic.newsdaily.database.entity.NewsItem
 import com.andruid.magic.newsdaily.database.entity.ReadNews
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NewsDao {
@@ -32,4 +33,10 @@ interface NewsDao {
 
     @Query("SELECT COUNT(*) FROM read_news WHERE url = :url AND category = :category")
     suspend fun findRead(category: String, url: String): Int
+
+    @Query("SELECT COUNT(*) FROM offline_news WHERE category = :category")
+    fun countTotal(category: String): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM read_news WHERE category = :category")
+    fun countRead(category: String): Flow<Int>
 }
