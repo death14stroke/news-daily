@@ -2,7 +2,6 @@
 <resources>
     <color name="white">#ffffff</color>
     <color name="dark_grey">#121212</color>
-    <color name="dark_grey_8dp">#1F121212</color>
     <color name="white_90">#E6FFFFFF</color>
 
     <color name="san_marino">#3F51B5</color>
@@ -10,16 +9,6 @@
     <color name="sapphire_40">#66303F9F</color>
     <color name="amber">#FFC107</color>
     <color name="periwinkle_gray">#C5CAE9</color>
-    <color name="red">#F44336</color>
-    <color name="purple">#E040FB</color>
-
-    <color name="colorPrimaryText">#212121</color>
-    <color name="colorSecondaryText">#757575</color>
-    <color name="colorBg2">#039BE5</color>
-    <color name="colorTranslucentBg">#6D000F25</color>
-    <color name="colorTextIcons">#FFFFFF</color>
-
-    <color name="colorSplash">#86DA00</color>
-    <color name="colorTitle2">#1A237E</color>
-    <color name="colorDesc2">#00062B</color>
+    <color name="pomegranate">#F44336</color>
+    <color name="boulder">#757575</color>
 </resources>

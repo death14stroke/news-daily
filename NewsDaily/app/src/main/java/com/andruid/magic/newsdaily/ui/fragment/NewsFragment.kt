@@ -65,7 +65,7 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
         super.onCreate(savedInstanceState)
         retainInstance = true
 
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val preferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         preferences.registerOnSharedPreferenceChangeListener(this@NewsFragment)
 
         syncWithUI = preferences.getBoolean(getString(R.string.pref_ui_sync), true)
@@ -91,6 +91,12 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
             mediaControllerCompat.unregisterCallback(mediaControllerCallback)
         if (mediaBrowserCompat.isConnected)
             mediaBrowserCompat.disconnect()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        PreferenceManager.getDefaultSharedPreferences(requireContext())
+            .unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

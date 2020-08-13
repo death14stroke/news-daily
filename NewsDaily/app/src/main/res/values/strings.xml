@@ -35,8 +35,6 @@
     <string name="pref_country" translatable="false">pref_country</string>
     <string name="default_country">in</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="new_content_title">Latest news</string>
     <string name="new_content_desc">%1$d new stories are available</string>
 </resources>

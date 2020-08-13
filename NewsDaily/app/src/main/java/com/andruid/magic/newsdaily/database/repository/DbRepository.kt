@@ -31,6 +31,6 @@ object DbRepository {
             .getNewsForCategoryPage(country, category, page * pageSize, pageSize)
     }
 
-    suspend fun getLatestNewsTime(): Long =
+    suspend fun getLatestNewsTime(): Long? =
         database.newsDao().getLatestNewsTime()
 }

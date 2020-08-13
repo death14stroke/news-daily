@@ -71,8 +71,8 @@ class NewsItemViewHolder(private val binding: LayoutNewsBinding) :
 
         Picasso.get()
             .load(news.imageUrl)
-            .placeholder(R.drawable.default_news2)
-            .error(R.drawable.default_news2)
+            .placeholder(R.drawable.default_news)
+            .error(R.drawable.default_news)
             .into(target)
     }
 

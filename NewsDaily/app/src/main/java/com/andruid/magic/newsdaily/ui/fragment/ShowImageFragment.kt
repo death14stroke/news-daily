@@ -64,7 +64,7 @@ class ShowImageFragment : Fragment() {
     private fun loadImage() {
         Picasso.get()
             .load(Uri.parse(safeArgs.imageUrl))
-            .error(R.drawable.default_news2)
+            .error(R.drawable.default_news)
             .into(binding.imageView, object : Callback {
                 override fun onSuccess() {
                     binding.imageView.transitionName = "iv_${safeArgs.imageUrl}"

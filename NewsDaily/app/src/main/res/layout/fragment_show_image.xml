@@ -10,6 +10,6 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        tools:src="@drawable/default_news2"
+        tools:src="@drawable/default_news"
         android:layout_height="match_parent" />
 </FrameLayout>

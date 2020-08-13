@@ -16,12 +16,12 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/emptyTV"
+        style="@style/EmptyMessageStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        style="@style/EmptyMessageStyle"
         android:text="@string/no_results"
-        android:textColor="@color/colorSecondaryText"
+        android:textColor="@color/boulder"
         android:textSize="25sp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"

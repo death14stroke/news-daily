@@ -22,18 +22,19 @@ class NewsWorker(appContext: Context, params: WorkerParameters) :
     override suspend fun doWork(): Result {
         Log.d("newsLog", "running news worker")
 
-        val latestNewsTime = DbRepository.getLatestNewsTime()
+        val latestNewsTime = DbRepository.getLatestNewsTime() ?: 0
         var total = 0
         applicationContext.resources.getStringArray(R.array.categories).forEach { category ->
             total += fetchNews(category, latestNewsTime)
         }
 
-        val builder = applicationContext.buildNewContentNotification(total)
-        applicationContext.getSystemService<NotificationManager>()?.notify(2, builder.build())
-            .also {
-                Log.d("newsLog", "fetched $total news")
-            }
-
+        if (total > 0) {
+            val builder = applicationContext.buildNewContentNotification(total)
+            applicationContext.getSystemService<NotificationManager>()?.notify(2, builder.build())
+                .also {
+                    Log.d("newsLog", "fetched $total news")
+                }
+        }
         return Result.success()
     }
 
