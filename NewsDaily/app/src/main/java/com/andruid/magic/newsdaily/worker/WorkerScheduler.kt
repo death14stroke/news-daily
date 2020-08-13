@@ -1,8 +1,8 @@
 package com.andruid.magic.newsdaily.worker
 
 import android.content.Context
-import android.util.Log
 import androidx.work.*
+import com.andruid.magic.newsdaily.util.logi
 import java.util.concurrent.TimeUnit
 
 object WorkerScheduler {
@@ -11,12 +11,11 @@ object WorkerScheduler {
             .setRequiresBatteryNotLow(true)
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-
         val request = PeriodicWorkRequestBuilder<NewsWorker>(1L, TimeUnit.HOURS)
             .setConstraints(constraints)
             .build()
 
-        Log.d("newsLog", "scheduling news worker now")
+        logi("scheduling news worker now")
 
         WorkManager.getInstance(context)
             .enqueueUniquePeriodicWork("news-worker", ExistingPeriodicWorkPolicy.REPLACE, request)

@@ -29,6 +29,7 @@ const val AUDIO_CHANNEL_ID = "audio_news_channel"
 const val NEW_CONTENT_CHANNEL_NAME = "New Content"
 const val NEW_CONTENT_CHANNEL_ID = "new_content_channel"
 
+@Suppress("BlockingMethodInNonBlockingContext")
 @SuppressLint("DefaultLocale")
 suspend fun Context.buildNotification(
     icon: Int,
@@ -47,15 +48,13 @@ suspend fun Context.buildNotification(
         importance = NotificationManager.IMPORTANCE_HIGH
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val notificationChannel =
-            NotificationChannel(
-                AUDIO_CHANNEL_ID,
-                AUDIO_CHANNEL_NAME,
-                importance
-            ).apply {
-                enableLights(true)
-                lightColor = Color.GREEN
-            }
+        val notificationChannel = NotificationChannel(
+            AUDIO_CHANNEL_ID,
+            AUDIO_CHANNEL_NAME, importance
+        ).apply {
+            enableLights(true)
+            lightColor = Color.GREEN
+        }
         notificationManager.createNotificationChannel(notificationChannel)
     }
 

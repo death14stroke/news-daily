@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -15,6 +14,8 @@ import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.database.entity.NewsItem
 import com.andruid.magic.newsdaily.databinding.LayoutNewsBinding
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
+import com.andruid.magic.newsdaily.util.logd
+import com.andruid.magic.newsdaily.util.loge
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 
@@ -32,13 +33,12 @@ class NewsItemViewHolder(private val binding: LayoutNewsBinding) :
     }
 
     fun bind(newsItem: NewsItem, listener: NewsAdapter.NewsClickListener) {
-        loadImage(binding, newsItem).also { Log.d("newsLog", "image url = ${newsItem.imageUrl}") }
-
-        binding.imageView.transitionName = "iv_${newsItem.imageUrl}"
+        loadImage(binding, newsItem).also { logd("image url = ${newsItem.imageUrl}") }
 
         with(binding) {
             news = newsItem
             newsClickListener = listener
+            imageView.transitionName = "iv_${newsItem.imageUrl}"
             imageView.setOnClickListener {
                 listener.onViewImage(it, newsItem.imageUrl ?: "")
                 binding.executePendingBindings()
@@ -54,10 +54,8 @@ class NewsItemViewHolder(private val binding: LayoutNewsBinding) :
             }
 
             override fun onBitmapFailed(e: Exception, errorDrawable: Drawable?) {
-                Log.d("picassoLog", "bitmap failed")
+                loge("loading bitmap failed", throwable = e)
                 binding.imageView.setImageDrawable(errorDrawable)
-                e.printStackTrace()
-
                 if (errorDrawable == null)
                     return
                 processBitmap((errorDrawable as BitmapDrawable).bitmap)

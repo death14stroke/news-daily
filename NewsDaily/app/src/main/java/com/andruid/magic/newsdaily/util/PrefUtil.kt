@@ -21,14 +21,11 @@ fun Context.isFirstTime(): Boolean {
 
 fun Context.updateFirstTimePref() {
     getSharedPreferences(PREF_FIRST_TIME, Context.MODE_PRIVATE)
-        .edit {
-            putBoolean(KEY_FIRST_TIME, false)
-        }
+        .edit { putBoolean(KEY_FIRST_TIME, false) }
 }
 
 fun Context.getCountries(): List<Country> {
     val actualFilename = ASSET_COUNTRIES.split("file:///android_asset/").toTypedArray()[1]
-
     return assets?.let { manager ->
         return@let manager.open(actualFilename).bufferedReader().useLines { countryCodes ->
             countryCodes.map { code -> World.getCountryFrom(code) }.toList()

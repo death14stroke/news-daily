@@ -29,9 +29,6 @@ class NewsAdapter(private val newsClickListener: NewsClickListener) :
         }
     }
 
-    fun getNews(position: Int) =
-        getItem(position)
-
     interface NewsClickListener {
         fun onShareNews(news: NewsItem)
         fun onOpenNews(url: String)

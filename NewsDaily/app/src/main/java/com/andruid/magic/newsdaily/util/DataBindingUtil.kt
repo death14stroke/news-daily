@@ -11,7 +11,6 @@ import java.text.DateFormat
 fun TextView.formatDate(ms: Long) {
     val dateFormat = DateFormat.getDateInstance()
     val date = dateFormat.format(ms)
-
     text = date
 }
 

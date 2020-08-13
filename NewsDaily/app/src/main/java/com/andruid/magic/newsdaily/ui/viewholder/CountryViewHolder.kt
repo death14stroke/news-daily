@@ -22,9 +22,11 @@ class CountryViewHolder(private val binding: LayoutCountryBinding) :
         }
     }
 
-    fun bind(country: Country, countryClickListener: CountryAdapter.CountryClickListener) {
-        binding.country = country
-        binding.countryClickListener = countryClickListener
-        binding.executePendingBindings()
+    fun bind(countryData: Country, clickListener: CountryAdapter.CountryClickListener) {
+        binding.apply {
+            country = countryData
+            countryClickListener = clickListener
+            executePendingBindings()
+        }
     }
 }

@@ -31,7 +31,6 @@ fun Context.openChromeCustomTab(url: String, onFailed: () -> Unit) {
     if (packageName != null) {
         val customTabsIntent = builder.build().also { it.intent.setPackage(packageName) }
         customTabsIntent.launchUrl(this, Uri.parse(url))
-    } else {
+    } else
         onFailed()
-    }
 }

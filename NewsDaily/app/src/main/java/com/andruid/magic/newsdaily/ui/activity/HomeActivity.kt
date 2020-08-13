@@ -53,7 +53,6 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         MenuInflater(this).inflate(R.menu.menu_news, menu)
-
         val item = menu!!.findItem(R.id.action_search)
         binding.searchView.setMenuItem(item)
 
@@ -85,7 +84,6 @@ class HomeActivity : AppCompatActivity() {
             categories[6] -> R.id.nav_tech
             else -> R.id.nav_general
         }
-
         navController.navigate(destination)
     }
 
@@ -100,6 +98,8 @@ class HomeActivity : AppCompatActivity() {
             if (destination.id == R.id.nav_show_image) {
                 supportActionBar?.setBackgroundDrawable(ColorDrawable(color(R.color.dark_grey)))
                 window.statusBarColor = color(R.color.dark_grey)
+                if (binding.searchView.isSearchOpen)
+                    binding.searchView.closeSearch()
             } else {
                 supportActionBar?.setBackgroundDrawable(ColorDrawable(getColorFromAttr(R.attr.colorPrimaryDark)))
                 window.statusBarColor = Color.TRANSPARENT

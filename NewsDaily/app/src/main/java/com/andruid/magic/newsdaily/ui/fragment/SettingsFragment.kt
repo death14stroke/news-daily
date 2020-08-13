@@ -11,9 +11,7 @@ import com.andruid.magic.newsdaily.util.getColorFromAttr
 import com.andruid.magic.newsdaily.util.getSelectedCountry
 
 class SettingsFragment : PreferenceFragmentCompat() {
-    private val countryPreference by lazy {
-        findPreference<CountryPreference>(getString(R.string.pref_country))
-    }
+    private val countryPreference by lazy { findPreference<CountryPreference>(getString(R.string.pref_country)) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,11 +40,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onDisplayPreferenceDialog(preference: Preference) {
         if (preference is CountryPreference) {
-            CountryPreferenceDialogFragment.newInstance(preference.key).apply {
+            val fragment = CountryPreferenceDialogFragment.newInstance(preference.key).apply {
                 setTargetFragment(this@SettingsFragment, 0)
-            }.also {
-                it.show(parentFragmentManager, "countryPref")
             }
+            fragment.show(parentFragmentManager, "countryPref")
         } else
             super.onDisplayPreferenceDialog(preference)
     }

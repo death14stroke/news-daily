@@ -51,6 +51,7 @@ class IntroActivity : AppIntro2() {
 
     override fun onSkipPressed(currentFragment: Fragment?) {
         super.onSkipPressed(currentFragment)
+        updateFirstTimePref()
         goToHomeScreen()
     }
 

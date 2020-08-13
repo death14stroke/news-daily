@@ -16,12 +16,11 @@ import kotlin.coroutines.suspendCoroutine
 
 object TtsApi {
     private val TAG = TtsApi::class.java.simpleName
+    var isReady = false
+        private set
 
     private lateinit var tts: TextToSpeech
     private lateinit var dir: File
-
-    var isReady = false
-        private set
 
     fun init(application: Application) {
         dir = File(application.cacheDir, DIR_TTS)

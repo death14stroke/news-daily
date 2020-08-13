@@ -22,11 +22,10 @@ class CountryPreferenceDialogFragment : PreferenceDialogFragmentCompat(),
     private lateinit var binding: PrefDialogCountryBinding
 
     companion object {
-        fun newInstance(key: String): CountryPreferenceDialogFragment {
-            return CountryPreferenceDialogFragment().apply {
+        fun newInstance(key: String) =
+            CountryPreferenceDialogFragment().apply {
                 arguments = bundleOf(ARG_KEY to key)
             }
-        }
     }
 
     override fun onBindDialogView(view: View) {

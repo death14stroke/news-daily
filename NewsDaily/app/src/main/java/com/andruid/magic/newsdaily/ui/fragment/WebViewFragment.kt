@@ -78,7 +78,9 @@ class WebViewFragment : Fragment() {
                 || super.onOptionsItemSelected(item)
     }
 
-    private fun loadNewsUrl() = binding.webView.loadUrl(safeArgs.newsUrl)
+    private fun loadNewsUrl() {
+        binding.webView.loadUrl(safeArgs.newsUrl)
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setWebView() {

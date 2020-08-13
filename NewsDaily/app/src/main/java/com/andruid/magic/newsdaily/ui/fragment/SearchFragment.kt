@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -27,10 +26,7 @@ import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
 import com.andruid.magic.newsdaily.ui.custom.AlphaPageTransformer
 import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
 import com.andruid.magic.newsdaily.ui.viewmodel.SearchViewModel
-import com.andruid.magic.newsdaily.util.hide
-import com.andruid.magic.newsdaily.util.openChromeCustomTab
-import com.andruid.magic.newsdaily.util.shareNews
-import com.andruid.magic.newsdaily.util.show
+import com.andruid.magic.newsdaily.util.*
 
 class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
     private val newsAdapter by lazy { NewsAdapter(this) }
@@ -40,9 +36,9 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
     private val queryBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_SEARCH_ARTICLES) {
-                val query = intent.extras!!.getString(EXTRA_QUERY, "")
-
-                Log.d("searchLog", "query = $query")
+                val query = intent.extras!!.getString(EXTRA_QUERY, "").also {
+                    logi("search query = $it")
+                }
 
                 searchViewModel.setQuery(query)
             }
@@ -54,12 +50,14 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        requireActivity().onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                (requireActivity() as HomeActivity).closeSearchView()
-            }
-        })
         retainInstance = true
+
+        requireActivity().onBackPressedDispatcher.addCallback(this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    (requireActivity() as HomeActivity).closeSearchView()
+                }
+            })
     }
 
     override fun onCreateView(
@@ -68,9 +66,7 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentSearchBinding.inflate(inflater, container, false)
-        newsAdapter.addLoadStateListener {
-            updateEmpty(newsAdapter.itemCount == 0)
-        }
+        newsAdapter.addLoadStateListener { updateEmpty(newsAdapter.itemCount == 0) }
 
         initViewPager()
 
@@ -101,8 +97,8 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
         super.onActivityCreated(savedInstanceState)
 
         searchViewModel.articles.observe(viewLifecycleOwner, Observer { articles ->
-            Log.d("searchLog", "search results found")
             newsAdapter.submitData(lifecycle, articles)
+                .also { logi("search results found") }
         })
     }
 
@@ -132,9 +128,7 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
 
     override fun onViewImage(view: View, imageUrl: String) {
         val directions = NewsFragmentDirections.actionNewsToShowImage(imageUrl)
-        val extras = FragmentNavigatorExtras(
-            view to view.transitionName
-        )
+        val extras = FragmentNavigatorExtras(view to view.transitionName)
         findNavController().navigate(directions, extras)
     }
 

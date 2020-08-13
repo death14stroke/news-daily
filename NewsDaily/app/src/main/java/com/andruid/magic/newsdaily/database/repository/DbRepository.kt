@@ -1,10 +1,10 @@
 package com.andruid.magic.newsdaily.database.repository
 
 import android.app.Application
-import android.util.Log
 import androidx.paging.PagingSource
 import com.andruid.magic.newsdaily.database.NewsDatabase
 import com.andruid.magic.newsdaily.database.entity.NewsItem
+import com.andruid.magic.newsdaily.util.logi
 
 object DbRepository {
     private lateinit var database: NewsDatabase
@@ -26,7 +26,7 @@ object DbRepository {
         page: Int,
         pageSize: Int
     ): List<NewsItem> {
-        Log.d("audioLog", "offset = ${page * pageSize}, pageSize = $pageSize")
+        logi("offset = ${page * pageSize}, pageSize = $pageSize")
         return database.newsDao()
             .getNewsForCategoryPage(country, category, page * pageSize, pageSize)
     }

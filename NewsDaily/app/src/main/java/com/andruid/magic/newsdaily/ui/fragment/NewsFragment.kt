@@ -50,10 +50,9 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
     private val mediaControllerCallback = MediaControllerCallback()
     private val mediaBrowserCompat by lazy {
         MediaBrowserCompat(
-            requireContext(), ComponentName(
-                requireContext(),
-                AudioNewsService::class.java
-            ), MBConnectionCallback(), null
+            requireContext(),
+            ComponentName(requireContext(), AudioNewsService::class.java),
+            MBConnectionCallback(), null
         )
     }
     private var syncWithUI = false
@@ -141,19 +140,15 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
             val country = sharedPreferences.getString(s, requireContext().getSelectedCountry())!!
             WorkerScheduler.scheduleNewsWorker(requireContext())
             newsViewModel.updateCountry(country)
-        }
-        if (getString(R.string.pref_ui_sync) == s)
+        } else if (getString(R.string.pref_ui_sync) == s)
             syncWithUI = sharedPreferences.getBoolean(s, false)
     }
 
     private fun scrollToCurrentNews(title: String) {
         newsAdapter.snapshot().items.apply {
             try {
-                val optionalInt =
-                    IntRange(
-                        0,
-                        size - 1
-                    ).firstOrNull { pos: Int -> this[pos].title == title }
+                val optionalInt = IntRange(0, size - 1)
+                    .firstOrNull { pos: Int -> this[pos].title == title }
                 binding.viewPager.currentItem = optionalInt ?: return@apply
             } catch (e: NoSuchElementException) {
                 e.printStackTrace()
@@ -193,10 +188,8 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
                     }
                 MediaControllerCompat.setMediaController(requireActivity(), mediaControllerCompat)
 
-                mediaControllerCompat.metadata?.apply {
-                    mediaControllerCallback.onMetadataChanged(
-                        this
-                    )
+                mediaControllerCompat.metadata?.let { metadata ->
+                    mediaControllerCallback.onMetadataChanged(metadata)
                 }
             } catch (e: RemoteException) {
                 e.printStackTrace()

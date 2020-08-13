@@ -7,6 +7,7 @@ import com.andruid.magic.newsloader.api.NewsRepository
 import com.andruid.magic.texttoaudiofile.api.TtsApi
 import com.blongho.country_data.World
 
+@Suppress("unused")
 class NewsApplication : Application() {
     override fun onCreate() {
         super.onCreate()

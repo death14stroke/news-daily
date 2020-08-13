@@ -20,16 +20,14 @@ object NewsRepository {
         category: String,
         page: Int,
         pageSize: Int
-    ): Result<ApiResponse> {
-        return sendNetworkRequest { service.getHeadlines(country, category, page, pageSize) }
-    }
+    ): Result<ApiResponse> =
+        sendNetworkRequest { service.getHeadlines(country, category, page, pageSize) }
 
     suspend fun loadArticles(
         language: String,
         query: String,
         page: Int,
         pageSize: Int
-    ): Result<ApiResponse> {
-        return sendNetworkRequest { service.getArticles(language, query, page, pageSize) }
-    }
+    ): Result<ApiResponse> =
+        sendNetworkRequest { service.getArticles(language, query, page, pageSize) }
 }

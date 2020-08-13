@@ -34,9 +34,8 @@ fun AudioNews.buildMetaData(): MediaMetadataCompat {
         .build()
 }
 
-fun NewsItem.toAudioNews(): AudioNews {
-    return AudioNews(
+fun NewsItem.toAudioNews() =
+    AudioNews(
         uri = url,
         news = this
     )
-}

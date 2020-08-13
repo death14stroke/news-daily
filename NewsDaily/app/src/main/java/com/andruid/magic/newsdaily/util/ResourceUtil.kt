@@ -17,10 +17,7 @@ fun Fragment.color(@ColorRes colorRes: Int) =
     requireContext().color(colorRes)
 
 @ColorInt
-fun Context.getColorFromAttr(
-    @AttrRes attrColor: Int,
-    resolveRefs: Boolean = true
-): Int {
+fun Context.getColorFromAttr(@AttrRes attrColor: Int, resolveRefs: Boolean = true): Int {
     val typedValue = TypedValue()
     theme.resolveAttribute(attrColor, typedValue, resolveRefs)
     return typedValue.data

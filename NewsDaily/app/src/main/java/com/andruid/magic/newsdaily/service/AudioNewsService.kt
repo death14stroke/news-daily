@@ -11,7 +11,6 @@ import android.os.Message
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
@@ -24,9 +23,7 @@ import com.andruid.magic.newsdaily.data.model.buildMetaData
 import com.andruid.magic.newsdaily.data.model.getMediaDescription
 import com.andruid.magic.newsdaily.data.model.toAudioNews
 import com.andruid.magic.newsdaily.database.repository.DbRepository
-import com.andruid.magic.newsdaily.util.buildNotification
-import com.andruid.magic.newsdaily.util.getDefaultCountry
-import com.andruid.magic.newsdaily.util.toast
+import com.andruid.magic.newsdaily.util.*
 import com.andruid.magic.texttoaudiofile.api.TtsApi
 import com.andruid.magic.texttoaudiofile.data.model.TtsResult
 import com.andruid.magic.texttoaudiofile.util.FileUtils.getUtteranceId
@@ -46,8 +43,6 @@ import kotlin.coroutines.CoroutineContext
 
 class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.EventListener {
     companion object {
-        private val TAG = "${AudioNewsService::class.java.simpleName}Log"
-
         private const val MEDIA_SERVICE = "AudioNewsService"
         private const val MSG_INIT_NEWS = 0
         private const val MSG_STOP_SERVICE = 1
@@ -70,10 +65,8 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
         )
         val pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, 0)
         val mediaButtonReceiver = ComponentName(applicationContext, MediaButtonReceiver::class.java)
-        MediaSessionCompat(
-            applicationContext,
-            MEDIA_SERVICE, mediaButtonReceiver, pendingIntent
-        )
+
+        MediaSessionCompat(applicationContext, MEDIA_SERVICE, mediaButtonReceiver, pendingIntent)
     }
     private val exoPlayer by lazy {
         SimpleExoPlayer.Builder(this)
@@ -97,7 +90,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "service created")
+        logi("service created")
 
         job.start()
         initExoPlayer()
@@ -113,6 +106,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
                 toast("Text to speech not available")
         } else
             MediaButtonReceiver.handleIntent(mediaSessionCompat, intent)
+
         return START_NOT_STICKY
     }
 
@@ -140,9 +134,8 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
                 if (playWhenReady) 1 else 0,
                 category
             )
-            audioNewsHandler.sendMessage(message).also {
-                Log.d(TAG, "sending message noti show in state change")
-            }
+            audioNewsHandler.sendMessage(message)
+                .also { logd("sending message noti show in state change") }
         }
     }
 
@@ -154,7 +147,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
             val pos = exoPlayer.currentWindowIndex
             if (pos == audioNewsList.size - NEWS_FETCH_DISTANCE) {
                 launch {
-                    Log.d("audioLog", "reached news fetch distance pos = $pos")
+                    logd("reached news fetch distance pos = $pos")
                     loadNews()
                 }
             }
@@ -168,9 +161,9 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
                 1,
                 category
             )
-            audioNewsHandler.sendMessage(message).also {
-                Log.d(TAG, "sending message noti show in pos discontinuity")
-            }
+
+            audioNewsHandler.sendMessage(message)
+                .also { logd("sending message noti show in pos discontinuity") }
         }
     }
 
@@ -182,7 +175,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
     }
 
     private suspend fun loadNews() {
-        Log.d("audioLog", "load news called page =  $page, page size = $PAGE_SIZE")
+        logd("load news called page =  $page, page size = $PAGE_SIZE")
         withContext(Dispatchers.IO) {
             DbRepository.getNewsForPage(
                 getDefaultCountry(),
@@ -193,11 +186,11 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
         }
             .map { news -> news.toAudioNews() }
             .forEach { news ->
+                logi("news = ${news.news.title}")
+
                 val pos = audioNewsList.size
-                Log.d("audioLog", "news = ${news.news.title}")
                 val text =
                     if (news.news.desc?.isNotEmpty() == true) news.news.desc else "No description available"
-
                 audioNewsList.add(news)
                 addAudioToQueue(text, pos.toString())
             }
@@ -208,10 +201,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
 
         if (result is TtsResult.Success) {
             val file = result.file
-            val utteranceId = getUtteranceId(file.name).also {
-                Log.d(TAG, "Utterance done $it")
-            }
-
+            val utteranceId = getUtteranceId(file.name).also { logd("Utterance done $it") }
             val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(Uri.fromFile(file))
             concatenatingMediaSource.addMediaSource(mediaSource)
@@ -328,7 +318,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
 
     private inner class AudioNewsHandler : Handler.Callback {
         override fun handleMessage(message: Message): Boolean {
-            Log.d(TAG, "handle message: ${message.what}")
+            logd("handle message: ${message.what}")
 
             when (message.what) {
                 MSG_INIT_NEWS -> {
@@ -336,9 +326,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
                     audioNewsList.clear()
                     concatenatingMediaSource.clear()
 
-                    launch {
-                        loadNews()
-                    }
+                    launch { loadNews() }
                 }
 
                 MSG_STOP_SERVICE -> {
@@ -357,6 +345,7 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
                     val category = message.obj as String
                     val playWhenReady = message.arg2 == 1
                     val metadataCompat = mediaSessionCompat.controller.metadata
+
                     launch {
                         val notificationBuilder = buildNotification(
                             icon,

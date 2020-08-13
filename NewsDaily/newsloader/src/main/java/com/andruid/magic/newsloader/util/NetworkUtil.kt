@@ -18,7 +18,7 @@ suspend fun <T> sendNetworkRequest(requestFunc: suspend () -> Response<T>): Resu
     return withContext(Dispatchers.IO) {
         try {
             val response = requestFunc.invoke()
-            Log.d("newsLog", "body = ${response.body() ?: "null"}")
+            Log.d("networkLog", "body = ${response.body() ?: "null"}")
             Result.Success(response.body())
         } catch (e: HttpException) {
             Result.Error<T>(e.message())
@@ -33,18 +33,18 @@ suspend fun <T> sendNetworkRequest(requestFunc: suspend () -> Response<T>): Resu
 @Suppress("DEPRECATION")
 fun Context.hasNetwork(): Boolean {
     getSystemService<ConnectivityManager>()?.let { cm ->
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             cm.getNetworkCapabilities(cm.activeNetwork)?.let { nc ->
-                return nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                        nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || nc.hasTransport(
+                    NetworkCapabilities.TRANSPORT_WIFI
+                )
             }
         } else {
             cm.activeNetworkInfo?.let { networkInfo ->
-                return (networkInfo.isConnected &&
-                        (networkInfo.type == ConnectivityManager.TYPE_WIFI ||
-                                networkInfo.type == ConnectivityManager.TYPE_MOBILE))
+                (networkInfo.isConnected &&
+                        (networkInfo.type == ConnectivityManager.TYPE_WIFI || networkInfo.type == ConnectivityManager.TYPE_MOBILE))
             }
-        }
+        } ?: false
     }
     return false
 }

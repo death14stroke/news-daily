@@ -14,26 +14,21 @@ import kotlinx.coroutines.flow.flow
 
 class NewsViewModel(selectedCountry: String, private val category: String) : ViewModel() {
     private val countryLiveData = MutableLiveData(selectedCountry)
+    val newsLiveData = countryLiveData.switchMap { country ->
+        flow<Result<PagingData<NewsItem>>> {
+            emit(Result.Loading(""))
 
-    val newsLiveData: LiveData<Result<PagingData<NewsItem>>>
+            val config = PagingConfig(PAGE_SIZE)
+            val pager = Pager(config) {
+                DbRepository.getNews(country, category)
+            }
 
-    init {
-        newsLiveData = countryLiveData.switchMap { country ->
-            flow<Result<PagingData<NewsItem>>> {
-                emit(Result.Loading(""))
-
-                val config = PagingConfig(PAGE_SIZE)
-                val pager = Pager(config) {
-                    DbRepository.getNews(country, category)
+            pager.flow
+                .cachedIn(viewModelScope)
+                .collect { news ->
+                    emit(Result.Success(news))
                 }
-
-                pager.flow
-                    .cachedIn(viewModelScope)
-                    .collect { news ->
-                        emit(Result.Success(news))
-                    }
-            }.asLiveData()
-        }
+        }.asLiveData()
     }
 
     fun updateCountry(country: String) {
