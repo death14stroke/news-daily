@@ -10,3 +10,8 @@ const val PAGE_SIZE = 10
 const val PAGE_SIZE_WORKER = 50
 
 const val ACTION_NOTI_CLICK = "com.andruid.magic.newsdaily.NOTI_CLICK"
+
+const val EXTRA_TITLE_RES = "title_res"
+const val EXTRA_DESC_RES = "desc_res"
+const val EXTRA_LOTTIE_RES = "lottie_res"
+const val EXTRA_BACKGROUND_COLOR = "background_color"

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -19,23 +18,25 @@ import com.andruid.magic.newsdaily.data.ACTION_NOTI_CLICK
 import com.andruid.magic.newsdaily.data.ACTION_SEARCH_ARTICLES
 import com.andruid.magic.newsdaily.data.EXTRA_CATEGORY
 import com.andruid.magic.newsdaily.data.EXTRA_QUERY
-import com.andruid.magic.newsdaily.database.repository.DbRepository
 import com.andruid.magic.newsdaily.databinding.ActivityHomeBinding
 import com.andruid.magic.newsdaily.ui.custom.DebouncingQueryTextListener
 import com.andruid.magic.newsdaily.ui.fragment.NewsFragmentDirections
 import com.andruid.magic.newsdaily.util.color
 import com.andruid.magic.newsdaily.util.getColorFromAttr
-import com.google.android.material.textview.MaterialTextView
 import com.miguelcatalan.materialsearchview.MaterialSearchView
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
     private val navController by lazy { findNavController(R.id.nav_host_fragment) }
+    private val appBarConfiguration by lazy {
+        AppBarConfiguration(
+            setOf(
+                R.id.nav_general, R.id.nav_business, R.id.nav_entertainment,
+                R.id.nav_health, R.id.nav_science, R.id.nav_sports, R.id.nav_tech
+            ), binding.drawerLayout
+        )
+    }
 
     private lateinit var binding: ActivityHomeBinding
-    private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,8 +61,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return NavigationUI.onNavDestinationSelected(item, navController) ||
-                super.onOptionsItemSelected(item)
+        return item.onNavDestinationSelected(navController) || super.onOptionsItemSelected(item)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -90,13 +90,6 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun initDrawer() {
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_general, R.id.nav_business, R.id.nav_entertainment,
-                R.id.nav_health, R.id.nav_science, R.id.nav_sports, R.id.nav_tech
-            ), binding.drawerLayout
-        )
-
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.nav_search, R.id.nav_webview, R.id.nav_show_image, R.id.action_settings, R.id.action_intro ->
@@ -118,33 +111,6 @@ class HomeActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setupWithNavController(navController)
-
-        val categories = resources.getStringArray(R.array.categories)
-        val itemIds = intArrayOf(
-            R.id.nav_general,
-            R.id.nav_business,
-            R.id.nav_entertainment,
-            R.id.nav_health,
-            R.id.nav_science,
-            R.id.nav_sports,
-            R.id.nav_tech
-        )
-
-        val flows = mutableListOf<Flow<Int>>()
-
-        lifecycleScope.launch {
-            categories.forEach { category ->
-                flows.add(DbRepository.countUnread(category))
-            }
-
-            flows.forEach { flow ->
-                flow.collect { unread ->
-                /*(binding.navView.menu.findItem(itemId).actionView as MaterialTextView).text =
-                    unread.toString()*/
-                    Log.d("unreadLog", "unread = $unread")
-            }
-            }
-        }
     }
 
     private fun initSearchView() {

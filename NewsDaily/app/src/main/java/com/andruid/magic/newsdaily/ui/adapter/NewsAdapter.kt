@@ -29,17 +29,8 @@ class NewsAdapter(private val newsClickListener: NewsClickListener) :
         }
     }
 
-    fun getNews(position: Int): NewsItem? {
-        return try {
-            val item = getItem(position)
-            if (item is NewsItem)
-                item
-            else null
-        } catch (e: IndexOutOfBoundsException) {
-            e.printStackTrace()
-            null
-        }
-    }
+    fun getNews(position: Int) =
+        getItem(position)
 
     interface NewsClickListener {
         fun onShareNews(news: NewsItem)

@@ -110,6 +110,12 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
         binding.viewPager.apply {
             adapter = newsAdapter
             setPageTransformer(AlphaPageTransformer())
+
+            postponeEnterTransition()
+            viewTreeObserver.addOnPreDrawListener {
+                startPostponedEnterTransition()
+                true
+            }
         }
     }
 
@@ -127,7 +133,7 @@ class SearchFragment : Fragment(), NewsAdapter.NewsClickListener {
     override fun onViewImage(view: View, imageUrl: String) {
         val directions = NewsFragmentDirections.actionNewsToShowImage(imageUrl)
         val extras = FragmentNavigatorExtras(
-            view to "imageViewTransition"
+            view to view.transitionName
         )
         findNavController().navigate(directions, extras)
     }

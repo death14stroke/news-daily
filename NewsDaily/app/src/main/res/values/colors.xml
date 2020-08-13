@@ -10,6 +10,8 @@
     <color name="sapphire_40">#66303F9F</color>
     <color name="amber">#FFC107</color>
     <color name="periwinkle_gray">#C5CAE9</color>
+    <color name="red">#F44336</color>
+    <color name="purple">#E040FB</color>
 
     <color name="colorPrimaryText">#212121</color>
     <color name="colorSecondaryText">#757575</color>

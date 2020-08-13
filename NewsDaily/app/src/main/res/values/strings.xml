@@ -22,9 +22,11 @@
 
     <string name="error_copy_link">Could not copy link</string>
 
-    <string name="categories">Categories</string>
+    <string name="categories_title">Categories</string>
     <string name="categories_desc">Get news from 7 different categories - General, Business, Entertainment,Health, Science, Sports and Technology</string>
-    <string name="audio_news">Audio news</string>
+    <string name="countries_title">Countries</string>
+    <string name="countries_desc">Get news from over 50 countries over the globe</string>
+    <string name="audio_news_title">Audio news</string>
     <string name="audio_news_desc">Want to keep updated but no time to read? Listen to latest news while working</string>
 
     <string name="pref_ui_sync" translatable="false">pref_ui_sync</string>

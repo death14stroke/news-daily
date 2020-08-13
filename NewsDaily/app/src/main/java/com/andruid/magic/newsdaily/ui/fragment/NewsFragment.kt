@@ -8,30 +8,23 @@ import android.os.RemoteException
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.paging.PagingData
-import androidx.paging.filter
 import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.viewpager2.widget.ViewPager2
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.data.ACTION_PREPARE_AUDIO
 import com.andruid.magic.newsdaily.data.EXTRA_CATEGORY
 import com.andruid.magic.newsdaily.database.entity.NewsItem
-import com.andruid.magic.newsdaily.database.repository.DbRepository
 import com.andruid.magic.newsdaily.databinding.FragmentNewsBinding
 import com.andruid.magic.newsdaily.service.AudioNewsService
-import com.andruid.magic.newsdaily.ui.adapter.FooterAdapter
 import com.andruid.magic.newsdaily.ui.adapter.NewsAdapter
 import com.andruid.magic.newsdaily.ui.custom.AlphaPageTransformer
 import com.andruid.magic.newsdaily.ui.viewmodel.BaseViewModelFactory
@@ -41,22 +34,11 @@ import com.andruid.magic.newsdaily.util.openChromeCustomTab
 import com.andruid.magic.newsdaily.util.shareNews
 import com.andruid.magic.newsdaily.worker.WorkerScheduler
 import com.andruid.magic.newsloader.data.model.Result
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
     SharedPreferences.OnSharedPreferenceChangeListener {
     private val safeArgs by navArgs<NewsFragmentArgs>()
-    private val unreadNewsAdapter by lazy { NewsAdapter(this) }
-    private val readNewsAdapter by lazy { NewsAdapter(this) }
-    private val concatAdapter by lazy {
-        val config = ConcatAdapter.Config.Builder()
-            .setIsolateViewTypes(false)
-            .build()
-        val footerAdapter = FooterAdapter()
-        val unreadWithFooter = unreadNewsAdapter.withLoadStateFooter(footerAdapter)
-        ConcatAdapter(config, unreadWithFooter, readNewsAdapter)
-    }
+    private val newsAdapter by lazy { NewsAdapter(this) }
     private val newsViewModel by viewModels<NewsViewModel> {
         BaseViewModelFactory {
             NewsViewModel(
@@ -86,7 +68,7 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
         val preferences = PreferenceManager.getDefaultSharedPreferences(context)
         preferences.registerOnSharedPreferenceChangeListener(this@NewsFragment)
 
-        syncWithUI = preferences.getBoolean(getString(R.string.pref_ui_sync), false)
+        syncWithUI = preferences.getBoolean(getString(R.string.pref_ui_sync), true)
     }
 
     override fun onCreateView(
@@ -105,8 +87,10 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mediaControllerCompat.unregisterCallback(mediaControllerCallback)
-        mediaBrowserCompat.disconnect()
+        if (::mediaControllerCompat.isInitialized)
+            mediaControllerCompat.unregisterCallback(mediaControllerCallback)
+        if (mediaBrowserCompat.isConnected)
+            mediaBrowserCompat.disconnect()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -115,16 +99,7 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
         newsViewModel.newsLiveData.observe(viewLifecycleOwner, Observer { result ->
             when (result) {
                 is Result.Success<PagingData<NewsItem>> -> {
-                    result.data?.let { pagingData ->
-                        val unread =
-                            pagingData.filter { news -> DbRepository.isUnread(news) }
-                        unreadNewsAdapter.submitData(lifecycle, unread)
-
-                        val read =
-                            pagingData.filter { news -> !DbRepository.isUnread(news) }
-                        readNewsAdapter.submitData(lifecycle, read)
-                    }
-
+                    result.data?.let { pagingData -> newsAdapter.submitData(lifecycle, pagingData) }
                     binding.progressBar.hide()
                 }
                 is Result.Error -> {
@@ -166,27 +141,23 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
     }
 
     private fun scrollToCurrentNews(title: String) {
-        concatAdapter.adapters.forEach { adapter ->
-            if (adapter is NewsAdapter) {
-                adapter.snapshot().items.apply {
-                    try {
-                        val optionalInt =
-                            IntRange(
-                                0,
-                                size - 1
-                            ).firstOrNull { pos: Int -> this[pos].title == title }
-                        binding.viewPager.currentItem = optionalInt ?: return@forEach
-                    } catch (e: NoSuchElementException) {
-                        e.printStackTrace()
-                    }
-                }
+        newsAdapter.snapshot().items.apply {
+            try {
+                val optionalInt =
+                    IntRange(
+                        0,
+                        size - 1
+                    ).firstOrNull { pos: Int -> this[pos].title == title }
+                binding.viewPager.currentItem = optionalInt ?: return@apply
+            } catch (e: NoSuchElementException) {
+                e.printStackTrace()
             }
         }
     }
 
     private fun initViewPager() {
         binding.viewPager.apply {
-            adapter = concatAdapter
+            adapter = newsAdapter
             setPageTransformer(AlphaPageTransformer())
 
             postponeEnterTransition()
@@ -194,22 +165,6 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
                 startPostponedEnterTransition()
                 true
             }
-
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    super.onPageSelected(position)
-                    Log.d("pageLog", "onPageSelected $position")
-                    unreadNewsAdapter.getNews(position)?.let { news ->
-                        Log.d("pageLog", "curr news = ${news.title}")
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            DbRepository.insertReadNews(
-                                category = news.category,
-                                url = news.url
-                            )
-                        }
-                    }
-                }
-            })
         }
     }
 

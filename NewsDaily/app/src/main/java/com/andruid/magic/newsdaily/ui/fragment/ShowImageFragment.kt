@@ -1,7 +1,5 @@
 package com.andruid.magic.newsdaily.ui.fragment
 
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,8 +17,6 @@ import com.igreenwood.loupe.extensions.createLoupe
 import com.igreenwood.loupe.extensions.setOnViewTranslateListener
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
-import com.squareup.picasso.Target
-import java.lang.Exception
 
 class ShowImageFragment : Fragment() {
     private val safeArgs by navArgs<ShowImageFragmentArgs>()
@@ -82,7 +78,6 @@ class ShowImageFragment : Fragment() {
                     startPostponedEnterTransition()
                     initPinchZooming()
                 }
-
             })
     }
 }

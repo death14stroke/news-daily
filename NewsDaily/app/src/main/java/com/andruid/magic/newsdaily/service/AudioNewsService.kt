@@ -183,7 +183,14 @@ class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Eve
 
     private suspend fun loadNews() {
         Log.d("audioLog", "load news called page =  $page, page size = $PAGE_SIZE")
-        withContext(Dispatchers.IO) { DbRepository.getNewsForPage(getDefaultCountry(), category, page++, PAGE_SIZE) }
+        withContext(Dispatchers.IO) {
+            DbRepository.getNewsForPage(
+                getDefaultCountry(),
+                category,
+                page++,
+                PAGE_SIZE
+            )
+        }
             .map { news -> news.toAudioNews() }
             .forEach { news ->
                 val pos = audioNewsList.size
