@@ -30,4 +30,7 @@ object DbRepository {
         return database.newsDao()
             .getNewsForCategoryPage(country, category, page * pageSize, pageSize)
     }
+
+    suspend fun getLatestNewsTime(): Long =
+        database.newsDao().getLatestNewsTime()
 }

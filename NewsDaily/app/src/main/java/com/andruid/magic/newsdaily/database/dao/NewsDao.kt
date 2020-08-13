@@ -25,4 +25,7 @@ interface NewsDao {
         offset: Int,
         size: Int
     ): List<NewsItem>
+
+    @Query("SELECT published FROM offline_news ORDER BY published DESC LIMIT 1")
+    suspend fun getLatestNewsTime(): Long
 }

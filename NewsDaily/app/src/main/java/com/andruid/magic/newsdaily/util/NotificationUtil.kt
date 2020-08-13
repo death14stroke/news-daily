@@ -23,8 +23,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-const val CHANNEL_NAME = "AudioNews"
-const val CHANNEL_ID = "audio_news_channel"
+const val AUDIO_CHANNEL_NAME = "AudioNews"
+const val AUDIO_CHANNEL_ID = "audio_news_channel"
+
+const val NEW_CONTENT_CHANNEL_NAME = "New Content"
+const val NEW_CONTENT_CHANNEL_ID = "new_content_channel"
 
 @SuppressLint("DefaultLocale")
 suspend fun Context.buildNotification(
@@ -46,8 +49,8 @@ suspend fun Context.buildNotification(
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val notificationChannel =
             NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
+                AUDIO_CHANNEL_ID,
+                AUDIO_CHANNEL_NAME,
                 importance
             ).apply {
                 enableLights(true)
@@ -56,14 +59,14 @@ suspend fun Context.buildNotification(
         notificationManager.createNotificationChannel(notificationChannel)
     }
 
-    return NotificationCompat.Builder(this, CHANNEL_ID).apply {
+    return NotificationCompat.Builder(this, AUDIO_CHANNEL_ID).apply {
         setStyle(
             androidx.media.app.NotificationCompat.MediaStyle()
                 .setMediaSession(token)
                 .setShowActionsInCompactView(0, 1, 2)
                 .setShowCancelButton(true)
         )
-        setSmallIcon(R.mipmap.ic_launcher)
+        setSmallIcon(R.drawable.logo_round)
 
         priority = NotificationCompat.PRIORITY_MAX
         setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -111,9 +114,46 @@ suspend fun Context.buildNotification(
     }
 }
 
-fun Context.startForegroundServiceCompat(intent: Intent) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        startForegroundService(intent)
-    else
-        startService(intent)
+fun Context.buildNewContentNotification(count: Int): NotificationCompat.Builder {
+    val intent = Intent(this, HomeActivity::class.java)
+        .setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
+
+    val notificationManager = getSystemService<NotificationManager>()!!
+    var importance = 0
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        importance = NotificationManager.IMPORTANCE_DEFAULT
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val notificationChannel =
+            NotificationChannel(
+                NEW_CONTENT_CHANNEL_ID,
+                NEW_CONTENT_CHANNEL_NAME,
+                importance
+            ).apply {
+                enableLights(true)
+                lightColor = Color.GREEN
+            }
+        notificationManager.createNotificationChannel(notificationChannel)
+    }
+
+    return NotificationCompat.Builder(this, NEW_CONTENT_CHANNEL_ID).apply {
+        setSmallIcon(R.drawable.logo_round)
+
+        priority = NotificationCompat.PRIORITY_DEFAULT
+        setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        setAutoCancel(true)
+        setOnlyAlertOnce(true)
+
+        setContentIntent(
+            PendingIntent.getActivity(
+                this@buildNewContentNotification,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        )
+        setContentTitle(getString(R.string.new_content_title))
+        setContentText(getString(R.string.new_content_desc, count))
+        setShowWhen(true)
+    }
 }
