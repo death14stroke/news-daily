@@ -21,11 +21,11 @@ suspend fun <T> sendNetworkRequest(requestFunc: suspend () -> Response<T>): Resu
             Log.d("networkLog", "body = ${response.body() ?: "null"}")
             Result.Success(response.body())
         } catch (e: HttpException) {
-            Result.Error<T>(e.message())
+            Result.Error(e.message(), e)
         } catch (e: ConnectException) {
-            Result.Error<T>(e.message ?: "ConnectException")
+            Result.Error(e.message ?: "ConnectException", e)
         } catch (e: IOException) {
-            Result.Error<T>(e.message ?: "IOException")
+            Result.Error(e.message ?: "IOException", e)
         }
     }
 }
