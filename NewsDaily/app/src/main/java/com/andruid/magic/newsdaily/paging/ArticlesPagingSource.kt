@@ -25,7 +25,7 @@ class ArticlesPagingSource(private val query: String) : PagingSource<Int, NewsIt
                 } ?: LoadResult.Error(Throwable("No results found"))
             }
             is Result.Error -> {
-                LoadResult.Error(Throwable(result.message))
+                LoadResult.Error(Throwable(result.error))
             }
             is Result.Loading -> {
                 LoadResult.Error(Throwable("Loading"))

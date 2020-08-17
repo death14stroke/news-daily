@@ -17,7 +17,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.paging.PagingData
 import androidx.preference.PreferenceManager
 import com.andruid.magic.newsdaily.R
 import com.andruid.magic.newsdaily.data.ACTION_PREPARE_AUDIO
@@ -33,7 +32,8 @@ import com.andruid.magic.newsdaily.util.getSelectedCountry
 import com.andruid.magic.newsdaily.util.openChromeCustomTab
 import com.andruid.magic.newsdaily.util.shareNews
 import com.andruid.magic.newsdaily.worker.WorkerScheduler
-import com.andruid.magic.newsloader.data.model.Result
+import com.andruid.magic.newsloader.data.model.onLoading
+import com.andruid.magic.newsloader.data.model.onSuccess
 
 class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
     SharedPreferences.OnSharedPreferenceChangeListener {
@@ -102,16 +102,11 @@ class NewsFragment : Fragment(), NewsAdapter.NewsClickListener,
         super.onActivityCreated(savedInstanceState)
 
         newsViewModel.newsLiveData.observe(viewLifecycleOwner, Observer { result ->
-            when (result) {
-                is Result.Success<PagingData<NewsItem>> -> {
-                    result.data?.let { pagingData -> newsAdapter.submitData(lifecycle, pagingData) }
-                    binding.progressBar.hide()
-                }
-                is Result.Error -> {
-                }
-                is Result.Loading -> {
-                    binding.progressBar.show()
-                }
+            result.onSuccess { data ->
+                data?.let { pagingData -> newsAdapter.submitData(lifecycle, pagingData) }
+                binding.progressBar.hide()
+            }.onLoading {
+                binding.progressBar.show()
             }
         })
     }
