@@ -16,7 +16,7 @@
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
+            android:theme="@style/Theme.NewsDaily.AppBarOverlay">
 
             <FrameLayout
                 android:id="@+id/toolBar_container"
@@ -27,7 +27,8 @@
                 <com.google.android.material.appbar.MaterialToolbar
                     android:id="@+id/toolBar"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize" />
+                    android:layout_height="?attr/actionBarSize"
+                    />
 
                 <com.miguelcatalan.materialsearchview.MaterialSearchView
                     android:id="@+id/searchView"

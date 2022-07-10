@@ -7,17 +7,13 @@
 
         <variable
             name="news"
-            type="com.andruid.magic.newsdaily.database.entity.NewsItem" />
-
-        <variable
-            name="newsClickListener"
-            type="com.andruid.magic.newsdaily.ui.adapter.NewsAdapter.NewsClickListener" />
+            type="com.death14stroke.newsloader.data.model.News" />
     </data>
 
     <com.google.android.material.circularreveal.cardview.CircularRevealCardView
+        style="@style/CardViewStyle"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        style="@style/CardViewStyle">
+        android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -27,12 +23,12 @@
                 android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                tools:src="@drawable/ic_launcher_background"
                 android:contentDescription="@{news.title}"
                 android:scaleType="fitXY"
                 app:layout_constraintBottom_toTopOf="@id/textCL"
                 app:layout_constraintHeight_percent=".4"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@drawable/ic_launcher_background" />
 
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/shareBtn"
@@ -40,29 +36,28 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/share"
-                android:onClick="@{() -> newsClickListener.onShareNews(news)}"
                 android:src="@android:drawable/ic_menu_share"
                 app:layout_constraintEnd_toEndOf="@id/imageView"
                 app:layout_constraintTop_toTopOf="@id/imageView" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/dateTV"
-                style="@style/AppTheme.Info"
+                style="@style/Theme.NewsDaily.Info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/round_rect_left"
-                app:dateFromMs="@{news.published}"
+                app:dateFormat="@{news.published}"
                 app:layout_constraintBottom_toBottomOf="@id/imageView"
                 app:layout_constraintEnd_toEndOf="@id/imageView"
                 tools:text="25-Jul-19" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/sourceTV"
-                style="@style/AppTheme.Info"
+                style="@style/Theme.NewsDaily.Info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/round_rect_right"
-                android:text="@{news.sourceName}"
+                android:text="@{news.source.name}"
                 app:layout_constraintBottom_toBottomOf="@id/imageView"
                 app:layout_constraintStart_toStartOf="@id/imageView"
                 tools:text="News source" />
@@ -77,32 +72,31 @@
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/titleTV"
-                    android:theme="@style/AppTheme.Title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@{news.title}"
+                    android:theme="@style/Theme.NewsDaily.Title"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="News title" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/descTV"
-                    android:theme="@style/AppTheme.Description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@{news.desc}"
+                    android:theme="@style/Theme.NewsDaily.Description"
                     app:layout_constraintTop_toBottomOf="@id/titleTV"
                     tools:text="News description" />
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/goToUrlTV"
-                    style="@style/AppTheme.URL"
+                    style="@style/Theme.NewsDaily.URL"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:gravity="center_vertical"
                     android:lines="3"
                     android:maxLines="3"
-                    android:onClick="@{() -> newsClickListener.onOpenNews(news.url)}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:readMore="@{news.url}"
                     tools:text="www.google.com" />
