@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_general"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.NewsFragment"
         android:label="@string/general"
         tools:layout="@layout/fragment_news">
         <argument
@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/nav_business"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.NewsFragment"
         android:label="@string/business"
         tools:layout="@layout/fragment_news">
         <argument
@@ -29,7 +29,7 @@
 
     <fragment
         android:id="@+id/nav_entertainment"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.NewsFragment"
         android:label="@string/entertainment"
         tools:layout="@layout/fragment_news">
         <argument
@@ -40,7 +40,7 @@
 
     <fragment
         android:id="@+id/nav_health"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.NewsFragment"
         android:label="@string/health"
         tools:layout="@layout/fragment_news">
         <argument
@@ -51,7 +51,7 @@
 
     <fragment
         android:id="@+id/nav_science"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.NewsFragment"
         android:label="@string/science"
         tools:layout="@layout/fragment_news">
         <argument
@@ -62,7 +62,7 @@
 
     <fragment
         android:id="@+id/nav_sports"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.NewsFragment"
         android:label="@string/sports"
         tools:layout="@layout/fragment_news">
         <argument
@@ -73,7 +73,7 @@
 
     <fragment
         android:id="@+id/nav_tech"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.NewsFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.NewsFragment"
         android:label="@string/technology"
         tools:layout="@layout/fragment_news">
         <argument
@@ -84,7 +84,7 @@
 
     <fragment
         android:id="@+id/nav_webview"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.WebViewFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.WebViewFragment"
         android:label="{newsUrl}"
         tools:layout="@layout/fragment_web_view">
         <argument
@@ -103,13 +103,13 @@
 
     <fragment
         android:id="@+id/nav_search"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.SearchFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.NewsFragment"
         android:label="Search"
         tools:layout="@layout/fragment_search" />
 
     <fragment
         android:id="@+id/action_settings"
-        android:name="com.andruid.magic.newsdaily.ui.fragment.SettingsFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.SettingsFragment"
         android:label="Settings" />
 
     <action
@@ -122,13 +122,13 @@
 
     <activity
         android:id="@+id/action_intro"
-        android:name="com.andruid.magic.newsdaily.ui.activity.IntroActivity"
+        android:name="com.death14stroke.newsdaily.ui.activity.IntroActivity"
         android:label="IntroActivity" />
 
     <fragment
         android:id="@+id/nav_show_image"
         android:label=""
-        android:name="com.andruid.magic.newsdaily.ui.fragment.ShowImageFragment"
+        android:name="com.death14stroke.newsdaily.ui.fragment.ShowImageFragment"
         tools:layout="@layout/fragment_show_image">
         <argument
             android:name="imageUrl"

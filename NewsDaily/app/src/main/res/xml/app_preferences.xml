@@ -7,7 +7,7 @@
         app:iconSpaceReserved="false">
 
         <!--suppress AndroidUnknownAttribute -->
-        <com.andruid.magic.newsdaily.ui.custom.CountryPreference
+        <com.death14stroke.newsdaily.ui.custom.CountryPreference
             style="@style/AppPreference.DialogPreference"
             android:defaultValue="@string/default_country"
             android:key="@string/pref_country"

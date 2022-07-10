@@ -10,12 +10,11 @@
         android:layout_height="match_parent"
         app:layout_constraintBottom_toTopOf="@id/progressBar" />
 
-    <com.google.android.material.progressindicator.ProgressIndicator
+    <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progressBar"
-        app:indicatorType="linear"
-        android:indeterminate="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:indeterminate="true"
         app:layout_constraintBottom_toTopOf="@id/webView"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
