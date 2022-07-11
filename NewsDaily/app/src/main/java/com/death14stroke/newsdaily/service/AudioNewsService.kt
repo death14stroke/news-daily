@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.content.getSystemService
@@ -19,17 +20,15 @@ import com.death14stroke.newsdaily.R
 import com.death14stroke.newsdaily.data.ACTION_PREPARE_AUDIO
 import com.death14stroke.newsdaily.data.EXTRA_CATEGORY
 import com.death14stroke.newsdaily.data.PAGE_SIZE
-import com.death14stroke.newsdaily.data.model.AudioNews
-import com.death14stroke.newsdaily.data.model.buildMetaData
-import com.death14stroke.newsdaily.data.model.getMediaDescription
-import com.death14stroke.newsdaily.data.model.toAudioNews
+import com.death14stroke.newsdaily.data.model.*
 import com.death14stroke.newsdaily.data.preferences.PreferenceHelper
 import com.death14stroke.newsdaily.data.repository.MainRepository
 import com.death14stroke.newsdaily.ui.util.buildNotification
+import com.death14stroke.newsdaily.ui.util.sendRequest
 import com.death14stroke.newsdaily.ui.util.toast
-import com.death14stroke.newsloader.data.model.onSuccess
+import com.death14stroke.newsloader.data.model.Category
+import com.death14stroke.newsloader.data.model.News
 import com.death14stroke.texttoaudiofile.api.TtsHelper
-import com.death14stroke.texttoaudiofile.data.model.TtsResult
 import com.death14stroke.texttoaudiofile.util.FileUtils.getUtteranceId
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
@@ -44,19 +43,13 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.Util
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 import kotlin.coroutines.CoroutineContext
 
-class AudioNewsService :
-    MediaBrowserServiceCompat(),
-    CoroutineScope, Player.Listener {
+class AudioNewsService : MediaBrowserServiceCompat(), CoroutineScope, Player.Listener {
     companion object {
         private const val MEDIA_SERVICE = "AudioNewsService"
-        private const val MSG_INIT_NEWS = 0
-        private const val MSG_STOP_SERVICE = 1
-        private const val MSG_UPDATE_SOURCE = 2
-        private const val MSG_SHOW_NOTI = 3
         private const val WAIT_QUEUE_TIMEOUT_MS = 5000
-
         private const val NEWS_FETCH_DISTANCE = 3
         private const val MEDIA_NOTI_ID = 1
     }
@@ -82,6 +75,7 @@ class AudioNewsService :
     }
     private val exoPlayer by lazy {
         ExoPlayer.Builder(this)
+            .setLooper(Looper.getMainLooper())
             .build()
     }
     private val dataSourceFactory by lazy {
@@ -97,14 +91,14 @@ class AudioNewsService :
     private val audioNewsHandler by lazy { Handler(Looper.getMainLooper(), AudioNewsHandler()) }
     private val concatenatingMediaSource = ConcatenatingMediaSource()
     private val mediaSessionCallback = MediaSessionCallback()
-    private val audioNewsList = mutableListOf<AudioNews>()
 
     private var page = 0
 
-    private lateinit var category: String
+    private lateinit var category: Category
 
     override fun onCreate() {
         super.onCreate()
+        Timber.i("onCreate AudioNewsService")
         job.start()
         initExoPlayer()
         initMediaSession()
@@ -112,20 +106,24 @@ class AudioNewsService :
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         if (ACTION_PREPARE_AUDIO == intent.action) {
-            category = intent.extras?.getString(EXTRA_CATEGORY) ?: "general"
-            if (ttsHelper.isReady)
-                audioNewsHandler.sendEmptyMessage(MSG_INIT_NEWS)
-            else
-                toast("Text to speech not available")
-        } else
+            category = intent.extras?.getParcelable(EXTRA_CATEGORY) ?: Category.GENERAL
+            ttsHelper.initialize { success ->
+                Timber.d("service tts initialize = $success")
+                if (success)
+                    audioNewsHandler.sendEmptyMessage(HandlerMessage.MSG_INIT_NEWS.code)
+                else
+                    toast("Text to speech not initialized")
+            }
+        } else {
             MediaButtonReceiver.handleIntent(mediaSessionCompat, intent)
+        }
 
         return START_NOT_STICKY
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        audioNewsHandler.sendEmptyMessage(MSG_STOP_SERVICE)
+        audioNewsHandler.sendEmptyMessage(HandlerMessage.MSG_STOP_SERVICE.code)
     }
 
     override fun onDestroy() {
@@ -143,11 +141,16 @@ class AudioNewsService :
             if (playWhenReady) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
 
         val message = audioNewsHandler.obtainMessage(
-            MSG_SHOW_NOTI, icon,
+            HandlerMessage.MSG_SHOW_NOTI.code, icon,
             if (playWhenReady) 1 else 0,
             category
         )
         audioNewsHandler.sendMessage(message)
+    }
+
+    override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        super.onMediaItemTransition(mediaItem, reason)
+        Timber.d("MediaItem transition")
     }
 
     override fun onPositionDiscontinuity(
@@ -162,17 +165,16 @@ class AudioNewsService :
             reason == Player.DISCONTINUITY_REASON_INTERNAL
         ) {
             val pos = exoPlayer.currentMediaItemIndex
-            if (pos == audioNewsList.size - NEWS_FETCH_DISTANCE) {
+            if (pos == exoPlayer.mediaItemCount - NEWS_FETCH_DISTANCE) {
                 launch {
                     loadNews()
                 }
             }
-            val audioNews = audioNewsList[pos]
-            val mediaMetadataCompat = audioNews.buildMetaData()
+            val mediaMetadataCompat = exoPlayer.currentMediaItem?.toAudioNews()?.buildMetaData()
             mediaSessionCompat.setMetadata(mediaMetadataCompat)
 
             val message = audioNewsHandler.obtainMessage(
-                MSG_SHOW_NOTI,
+                HandlerMessage.MSG_SHOW_NOTI.code,
                 android.R.drawable.ic_media_pause,
                 1,
                 category
@@ -200,36 +202,52 @@ class AudioNewsService :
                 page++,
                 PAGE_SIZE
             ).onSuccess { response ->
-                (response?.newsOnlineList ?: emptyList())
-                    .map { news -> news.toAudioNews() }
-                    .forEach { news ->
-                        val pos = audioNewsList.size
-                        val text = news.news.desc ?: "No description available"
-                        audioNewsList.add(news)
-                        addAudioToQueue(text, pos.toString())
-                    }
+                //val text = news.desc ?: "No description available"
+                addAudioToQueue(
+                    response?.newsList.orEmpty()
+                )
+                //withContext(Dispatchers.Main) { exoPlayer.mediaItemCount.toString() })
             }
         }
     }
 
-    private suspend fun addAudioToQueue(text: String, id: String) {
-        val result = ttsHelper.convertToAudioFile(text, id)
+    // TODO: call tts for all list items in parallel with async/await
+    private suspend fun addAudioToQueue(newsList: List<News>) {
+        val count = withContext(Dispatchers.Main) { exoPlayer.mediaItemCount }
+        val deferredResults = newsList.mapIndexed { pos, news ->
+            coroutineScope {
+                async {
+                    sendRequest {
+                        ttsHelper.convertToAudioFile(
+                            news.desc ?: "No description available", "${count + pos}"
+                        )
+                    }
+                }
+            }
+        }
+        deferredResults.awaitAll().forEachIndexed { index, result ->
+            if (result is com.death14stroke.newsdaily.data.model.Result.Success) {
+                val file = result.data
+                val utteranceId = getUtteranceId(file.name)
+                val mediaItem = MediaItem.Builder()
+                    .setUri(file.toUri())
+                    .setTag(AudioNews(file.toUri().toString(), newsList[index]))
+                    .build()
+                val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem)
+                concatenatingMediaSource.addMediaSource(mediaSource)
 
-        if (result is TtsResult.Success) {
-            val file = result.file
-            val utteranceId = getUtteranceId(file.name)
-            val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(file.toUri()))
-            concatenatingMediaSource.addMediaSource(mediaSource)
+                Timber.d("$utteranceId converted success")
 
-            if (utteranceId == "0") {
-                audioNewsHandler.sendEmptyMessage(MSG_UPDATE_SOURCE)
-                mediaSessionCallback.onPlay()
-            } else {
-                audioNewsHandler.sendEmptyMessageDelayed(
-                    MSG_UPDATE_SOURCE,
-                    WAIT_QUEUE_TIMEOUT_MS.toLong()
-                )
+                if (utteranceId == "0") {
+                    audioNewsHandler.sendEmptyMessage(HandlerMessage.MSG_UPDATE_SOURCE.code)
+                    mediaSessionCallback.onPlay()
+                } else {
+                    audioNewsHandler.sendEmptyMessageDelayed(
+                        HandlerMessage.MSG_UPDATE_SOURCE.code,
+                        WAIT_QUEUE_TIMEOUT_MS.toLong()
+                    )
+                }
             }
         }
     }
@@ -258,7 +276,8 @@ class AudioNewsService :
         mediaSessionConnector.apply {
             setQueueNavigator(object : TimelineQueueNavigator(mediaSessionCompat) {
                 override fun getMediaDescription(player: Player, windowIndex: Int) =
-                    audioNewsList[windowIndex].getMediaDescription()
+                    player.getMediaItemAt(windowIndex).toAudioNews()?.getMediaDescription()
+                        ?: MediaDescriptionCompat.Builder().build()
             })
             setPlayer(exoPlayer)
         }
@@ -297,9 +316,7 @@ class AudioNewsService :
     }
 
     private fun setCurrentAudio(pos: Int) {
-        if (pos >= audioNewsList.size || pos < 0)
-            return
-        mediaSessionCompat.setMetadata(audioNewsList[pos].buildMetaData())
+        mediaSessionCompat.setMetadata(exoPlayer.getMediaItemAt(pos).toAudioNews()?.buildMetaData())
     }
 
     private inner class MediaSessionCallback : MediaSessionCompat.Callback() {
@@ -345,37 +362,38 @@ class AudioNewsService :
 
     private inner class AudioNewsHandler : Handler.Callback {
         override fun handleMessage(message: Message): Boolean {
-            when (message.what) {
-                MSG_INIT_NEWS -> {
-                    audioNewsHandler.removeCallbacksAndMessages(null)
-                    audioNewsList.clear()
-                    concatenatingMediaSource.clear()
 
+            when (HandlerMessage.from(message.what)) {
+                HandlerMessage.MSG_INIT_NEWS -> {
+                    audioNewsHandler.removeCallbacksAndMessages(null)
+                    concatenatingMediaSource.clear()
+                    Timber.i("Message init received")
                     launch { loadNews() }
                 }
 
-                MSG_STOP_SERVICE -> {
+                HandlerMessage.MSG_STOP_SERVICE -> {
                     audioNewsHandler.removeCallbacksAndMessages(null)
                     stopForeground(true)
                     stopSelf()
                 }
 
-                MSG_UPDATE_SOURCE -> {
-                    audioNewsHandler.removeMessages(MSG_UPDATE_SOURCE)
+                HandlerMessage.MSG_UPDATE_SOURCE -> {
+                    audioNewsHandler.removeMessages(HandlerMessage.MSG_UPDATE_SOURCE.code)
+                    Timber.i("MSG_UPDATE_SOURCE received")
                     exoPlayer.setMediaSource(concatenatingMediaSource, false)
                     exoPlayer.prepare()
                 }
 
-                MSG_SHOW_NOTI -> {
+                HandlerMessage.MSG_SHOW_NOTI -> {
                     val icon = message.arg1
-                    val category = message.obj as String
+                    val category = message.obj as Category
                     val playWhenReady = message.arg2 == 1
                     val metadataCompat = mediaSessionCompat.controller.metadata
 
                     launch {
                         val notificationBuilder = buildNotification(
                             icon,
-                            category,
+                            category.value,
                             metadataCompat,
                             mediaSessionCompat.sessionToken
                         )
@@ -390,9 +408,12 @@ class AudioNewsService :
                         }
                     }
                 }
+                else -> {}
             }
 
             return false
         }
     }
 }
+
+private fun MediaItem.toAudioNews() = localConfiguration?.tag as AudioNews?

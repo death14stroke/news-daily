@@ -13,11 +13,18 @@ import com.death14stroke.texttoaudiofile.api.TtsHelperImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
+/**
+ * Singleton instances for repository layer and its helpers
+ */
 val repoModule = module {
+    // network
     single { provideApiService(androidContext()) }
     single<NetworkNewsHelper> { NetworkNewsHelperImpl(get()) }
+    // preferences
     single<PreferenceHelper> { PreferenceHelperImpl(androidContext()) }
+    // data
     single<CountryHelper> { CountryHelperImpl(androidContext()) }
+    // audio
     single<TtsHelper> { TtsHelperImpl(androidContext()) }
     single { MainRepository(get(), get(), get()) }
 }

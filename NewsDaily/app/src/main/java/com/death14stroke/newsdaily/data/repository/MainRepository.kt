@@ -2,7 +2,9 @@ package com.death14stroke.newsdaily.data.repository
 
 import com.death14stroke.newsdaily.data.countries.CountryHelper
 import com.death14stroke.newsdaily.data.preferences.PreferenceHelper
+import com.death14stroke.newsdaily.ui.util.sendRequest
 import com.death14stroke.newsloader.api.NetworkNewsHelper
+import com.death14stroke.newsloader.data.model.Category
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -26,9 +28,9 @@ class MainRepository(
 
     fun getSelectedCountry() = preferenceHelper.getSelectedCountry()
 
-    suspend fun loadHeadlines(country: String, category: String, page: Int, pageSize: Int) =
-        networkHelper.loadHeadlines(country, category, page, pageSize)
+    suspend fun loadHeadlines(country: String, category: Category, page: Int, pageSize: Int) =
+        sendRequest { networkHelper.loadHeadlines(country, category, page, pageSize) }
 
     suspend fun loadArticles(language: String, query: String, page: Int, pageSize: Int) =
-        networkHelper.loadArticles(language, query, page, pageSize)
+        sendRequest { networkHelper.loadArticles(language, query, page, pageSize) }
 }

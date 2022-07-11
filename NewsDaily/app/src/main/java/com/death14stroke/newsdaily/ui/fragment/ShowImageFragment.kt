@@ -1,7 +1,6 @@
 package com.death14stroke.newsdaily.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -13,6 +12,7 @@ import com.death14stroke.newsdaily.databinding.FragmentShowImageBinding
 import com.death14stroke.newsdaily.ui.viewbinding.viewBinding
 import com.igreenwood.loupe.extensions.createLoupe
 import com.igreenwood.loupe.extensions.setOnViewTranslateListener
+import timber.log.Timber
 
 class ShowImageFragment : Fragment(R.layout.fragment_show_image) {
     private val binding by viewBinding(FragmentShowImageBinding::bind)
@@ -48,13 +48,16 @@ class ShowImageFragment : Fragment(R.layout.fragment_show_image) {
             listener(
                 onSuccess = { _, _ -> beginTransition() },
                 onError = { _, e ->
-                    Log.e("error", "Could not load image", e.throwable)
+                    Timber.e("Could not load image = ${safeArgs.imageUrl}", e.throwable)
                     beginTransition()
                 }
             )
         }
     }
 
+    /**
+     * Setup shared element transition effect with pinch zooming
+     */
     private fun beginTransition() {
         binding.imageView.transitionName = "iv_${safeArgs.imageUrl}"
         startPostponedEnterTransition()

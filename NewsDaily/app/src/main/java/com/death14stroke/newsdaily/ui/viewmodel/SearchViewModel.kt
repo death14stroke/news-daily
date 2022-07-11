@@ -8,7 +8,7 @@ import androidx.paging.cachedIn
 import com.death14stroke.newsdaily.data.PAGE_SIZE
 import com.death14stroke.newsdaily.data.repository.MainRepository
 import com.death14stroke.newsdaily.paging.ArticlesPagingSource
-import com.death14stroke.newsloader.data.model.Result
+import com.death14stroke.newsdaily.data.model.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*

@@ -17,7 +17,9 @@ import com.death14stroke.newsdaily.ui.custom.CustomTabHelper
 import com.death14stroke.newsdaily.ui.fragment.NewsFragmentDirections
 import com.death14stroke.newsloader.data.model.News
 
-
+/**
+ * Open share via popup to share news with friends
+ */
 fun Activity.shareNews(news: News) {
     ShareCompat.IntentBuilder(this)
         .setSubject(news.title)
@@ -27,6 +29,9 @@ fun Activity.shareNews(news: News) {
         .startChooser()
 }
 
+/**
+ * Open news url in custom chrome tabs if possible or in the web browser
+ */
 fun Context.openChromeCustomTab(url: String, onFailed: () -> Unit) {
     val defaultColorSchemeParams = CustomTabColorSchemeParams.Builder()
         .setToolbarColor(getColorFromAttr(android.R.attr.colorPrimaryDark))

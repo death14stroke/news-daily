@@ -12,8 +12,8 @@
         tools:layout="@layout/fragment_news">
         <argument
             android:name="category"
-            android:defaultValue="general"
-            app:argType="string" />
+            android:defaultValue="GENERAL"
+            app:argType="com.death14stroke.newsloader.data.model.Category" />
     </fragment>
 
     <fragment
@@ -23,8 +23,8 @@
         tools:layout="@layout/fragment_news">
         <argument
             android:name="category"
-            android:defaultValue="business"
-            app:argType="string" />
+            android:defaultValue="BUSINESS"
+            app:argType="com.death14stroke.newsloader.data.model.Category" />
     </fragment>
 
     <fragment
@@ -34,8 +34,8 @@
         tools:layout="@layout/fragment_news">
         <argument
             android:name="category"
-            android:defaultValue="entertainment"
-            app:argType="string" />
+            android:defaultValue="ENTERTAINMENT"
+            app:argType="com.death14stroke.newsloader.data.model.Category" />
     </fragment>
 
     <fragment
@@ -45,8 +45,8 @@
         tools:layout="@layout/fragment_news">
         <argument
             android:name="category"
-            android:defaultValue="health"
-            app:argType="string" />
+            android:defaultValue="HEALTH"
+            app:argType="com.death14stroke.newsloader.data.model.Category" />
     </fragment>
 
     <fragment
@@ -56,8 +56,8 @@
         tools:layout="@layout/fragment_news">
         <argument
             android:name="category"
-            android:defaultValue="science"
-            app:argType="string" />
+            android:defaultValue="SCIENCE"
+            app:argType="com.death14stroke.newsloader.data.model.Category" />
     </fragment>
 
     <fragment
@@ -67,8 +67,8 @@
         tools:layout="@layout/fragment_news">
         <argument
             android:name="category"
-            android:defaultValue="sports"
-            app:argType="string" />
+            android:defaultValue="SPORTS"
+            app:argType="com.death14stroke.newsloader.data.model.Category" />
     </fragment>
 
     <fragment
@@ -78,8 +78,8 @@
         tools:layout="@layout/fragment_news">
         <argument
             android:name="category"
-            android:defaultValue="technology"
-            app:argType="string" />
+            android:defaultValue="TECHNOLOGY"
+            app:argType="com.death14stroke.newsloader.data.model.Category" />
     </fragment>
 
     <fragment

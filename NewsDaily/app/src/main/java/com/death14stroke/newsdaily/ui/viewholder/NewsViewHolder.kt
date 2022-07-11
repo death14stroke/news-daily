@@ -15,8 +15,13 @@ import com.death14stroke.newsdaily.data.model.OpenNewsListener
 import com.death14stroke.newsdaily.data.model.ShareNewsListener
 import com.death14stroke.newsdaily.data.model.ViewImageListener
 import com.death14stroke.newsdaily.databinding.LayoutNewsBinding
+import com.death14stroke.newsdaily.ui.fragment.NewsFragment
+import com.death14stroke.newsdaily.ui.fragment.SearchFragment
 import com.death14stroke.newsloader.data.model.News
 
+/**
+ * ViewHolder for the news items in [NewsFragment] and [SearchFragment]
+ */
 class NewsViewHolder(private val binding: LayoutNewsBinding) :
     RecyclerView.ViewHolder(binding.root) {
     companion object {
@@ -41,12 +46,10 @@ class NewsViewHolder(private val binding: LayoutNewsBinding) :
         binding.apply {
             news = newsItem
             imageView.transitionName = "iv_${newsItem.imageUrl}"
-            imageView.setOnClickListener {
-                viewImageListener.invoke(it, newsItem.imageUrl ?: "")
-                binding.executePendingBindings()
-            }
+            imageView.setOnClickListener { viewImageListener.invoke(it, newsItem.imageUrl ?: "") }
             goToUrlTV.setOnClickListener { openNewsListener.invoke(newsItem.url) }
             shareBtn.setOnClickListener { shareNewsListener.invoke(newsItem) }
+            executePendingBindings()
         }
     }
 
@@ -61,6 +64,9 @@ class NewsViewHolder(private val binding: LayoutNewsBinding) :
         }
     }
 
+    /**
+     * Util to create color palette from news image for url textview background
+     */
     private fun processBitmap(bitmap: Bitmap) {
         Palette.from(bitmap)
             .generate { palette ->

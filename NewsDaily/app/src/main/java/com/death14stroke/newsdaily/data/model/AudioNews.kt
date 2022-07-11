@@ -6,6 +6,12 @@ import android.support.v4.media.MediaMetadataCompat
 import androidx.core.os.bundleOf
 import com.death14stroke.newsloader.data.model.News
 
+/**
+ * Data model for news item in the audio playlist
+ * @property uri uri of the text to speech output
+ * @property news metadata of the news object
+ * @see News
+ */
 data class AudioNews(
     val uri: String,
     val news: News
@@ -33,5 +39,3 @@ fun AudioNews.buildMetaData(): MediaMetadataCompat {
         .putString(MediaMetadataCompat.METADATA_KEY_TITLE, news.title)
         .build()
 }
-
-fun News.toAudioNews() = AudioNews(uri = url, news = this)

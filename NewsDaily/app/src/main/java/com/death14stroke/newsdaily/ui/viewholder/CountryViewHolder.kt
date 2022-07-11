@@ -8,7 +8,11 @@ import com.blongho.country_data.Country
 import com.death14stroke.newsdaily.R
 import com.death14stroke.newsdaily.data.model.CountryClickListener
 import com.death14stroke.newsdaily.databinding.LayoutCountryBinding
+import com.death14stroke.newsdaily.ui.fragment.SettingsFragment
 
+/**
+ * ViewHolder for the country items in [SettingsFragment]
+ */
 class CountryViewHolder(private val binding: LayoutCountryBinding) :
     RecyclerView.ViewHolder(binding.root) {
     companion object {

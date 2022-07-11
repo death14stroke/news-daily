@@ -18,7 +18,7 @@ import com.death14stroke.newsdaily.ui.util.getShareNewsListener
 import com.death14stroke.newsdaily.ui.util.getViewImageListener
 import com.death14stroke.newsdaily.ui.viewbinding.viewBinding
 import com.death14stroke.newsdaily.ui.viewmodel.SearchViewModel
-import com.death14stroke.newsloader.data.model.onSuccess
+import com.death14stroke.newsdaily.data.model.onSuccess
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel

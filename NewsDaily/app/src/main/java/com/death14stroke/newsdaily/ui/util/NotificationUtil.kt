@@ -29,6 +29,9 @@ import java.util.*
 private const val AUDIO_CHANNEL_NAME = "AudioNews"
 private const val AUDIO_CHANNEL_ID = "audio_news_channel"
 
+/**
+ * Build notification for media controls
+ */
 @Suppress("BlockingMethodInNonBlockingContext")
 @SuppressLint("DefaultLocale")
 suspend fun Context.buildNotification(

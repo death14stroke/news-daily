@@ -5,6 +5,9 @@ import androidx.viewpager2.widget.ViewPager2
 import kotlin.math.abs
 import kotlin.math.max
 
+/**
+ * A [ViewPager2.PageTransformer] implementation to scale the pages and adjust alpha on swipe
+ */
 class AlphaPageTransformer : ViewPager2.PageTransformer {
     override fun transformPage(page: View, position: Float) {
         page.apply {

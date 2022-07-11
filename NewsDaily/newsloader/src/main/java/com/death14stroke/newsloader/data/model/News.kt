@@ -5,6 +5,13 @@ import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Data model for news fetched from the network
+ * @property desc short content summary of the news
+ * @property url url of the news article
+ * @property imageUrl url of the image associated with the news
+ * @property published string containing date and time for when the article was published
+ */
 @Parcelize
 @Serializable
 data class News(

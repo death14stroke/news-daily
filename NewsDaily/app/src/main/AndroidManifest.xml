@@ -39,6 +39,7 @@
         <activity
             android:name=".ui.activity.LauncherActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.NewsDaily.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -46,8 +47,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.IntroActivity" />
-        <activity android:name=".ui.activity.HomeActivity" />
+        <activity
+            android:name=".ui.activity.IntroActivity"
+            android:launchMode="singleTop" />
+        <activity
+            android:name=".ui.activity.HomeActivity"
+            android:launchMode="singleTop" />
     </application>
 
 </manifest>

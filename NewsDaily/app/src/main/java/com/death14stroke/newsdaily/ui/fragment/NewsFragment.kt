@@ -18,6 +18,8 @@ import androidx.preference.PreferenceManager
 import com.death14stroke.newsdaily.R
 import com.death14stroke.newsdaily.data.ACTION_PREPARE_AUDIO
 import com.death14stroke.newsdaily.data.EXTRA_CATEGORY
+import com.death14stroke.newsdaily.data.model.onLoading
+import com.death14stroke.newsdaily.data.model.onSuccess
 import com.death14stroke.newsdaily.databinding.FragmentNewsBinding
 import com.death14stroke.newsdaily.service.AudioNewsService
 import com.death14stroke.newsdaily.ui.adapter.NewsAdapter
@@ -27,8 +29,6 @@ import com.death14stroke.newsdaily.ui.util.getShareNewsListener
 import com.death14stroke.newsdaily.ui.util.getViewImageListener
 import com.death14stroke.newsdaily.ui.viewbinding.viewBinding
 import com.death14stroke.newsdaily.ui.viewmodel.NewsViewModel
-import com.death14stroke.newsloader.data.model.onLoading
-import com.death14stroke.newsloader.data.model.onSuccess
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -70,6 +70,7 @@ class NewsFragment : Fragment(R.layout.fragment_news),
         super.onDestroyView()
         if (::mediaControllerCompat.isInitialized)
             mediaControllerCompat.unregisterCallback(mediaControllerCallback)
+        //TODO: remove mediaBrowserCompat
         if (mediaBrowserCompat.isConnected)
             mediaBrowserCompat.disconnect()
     }
@@ -103,6 +104,9 @@ class NewsFragment : Fragment(R.layout.fragment_news),
         }
     }
 
+    /**
+     * Util to scroll to the current playing news in the swipe cards
+     */
     private fun scrollToCurrentNews(title: String) {
         newsAdapter.snapshot().items.apply {
             try {

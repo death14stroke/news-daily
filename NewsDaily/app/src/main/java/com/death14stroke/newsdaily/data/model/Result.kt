@@ -1,10 +1,23 @@
-package com.death14stroke.newsloader.data.model
+package com.death14stroke.newsdaily.data.model
 
+/**
+ * Placeholder for state management of various api results
+ */
 sealed class Result<out T> {
+    /**
+     * Success state with the [data]
+     */
     data class Success<out T>(val data: T) : Result<T>()
+
+    /**
+     * Error state with the [error] and [throwable]
+     */
     data class Error(val error: String? = null, val throwable: Throwable? = null) :
         Result<Nothing>()
 
+    /**
+     * Loading state
+     */
     object Loading : Result<Nothing>()
 }
 

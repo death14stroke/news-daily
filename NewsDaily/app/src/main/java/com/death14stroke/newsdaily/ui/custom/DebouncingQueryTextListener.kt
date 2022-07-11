@@ -6,6 +6,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * QueryTextListener with debouncing rate of 500ms
+ */
 class DebouncingQueryTextListener(
     private val coroutineScope: CoroutineScope,
     private val onDebouncingQueryTextChange: (String?) -> Unit

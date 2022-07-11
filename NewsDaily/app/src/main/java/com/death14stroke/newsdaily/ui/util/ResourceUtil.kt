@@ -16,6 +16,9 @@ fun Context.color(@ColorRes colorRes: Int) =
 fun Fragment.color(@ColorRes colorRes: Int) =
     requireContext().color(colorRes)
 
+/**
+ * Util to get color [Int] from theme color attributes
+ */
 @ColorInt
 fun Context.getColorFromAttr(@AttrRes attrColor: Int, resolveRefs: Boolean = true): Int {
     val typedValue = TypedValue()
