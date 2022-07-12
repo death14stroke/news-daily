@@ -1,5 +1,6 @@
 package com.death14stroke.newsdaily.ui.activity
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -12,6 +13,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.*
 import com.death14stroke.newsdaily.R
+import com.death14stroke.newsdaily.data.ACTION_NOTI_CLICK
+import com.death14stroke.newsdaily.data.EXTRA_CATEGORY
 import com.death14stroke.newsdaily.databinding.ActivityHomeBinding
 import com.death14stroke.newsdaily.ui.custom.DebouncingQueryTextListener
 import com.death14stroke.newsdaily.ui.fragment.NewsFragmentDirections
@@ -19,6 +22,7 @@ import com.death14stroke.newsdaily.ui.util.color
 import com.death14stroke.newsdaily.ui.util.getColorFromAttr
 import com.death14stroke.newsdaily.ui.viewbinding.viewBinding
 import com.death14stroke.newsdaily.ui.viewmodel.SearchViewModel
+import com.death14stroke.newsloader.data.model.Category
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -57,6 +61,25 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.action == ACTION_NOTI_CLICK)
+            handleNotiClick(intent)
+    }
+
+    private fun handleNotiClick(intent: Intent) {
+        val destination = when (intent.getSerializableExtra(EXTRA_CATEGORY) as Category?) {
+            Category.BUSINESS -> R.id.nav_business
+            Category.ENTERTAINMENT -> R.id.nav_entertainment
+            Category.HEALTH -> R.id.nav_health
+            Category.SCIENCE -> R.id.nav_science
+            Category.SPORTS -> R.id.nav_sports
+            Category.TECHNOLOGY -> R.id.nav_tech
+            else -> R.id.nav_general
+        }
+        navController.navigate(destination)
     }
 
     private fun initDrawer() {

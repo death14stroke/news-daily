@@ -28,7 +28,7 @@ class MainRepository(
 
     fun getSelectedCountry() = preferenceHelper.getSelectedCountry()
 
-    suspend fun loadHeadlines(country: String, category: Category, page: Int, pageSize: Int) =
+    suspend fun loadHeadlines(country: String = preferenceHelper.getSelectedCountry(), category: Category, page: Int, pageSize: Int) =
         sendRequest { networkHelper.loadHeadlines(country, category, page, pageSize) }
 
     suspend fun loadArticles(language: String, query: String, page: Int, pageSize: Int) =
